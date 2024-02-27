@@ -1,0 +1,10 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../Project.srcs/sources_1/new/Adder.vhd" \
+"../../../../Project.srcs/sources_1/new/Nand_Component.vhd" \
+"../../../../Project.srcs/sources_1/new/ALU.vhd" \
+"../../../../Project.srcs/sources_1/new/The_Marmot.vhd" \
+"../../../../Project.srcs/sim_1/new/The_Marmot_tb.vhd" \
+
+# Do not sort compile order
+nosort
