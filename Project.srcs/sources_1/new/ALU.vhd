@@ -6,6 +6,8 @@ entity ALU is
 
     generic(address_adder   : std_logic_vector := "001";
             address_nand    : std_logic_vector := "010";
+            address_bshl    : std_logic_vector := "101";
+            address_bshr    : std_logic_vector := "110";
             address_test    : std_logic_vector := "111");
     
     PORT(
@@ -21,6 +23,10 @@ architecture Behavioral of ALU is
     signal  i_nand_A, i_nand_B, o_nand_C    : std_logic_vector(15 downto 0);
     signal  i_test_A                        : std_logic_vector(15 downto 0);
     signal  o_test_Z, o_test_N              : std_logic;
+    signal  i_bshl_A, o_bshl_A              : std_logic_vector(15 downto 0);
+    signal  i_bshl_B                        : std_logic_vector(3 downto 0);
+    signal  i_bshr_A, o_bshr_A              : std_logic_vector(15 downto 0);
+    signal  i_bshr_B                        : std_logic_vector(3 downto 0);
 
 begin
 
@@ -63,4 +69,17 @@ begin
         Test_Z  => o_test_N
     );
     
+    BarrelShifterLeft_instance : entity work.BarrelShifterLeft
+    port map(
+        Sh_A    => i_bshl_A,
+        Sh_B    => i_bshl_B,
+        Sh_C    => o_bshl_A
+    );    
+    
+    BarrelShifterRight_instance : entity work.BarrelShifterRight
+    port map(
+        Sh_A    => i_bshr_A,
+        Sh_B    => i_bshr_B,
+        Sh_C    => o_bshr_A
+    );
 end Behavioral;
