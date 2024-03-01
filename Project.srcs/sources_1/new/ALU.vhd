@@ -5,7 +5,8 @@ use IEEE.NUMERIC_STD.ALL;
 entity ALU is
 
     generic(address_adder   : std_logic_vector := "001";
-            address_nand    : std_logic_vector := "010");
+            address_nand    : std_logic_vector := "010";
+            address_test    : std_logic_vector := "111");
     
     PORT(
         ALU_Op      : IN    std_logic_vector( 2 downto 0);
@@ -18,12 +19,15 @@ architecture Behavioral of ALU is
 
     signal  i_adder_A, i_adder_B, o_adder_C : std_logic_vector(15 downto 0);
     signal  i_nand_A, i_nand_B, o_nand_C    : std_logic_vector(15 downto 0);
+    signal  i_test_A                        : std_logic_vector(15 downto 0);
+    signal  o_test_Z, o_test_N              : std_logic;
 
 begin
 
     input_demux_A : for i in 15 downto 0 generate
         i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
         i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
+        i_test_A(i)     <= ALU_A(i) when ALU_Op = address_test else '0';
     end generate input_demux_A;
     
     input_demux_B : for i in 15 downto 0 generate
@@ -50,6 +54,13 @@ begin
         Nand_A  => i_nand_A,
         Nand_B  => i_nand_B,
         Nand_C  => o_nand_C
+    );
+    
+    Test_instance   : entity work.Test_Component
+    port map(
+        Test_A  => i_test_A,
+        Test_N  => o_test_Z,
+        Test_Z  => o_test_N
     );
     
 end Behavioral;
