@@ -119,15 +119,14 @@ begin
             ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
             ID_EX_ins <= IF_ID_ins;
+            i_ALU_Op <= IF_ID_ins;
+            i_ALU_A <= RB_data;
+            i_ALU_B <= RC_data;
         end if;
     end process ID_EX;
     
     ALU_instance: entity work.ALU
     port map( ALU_Ins => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C );    
-    
-    i_ALU_Op <= IF_ID_ins;
-    i_ALU_A <= RB_data;
-    i_ALU_B <= RC_data;
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin

@@ -10,10 +10,10 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT The_Marmot
     GENERIC(
-        IF_ID_width    : integer := 17;
-        ID_EX_width    : integer := 83;
-        EX_MEM_width   : integer := 17;
-        MEM_WB_width   : integer := 17
+        REG_width       :   integer             := 17;
+        ID_EX_width     :   integer             := 83;   -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
+        EX_MEM_width    :   integer             := 17;   -- 16 bits for 1 word
+        MEM_WB_width    :   integer             := 17   -- 16 bits for 1 word
     );
     PORT(
         in_port             : IN  std_logic_vector(15 downto 0);
@@ -25,13 +25,7 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
         INS_port            : IN std_logic_vector(15 downto 0);
         wr_data             : IN std_logic_vector(16 downto 0);
         wr_index            : IN std_logic_vector(2 downto 0);
-        wr_enable           : IN std_logic;
-        
-        ALU_A_test          : OUT std_logic_vector(16 downto 0);
-        ALU_B_test          : OUT std_logic_vector(16 downto 0);
-        ALU_C_test          : OUT std_logic_vector(16 downto 0);
-        EX_MEM_test         : OUT std_logic_vector(EX_MEM_width-1 downto 0);
-        MEM_WB_test         : OUT std_logic_vector(MEM_WB_width-1 downto 0)
+        wr_enable           : IN std_logic
     );
     END COMPONENT;
    
@@ -48,18 +42,13 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
 
    --Outputs
    signal out_port : std_logic_vector(15 downto 0);
-   signal ALU_A_test : std_logic_vector(16 downto 0);
-   signal ALU_B_test : std_logic_vector(16 downto 0);
-   signal ALU_C_test : std_logic_vector(16 downto 0);
-   signal EX_MEM_test : std_logic_vector(16 downto 0);
-   signal MEM_WB_test : std_logic_vector(16 downto 0);
 
 BEGIN
 
     -- Instantiate the Unit Under Test (UUT)
    uut: COMPONENT The_Marmot
         GENERIC MAP (
-            IF_ID_width => 17,
+            REG_width => 17,
             ID_EX_width => 83,
             EX_MEM_width => 17,
             MEM_WB_width => 17
@@ -75,12 +64,7 @@ BEGIN
           wr_index => wr_index,
           wr_enable => wr_enable,
           
-          out_port => out_port,
-          ALU_A_test => ALU_A_test,
-          ALU_B_test => ALU_B_test,
-          ALU_C_test => ALU_C_test,
-          EX_MEM_test => EX_MEM_test,
-          MEM_WB_test => MEM_WB_test
+          out_port => out_port
         );
 
     -- Clock process definitions
@@ -102,21 +86,53 @@ BEGIN
         wait for 100 ns;  
 
         wr_index <= "001";
-        wr_data <= '0' & x"0001";
+        wr_data <= '0' & x"0002";
         wr_enable <= '1';
         wait for 40 ns;
         wr_enable <= '0';
         wr_index <= "010";
-        wr_data <= '0' & x"0002";
+        wr_data <= '0' & x"0004";
         wr_enable <= '1';
         wait for 20 ns;
         wr_enable <= '0';
 
 
         -- Add stimulus here 
+        
+        -- ADD R3 R2 R1
         INS_port <= "0000001011010001" ;
         wait for 100 ns;          
-        INS_port <= "0000101011000010" ;
+        
+        -- SUB R3 R2 R1
+        INS_port <= "0000010011010001" ;
+        wait for 100 ns;
+        
+        -- MUL R3 R2 R1
+        INS_port <= "0000011011010001" ;
+        wait for 100 ns;          
+        
+        -- NAND R3 R2 R1
+        INS_port <= "0000100011010001" ;
+        wait for 100 ns;          
+        
+        -- SHL R1 #2
+        INS_port <= "0000101001000001" ;
+        wait for 100 ns;  
+        
+        -- SHR R1 #1
+        INS_port <= "0000110001000001" ;
+        wait for 100 ns;
+        
+        -- TEST R3
+        INS_port <= "0000111011000000" ;
+        wait for 100 ns;
+        
+        -- OUT R3
+        INS_port <= "0100000011000000" ;
+        wait for 100 ns;  
+        
+        -- IN R3
+        INS_port <= "0100001011000000" ;
         wait for 100 ns;  
 
     end process;
