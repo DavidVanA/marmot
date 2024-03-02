@@ -24,7 +24,7 @@ begin
     sh_2(13 downto 0) <= sh_4(15 downto 2) when Sh_B(1)='1' else sh_4(13 downto 0);
     sh_2(15 downto 14) <= "00" when Sh_B(1)='1' else sh_4(15 downto 14);
     
-    Sh_C(14 downto 0) <= sh_4(15 downto 1) when Sh_B(1)='1' else sh_4(14 downto 0);
-    Sh_C(15) <= '0' when Sh_B(1)='1' else sh_2(15);
+    Sh_C(14 downto 0) <= sh_2(15 downto 1) when Sh_B(0)='1' else sh_2(14 downto 0);
+    Sh_C(15) <= '0' when Sh_B(0)='1' else sh_2(15);
     
 end Behavioral;
