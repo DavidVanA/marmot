@@ -9,10 +9,17 @@ entity ALU is
             address_bshl    : std_logic_vector := "101";
             address_bshr    : std_logic_vector := "110";
             address_test    : std_logic_vector := "111";
-            address_mult    : std_logic_vector := "011");
+            address_mult    : std_logic_vector := "011";
+            alu_mode_a0     : std_logic_vector := "000";
+            alu_mode_a1     : std_logic_vector := "001";
+            alu_mode_a2     : std_logic_vector := "010";
+            alu_mode_a3     : std_logic_vector := "011"
+    );
     
     PORT(
-        ALU_Op      : IN    std_logic_vector( 2 downto 0);
+        
+        ALU_Ins     : IN    std_logic_vector(15 downto 0);
+--        ALU_Mode    : IN    std_logic_vector(2 downto 0);
         ALU_A,ALU_B : IN    std_logic_vector(16 downto 0);
         ALU_C       : OUT   std_logic_vector(16 downto 0) 
     );
@@ -35,20 +42,24 @@ architecture Behavioral of ALU is
 begin
 
     input_demux_A : for i in 15 downto 0 generate
-        i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
-        i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
-        i_test_A(i)     <= ALU_A(i) when ALU_Op = address_test else '0';
-        i_mult_A(i)     <= ALU_A(i) when ALU_Op = address_mult else '0';
+        i_adder_A(i)    <= ALU_A(i) when ALU_ins(11 downto 9) = address_adder else '0';
+        i_nand_A(i)     <= ALU_A(i) when ALU_ins(11 downto 9) = address_nand else '0';
+        i_test_A(i)     <= ALU_A(i) when ALU_ins(11 downto 9) = address_test else '0';
+        i_bshl_A(i)     <= ALU_A(i) when ALU_ins(11 downto 9) = address_bshl else '0';
+        i_bshr_A(i)     <= ALU_A(i) when ALU_ins(11 downto 9) = address_bshr else '0';
+        i_mult_A(i)     <= ALU_A(i) when ALU_ins(11 downto 9) = address_mult else '0';
     end generate input_demux_A;
     
     input_demux_B : for i in 15 downto 0 generate
-        i_adder_B(i)    <= ALU_B(i) when ALU_Op = address_adder else '0';
-        i_nand_B(i)     <= ALU_B(i) when ALU_Op = address_nand else '0';
-        i_mult_B(i)     <= ALU_B(i) when ALU_Op = address_mult else '0';
+        i_adder_B(i)    <= ALU_B(i) when ALU_ins(11 downto 9) = address_adder else '0';
+        i_nand_B(i)     <= ALU_B(i) when ALU_ins(11 downto 9) = address_nand else '0';
+        i_mult_B(i)     <= ALU_B(i) when ALU_ins(11 downto 9) = address_mult else '0';
     end generate input_demux_B;
-    
+    i_bshl_B            <= ALU_ins(3 downto 0) when ALU_ins(11 downto 9) = address_bshl else x"0";
+    i_bshr_B            <= ALU_ins(3 downto 0) when ALU_ins(11 downto 9) = address_bshr else x"0";
+
     -- Output Mux
-    with ALU_Op select 
+    with ALU_ins(11 downto 9) select 
         ALU_C <=
             '0' & o_adder_C when address_adder,
             '0' & o_nand_C  when address_nand,
