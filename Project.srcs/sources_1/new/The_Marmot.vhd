@@ -95,6 +95,8 @@ begin
         rd_index1 <=
             IF_ID_ins(2 downto 0) when op_bshl,
             IF_ID_ins(2 downto 0) when op_bshr,
+            IF_ID_ins(8 downto 6) when op_out,
+            IF_ID_ins(8 downto 6) when op_test,
             IF_ID_ins(5 downto 3) when others;
 
         
@@ -120,7 +122,11 @@ begin
         elsif rising_edge(M_clock) then
             ID_EX_ins <= IF_ID_ins;
             i_ALU_Op <= IF_ID_ins;
-            i_ALU_A <= RB_data;
+            if IF_ID_ins(15 downto 9) = op_in then
+                i_ALU_A <= '0' & in_port;
+            else
+                i_ALU_A <= RB_data;
+            end if;
             i_ALU_B <= RC_data;
         end if;
     end process ID_EX;

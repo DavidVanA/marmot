@@ -85,6 +85,7 @@ BEGIN
         Reset_and_Load <= '0';
         wait for 100 ns;  
 
+        in_port <= x"0101";
         wr_index <= "001";
         wr_data <= '0' & x"0002";
         wr_enable <= '1';
@@ -150,7 +151,7 @@ BEGIN
         wait for 100 ns;
         
         -- OUT R3
-        INS_port <= "0100000011000000" ;
+        INS_port <= "0100000010000000" ;
         wait for 100 ns;  
         
         -- IN R3
