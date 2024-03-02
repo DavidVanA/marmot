@@ -111,9 +111,31 @@ BEGIN
         INS_port <= "0000011011010001" ;
         wait for 100 ns;          
         
+        wr_index <= "001";
+        wr_data <= '0' & x"00FF";
+        wr_enable <= '1';
+        wait for 40 ns;
+        wr_enable <= '0';
+        wr_index <= "010";
+        wr_data <= '0' & x"0081";
+        wr_enable <= '1';
+        wait for 20 ns;
+        wr_enable <= '0';
+        
         -- NAND R3 R2 R1
         INS_port <= "0000100011010001" ;
-        wait for 100 ns;          
+        wait for 100 ns;        
+        
+        wr_index <= "001";
+        wr_data <= '0' & x"0002";
+        wr_enable <= '1';
+        wait for 40 ns;
+        wr_enable <= '0';
+        wr_index <= "010";
+        wr_data <= '0' & x"0004";
+        wr_enable <= '1';
+        wait for 20 ns;
+        wr_enable <= '0';  
         
         -- SHL R1 #2
         INS_port <= "0000101001000001" ;
