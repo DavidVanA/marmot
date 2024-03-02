@@ -3,6 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.Marmot_Config.all;
 
 entity The_Marmot is
+  generic(
+    Test_val_A  : std_logic_vector(int_instr_width-1 downto 0) := '0' & x"0002";
+    Test_val_B  : std_logic_vector(int_instr_width-1 downto 0) := '0' & x"0003"
+  );
   port (
     in_port             : IN std_logic_vector(ext_instr_width-1 downto 0);
     M_clock             : IN std_logic;
@@ -49,17 +53,24 @@ begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
             ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
-            ID_EX_val(82 downto 67) <= IF_ID_val(15 downto 0); -- Update register value on rising edge of clock
+            ID_EX_val(82 downto 67) <= IF_ID_val(ext_instr_width-1 downto 0); -- Update register value on rising edge of clock
+            ID_EX_val(33 downto 17) <= Test_val_A;
+            ID_EX_val(16 downto 0)  <= Test_val_B;
         end if;
     end process ID_EX;    
     
---    ALU_instance: entity work.ALU
---    port map( ALU_Op => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C );    
+    ALU_instance: entity work.ALU
+    port map( 
+        ALU_Op => i_ALU_Op,
+        ALU_A  => i_ALU_A, 
+        ALU_B  => i_ALU_B, 
+        ALU_C  => o_ALU_C 
+    );    
     
 --    i_ALU_Op <= (others => '0');--ID_EX_val(77 downto 75);
---    i_ALU_A  <= (others => '0');--"0" & x"000" & ID_EX_val(74 downto 71);
---    i_ALU_B  <= (others => '0');--"0" & x"000" & ID_EX_val(70 downto 67);
-    o_ALU_C <= '0' & ID_EX_val(82 downto 67);
+    i_ALU_A  <= ID_EX_val(33 downto 17);
+    i_ALU_B  <= ID_EX_val(16 downto 0);
+--    o_ALU_C <=  ALU_C;
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
@@ -82,6 +93,6 @@ begin
     end process MEM_WB;   
 
 -----------------------------------   OUT Port   -------------------------------------------------   
-    out_port <= MEM_WB_val(15 downto 0);
+    out_port <= MEM_WB_val(ext_instr_width-1 downto 0);
     
 end Behavioral;

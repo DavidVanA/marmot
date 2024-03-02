@@ -1,20 +1,22 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.Marmot_Config.all;
 
 entity ALU is
 
-    generic(address_adder   : std_logic_vector := "001";
-            address_nand    : std_logic_vector := "010";
-            address_bshl    : std_logic_vector := "101";
-            address_bshr    : std_logic_vector := "110";
-            address_test    : std_logic_vector := "111";
-            address_mult    : std_logic_vector := "011");
+    generic(
+        address_adder   : std_logic_vector := "001";
+        address_nand    : std_logic_vector := "010";
+        address_bshl    : std_logic_vector := "101";
+        address_bshr    : std_logic_vector := "110";
+        address_test    : std_logic_vector := "111";
+        address_mult    : std_logic_vector := "011");
     
-    PORT(
+    port(
         ALU_Op      : IN    std_logic_vector( 2 downto 0);
-        ALU_A,ALU_B : IN    std_logic_vector(16 downto 0);
-        ALU_C       : OUT   std_logic_vector(16 downto 0) 
+        ALU_A,ALU_B : IN    std_logic_vector(int_instr_width-1 downto 0);
+        ALU_C       : OUT   std_logic_vector(int_instr_width-1 downto 0) 
     );
 end ALU;
 
@@ -33,67 +35,69 @@ architecture Behavioral of ALU is
 
 begin
 
-    input_demux_A : for i in 15 downto 0 generate
-        i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
-        i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
-        i_test_A(i)     <= ALU_A(i) when ALU_Op = address_test else '0';
-        i_mult_A(i)     <= ALU_A(i) when ALU_Op = address_mult else '0';
-    end generate input_demux_A;
-    
-    input_demux_B : for i in 15 downto 0 generate
-        i_adder_B(i)    <= ALU_B(i) when ALU_Op = address_adder else '0';
-        i_nand_B(i)     <= ALU_B(i) when ALU_Op = address_nand else '0';
-        i_mult_B(i)     <= ALU_B(i) when ALU_Op = address_mult else '0';
-    end generate input_demux_B;
-    
-    -- Output Mux
-    with ALU_Op select 
-        ALU_C <=
-            o_adder_C when address_adder,
-            o_nand_C  when address_nand,
-            o_mult_C  when address_mult,
-            (others => '0') when others;
-    
-    Adder_instance : entity work.Adder
-    port map (
-        Adder_A => i_adder_A,
-        Adder_B => i_adder_B,
-        Adder_C => o_adder_C
-    );
-    
-    Nand_instance  : entity work.Nand_Component
-    port map(
-        Nand_A  => i_nand_A,
-        Nand_B  => i_nand_B,
-        Nand_C  => o_nand_C
-    );
-    
-    Test_instance   : entity work.Test_Component
-    port map(
-        Test_A  => i_test_A,
-        Test_N  => o_test_Z,
-        Test_Z  => o_test_N
-    );
-    
-    BarrelShifterLeft_instance : entity work.BarrelShifterLeft
-    port map(
-        Sh_A    => i_bshl_A,
-        Sh_B    => i_bshl_B,
-        Sh_C    => o_bshl_A
-    );    
-    
-    BarrelShifterRight_instance : entity work.BarrelShifterRight
-    port map(
-        Sh_A    => i_bshr_A,
-        Sh_B    => i_bshr_B,
-        Sh_C    => o_bshr_A
-    );
+    ALU_C <= ALU_A;
 
-    Mult_instance   : entity work.Mult
-    port map(
-        Mult_A  => i_mult_A,
-        Mult_B  => i_mult_B,
-        Mult_C  => o_mult_C
-    );
+--    input_demux_A : for i in 15 downto 0 generate
+--        i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
+--        i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
+--        i_test_A(i)     <= ALU_A(i) when ALU_Op = address_test else '0';
+--        i_mult_A(i)     <= ALU_A(i) when ALU_Op = address_mult else '0';
+--    end generate input_demux_A;
+    
+--    input_demux_B : for i in 15 downto 0 generate
+--        i_adder_B(i)    <= ALU_B(i) when ALU_Op = address_adder else '0';
+--        i_nand_B(i)     <= ALU_B(i) when ALU_Op = address_nand else '0';
+--        i_mult_B(i)     <= ALU_B(i) when ALU_Op = address_mult else '0';
+--    end generate input_demux_B;
+    
+--    -- Output Mux
+--    with ALU_Op select 
+--        ALU_C <=
+--            o_adder_C when address_adder,
+--            o_nand_C  when address_nand,
+--            o_mult_C  when address_mult,
+--            (others => '0') when others;
+    
+--    Adder_instance : entity work.Adder
+--    port map (
+--        Adder_A => i_adder_A,
+--        Adder_B => i_adder_B,
+--        Adder_C => o_adder_C
+--    );
+    
+--    Nand_instance  : entity work.Nand_Component
+--    port map(
+--        Nand_A  => i_nand_A,
+--        Nand_B  => i_nand_B,
+--        Nand_C  => o_nand_C
+--    );
+    
+--    Test_instance   : entity work.Test_Component
+--    port map(
+--        Test_A  => i_test_A,
+--        Test_N  => o_test_Z,
+--        Test_Z  => o_test_N
+--    );
+    
+--    BarrelShifterLeft_instance : entity work.BarrelShifterLeft
+--    port map(
+--        Sh_A    => i_bshl_A,
+--        Sh_B    => i_bshl_B,
+--        Sh_C    => o_bshl_A
+--    );    
+    
+--    BarrelShifterRight_instance : entity work.BarrelShifterRight
+--    port map(
+--        Sh_A    => i_bshr_A,
+--        Sh_B    => i_bshr_B,
+--        Sh_C    => o_bshr_A
+--    );
+
+--    Mult_instance   : entity work.Mult
+--    port map(
+--        Mult_A  => i_mult_A,
+--        Mult_B  => i_mult_B,
+--        Mult_C  => o_mult_C
+--    );
     
 end Behavioral;
