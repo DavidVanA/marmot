@@ -8,12 +8,13 @@ entity ALU is
             address_nand    : std_logic_vector := "010";
             address_bshl    : std_logic_vector := "101";
             address_bshr    : std_logic_vector := "110";
-            address_test    : std_logic_vector := "111");
+            address_test    : std_logic_vector := "111";
+            address_mult    : std_logic_vector := "011");
     
     PORT(
         ALU_Op      : IN    std_logic_vector( 2 downto 0);
-        ALU_A,ALU_B : IN    std_logic_vector(15 downto 0);
-        ALU_C       : OUT   std_logic_vector(15 downto 0) 
+        ALU_A,ALU_B : IN    std_logic_vector(16 downto 0);
+        ALU_C       : OUT   std_logic_vector(16 downto 0) 
     );
 end ALU;
 
@@ -27,6 +28,8 @@ architecture Behavioral of ALU is
     signal  i_bshl_B                        : std_logic_vector(3 downto 0);
     signal  i_bshr_A, o_bshr_A              : std_logic_vector(15 downto 0);
     signal  i_bshr_B                        : std_logic_vector(3 downto 0);
+--    signal  i_NOP_A, i_NOP_B, o_NOP_C                       : std_logic_vector(16 downto 0);
+    signal  i_mult_A, i_mult_B, o_mult_C                    : std_logic_vector(16 downto 0);
 
 begin
 
@@ -34,11 +37,13 @@ begin
         i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
         i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
         i_test_A(i)     <= ALU_A(i) when ALU_Op = address_test else '0';
+        i_mult_A(i)     <= ALU_A(i) when ALU_Op = address_mult else '0';
     end generate input_demux_A;
     
     input_demux_B : for i in 15 downto 0 generate
         i_adder_B(i)    <= ALU_B(i) when ALU_Op = address_adder else '0';
         i_nand_B(i)     <= ALU_B(i) when ALU_Op = address_nand else '0';
+        i_mult_B(i)     <= ALU_B(i) when ALU_Op = address_mult else '0';
     end generate input_demux_B;
     
     -- Output Mux
@@ -46,6 +51,7 @@ begin
         ALU_C <=
             o_adder_C when address_adder,
             o_nand_C  when address_nand,
+            o_mult_C  when address_mult,
             (others => '0') when others;
     
     Adder_instance : entity work.Adder
@@ -82,4 +88,12 @@ begin
         Sh_B    => i_bshr_B,
         Sh_C    => o_bshr_A
     );
+
+    Mult_instance   : entity work.Mult
+    port map(
+        Mult_A  => i_mult_A,
+        Mult_B  => i_mult_B,
+        Mult_C  => o_mult_C
+    );
+    
 end Behavioral;
