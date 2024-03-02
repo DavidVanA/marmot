@@ -1,10 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.Marmot_Config.all;
 
 entity Nand_Component is
   Port ( 
-  Nand_A, Nand_B    : IN std_logic_vector(16 downto 0);
-  Nand_C            : OUT std_logic_vector(16 downto 0)
+  Nand_A, Nand_B    : IN std_logic_vector(int_instr_width-1 downto 0);
+  Nand_C            : OUT std_logic_vector(int_instr_width-1 downto 0)
   );
 end Nand_Component;
 

@@ -67,7 +67,7 @@ begin
         ALU_C  => o_ALU_C 
     );    
     
---    i_ALU_Op <= (others => '0');--ID_EX_val(77 downto 75);
+    i_ALU_Op <= ID_EX_val(77 downto 75);
     i_ALU_A  <= ID_EX_val(33 downto 17);
     i_ALU_B  <= ID_EX_val(16 downto 0);
 --    o_ALU_C <=  ALU_C;

@@ -5,13 +5,13 @@ use work.Marmot_Config.all;
 
 entity ALU is
 
-    generic(
-        address_adder   : std_logic_vector := "001";
-        address_nand    : std_logic_vector := "010";
-        address_bshl    : std_logic_vector := "101";
-        address_bshr    : std_logic_vector := "110";
-        address_test    : std_logic_vector := "111";
-        address_mult    : std_logic_vector := "011");
+--    generic(
+--        address_adder   : std_logic_vector := "001";
+--        address_nand    : std_logic_vector := "010";
+--        address_bshl    : std_logic_vector := "101";
+--        address_bshr    : std_logic_vector := "110";
+--        address_test    : std_logic_vector := "111";
+--        address_mult    : std_logic_vector := "011");
     
     port(
         ALU_Op      : IN    std_logic_vector( 2 downto 0);
@@ -22,41 +22,42 @@ end ALU;
 
 architecture Behavioral of ALU is
 
-    signal  i_adder_A, i_adder_B, o_adder_C : std_logic_vector(15 downto 0);
-    signal  i_nand_A, i_nand_B, o_nand_C    : std_logic_vector(15 downto 0);
-    signal  i_test_A                        : std_logic_vector(15 downto 0);
-    signal  o_test_Z, o_test_N              : std_logic;
-    signal  i_bshl_A, o_bshl_A              : std_logic_vector(15 downto 0);
-    signal  i_bshl_B                        : std_logic_vector(3 downto 0);
-    signal  i_bshr_A, o_bshr_A              : std_logic_vector(15 downto 0);
-    signal  i_bshr_B                        : std_logic_vector(3 downto 0);
+    signal  i_adder_A, i_adder_B, o_adder_C : std_logic_vector(int_instr_width-1 downto 0);
+    signal overflow_signal : std_logic;
+    signal  i_nand_A, i_nand_B, o_nand_C    : std_logic_vector(int_instr_width-1 downto 0);
+--    signal  i_test_A                        : std_logic_vector(int_instr_width-1 downto 0);
+--    signal  o_test_Z, o_test_N              : std_logic;
+--    signal  i_bshl_A, o_bshl_A              : std_logic_vector(int_instr_width-1 downto 0);
+--    signal  i_bshl_B                        : std_logic_vector(3 downto 0);
+--    signal  i_bshr_A, o_bshr_A              : std_logic_vector(int_instr_width-1 downto 0);
+--    signal  i_bshr_B                        : std_logic_vector(3 downto 0);
 --    signal  i_NOP_A, i_NOP_B, o_NOP_C                       : std_logic_vector(16 downto 0);
-    signal  i_mult_A, i_mult_B, o_mult_C                    : std_logic_vector(16 downto 0);
+--    signal  i_mult_A, i_mult_B, o_mult_C                    : std_logic_vector(int_instr_width-1 downto 0);
 
 begin
 
-    ALU_C <= ALU_A;
+--    ALU_C <= ALU_A;
 
---    input_demux_A : for i in 15 downto 0 generate
---        i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
---        i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
+    input_demux_A : for i in 15 downto 0 generate
+        i_adder_A(i)    <= ALU_A(i) when ALU_Op = address_adder else '0';
+        i_nand_A(i)     <= ALU_A(i) when ALU_Op = address_nand else '0';
 --        i_test_A(i)     <= ALU_A(i) when ALU_Op = address_test else '0';
 --        i_mult_A(i)     <= ALU_A(i) when ALU_Op = address_mult else '0';
---    end generate input_demux_A;
+    end generate input_demux_A;
     
---    input_demux_B : for i in 15 downto 0 generate
---        i_adder_B(i)    <= ALU_B(i) when ALU_Op = address_adder else '0';
---        i_nand_B(i)     <= ALU_B(i) when ALU_Op = address_nand else '0';
+    input_demux_B : for i in 15 downto 0 generate
+        i_adder_B(i)    <= ALU_B(i) when ALU_Op = address_adder else '0';
+        i_nand_B(i)     <= ALU_B(i) when ALU_Op = address_nand else '0';
 --        i_mult_B(i)     <= ALU_B(i) when ALU_Op = address_mult else '0';
---    end generate input_demux_B;
+    end generate input_demux_B;
     
---    -- Output Mux
---    with ALU_Op select 
---        ALU_C <=
---            o_adder_C when address_adder,
---            o_nand_C  when address_nand,
+    -- Output Mux
+    with ALU_Op select 
+        ALU_C <=
+            o_adder_C when address_adder,
+            o_nand_C  when address_nand,
 --            o_mult_C  when address_mult,
---            (others => '0') when others;
+            (others => '0') when others;
     
 --    Adder_instance : entity work.Adder
 --    port map (
@@ -65,12 +66,24 @@ begin
 --        Adder_C => o_adder_C
 --    );
     
---    Nand_instance  : entity work.Nand_Component
---    port map(
---        Nand_A  => i_nand_A,
---        Nand_B  => i_nand_B,
---        Nand_C  => o_nand_C
---    );
+    Adder_Instance : entity work.Adder4bits
+    generic map (
+        bitWidth => int_instr_width  -- Assuming int_instr_width is 17
+    )
+    port map (
+        A => i_adder_A,  -- Your 17-bit input A
+        B => i_adder_B,  -- Your 17-bit input B
+        S => o_adder_C,  -- Your 17-bit sum output
+        Cin => '0',    -- Assuming no carry-in for the LSB addition
+        Cout => overflow_signal  -- Capture the overflow if needed
+    );
+    
+    Nand_instance  : entity work.Nand_Component
+    port map(
+        Nand_A  => i_nand_A,
+        Nand_B  => i_nand_B,
+        Nand_C  => o_nand_C
+    );
     
 --    Test_instance   : entity work.Test_Component
 --    port map(

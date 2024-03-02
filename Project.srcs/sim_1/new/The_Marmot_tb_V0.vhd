@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 use work.Marmot_Config.all;
 
 entity The_Marmot_tb_V0 is
@@ -59,16 +60,20 @@ begin
         in_port <= (others => '0');  -- Initial input
         wait for 100 ns;  -- Wait some time to observe the output
 
-        -- Change inputs as needed to test different parts of your design
-        in_port <= (others => '1');  -- Change input to another value
-        wait for 200 ns;  -- Wait more time to observe changes in the output
+--        -- Change inputs as needed to test different parts of your design
+--        in_port <= (others => '1');  -- Change input to another value
+--        wait for 200 ns;  -- Wait more time to observe changes in the output
 
-        -- Apply first input
-        in_port <= x"0001";
-        wait for 100 ns; -- Wait for the system to process this input
+--        -- Apply first input
+--        in_port <= x"0001";
+--        wait for 100 ns; -- Wait for the system to process this input
         
-        -- Apply second input
-        in_port <= x"00FF";
+        -- Add
+        in_port <= std_logic_vector(to_unsigned(0, 5)) & address_adder & std_logic_vector(to_unsigned(0, 8));
+        wait for 100 ns;
+
+        -- Nand
+        in_port <= std_logic_vector(to_unsigned(0, 5)) & address_nand & std_logic_vector(to_unsigned(0, 8));
         wait for 100 ns;
 
         -- Finish simulation
