@@ -148,6 +148,6 @@ begin
         end if;
     end process MEM_WB;   
 -----------------------------------   OUT Port   -------------------------------------------------
-    out_port <= MEM_WB_val(15 downto 0) when MEM_WB_ins(15 downto 9) = "0100000" else (others => '0');
+    out_port <= MEM_WB_val(15 downto 0) when MEM_WB_ins(15 downto 9) = "0100000";
     
 end Behavioral;
