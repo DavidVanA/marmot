@@ -42,12 +42,12 @@ entity The_Marmot is
     M_clock             : IN std_logic;
     Reset_and_Execute   : IN std_logic;
     Reset_and_Load      : IN std_logic;
-    out_port            : OUT std_logic_vector(15 downto 0) 
+    out_port            : OUT std_logic_vector(15 downto 0) ;
     
-    ALU_A_test          :OUT std_logic_vector(15 downto 0) 
-    ALU_B_test          :OUT std_logic_vector(15 downto 0) 
-    ALU_C_test          :OUT std_logic_vector(15 downto 0) 
-    EX_MEM_test         :OUT std_logic_vector(15 downto 0) 
+    ALU_A_test          :OUT std_logic_vector(15 downto 0) ;
+    ALU_B_test          :OUT std_logic_vector(15 downto 0) ;
+    ALU_C_test          :OUT std_logic_vector(15 downto 0) ;
+    EX_MEM_test         :OUT std_logic_vector(15 downto 0); 
     MEM_WB_test         :OUT std_logic_vector(15 downto 0) 
     
   );
@@ -86,7 +86,7 @@ begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
             ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
-            ID_EX_val(82 downto 67) <= IF_ID_val; -- Update register value on rising edge of clock
+            ID_EX_val(82 downto 67) <= IF_ID_val(15 downto 0); -- Update register value on rising edge of clock
         end if;
     end process ID_EX;    
     
@@ -96,11 +96,7 @@ begin
     i_ALU_Op <= ID_EX_val(77 downto 75);
     i_ALU_A <= "0" & x"000" & ID_EX_val(74 downto 71);
     i_ALU_B <= "0" & x"000" & ID_EX_val(70 downto 67);
-    ALU_A_test <= i_ALU_A;
-    ALU_B_test <= i_ALU_B;
-    ALU_C_test <= o_ALU_C;
---    i_ALU_A <= ID_EX_val(15 downto 0);
---    i_ALU_B <= ID_EX_val(15 downto 0);
+
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
