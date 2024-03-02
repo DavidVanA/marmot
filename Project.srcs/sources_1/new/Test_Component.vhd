@@ -3,9 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Test_Component is
   Port ( 
-  Test_A			: IN std_logic_vector(15 downto 0);
+  Test_A			: IN std_logic_vector(16 downto 0);
   Test_Z			: OUT std_logic;
-  Test_N			: OUT std_logic
+  Test_N			: OUT std_logic;
+  TEST_O            : OUT std_logic
   );
 end Test_Component;
 
@@ -19,5 +20,7 @@ begin
                   or Test_A(12) or Test_A(13) or Test_A(14) or Test_A(15);
                   
     Test_N <= Test_A(15);
+    
+    Test_O <= Test_A(16);
 
 end Behavioral;

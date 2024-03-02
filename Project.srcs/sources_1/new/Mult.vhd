@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Mult is
     Port(
-        Mult_A,Mult_B     : IN std_logic_vector(16 downto 0);
+        Mult_A,Mult_B     : IN std_logic_vector(15 downto 0);
         Mult_C            : OUT std_logic_vector(16 downto 0)
         );
 end Mult;

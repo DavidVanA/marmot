@@ -22,14 +22,15 @@ architecture Behavioral of ALU is
 
     signal  i_adder_A, i_adder_B, o_adder_C : std_logic_vector(15 downto 0);
     signal  i_nand_A, i_nand_B, o_nand_C    : std_logic_vector(15 downto 0);
-    signal  i_test_A                        : std_logic_vector(15 downto 0);
-    signal  o_test_Z, o_test_N              : std_logic;
+    signal  i_test_A                        : std_logic_vector(16 downto 0);
+    signal  o_test_Z, o_test_N,o_test_O     : std_logic;
     signal  i_bshl_A, o_bshl_A              : std_logic_vector(15 downto 0);
     signal  i_bshl_B                        : std_logic_vector(3 downto 0);
     signal  i_bshr_A, o_bshr_A              : std_logic_vector(15 downto 0);
     signal  i_bshr_B                        : std_logic_vector(3 downto 0);
 --    signal  i_NOP_A, i_NOP_B, o_NOP_C                       : std_logic_vector(16 downto 0);
-    signal  i_mult_A, i_mult_B, o_mult_C                    : std_logic_vector(16 downto 0);
+    signal  i_mult_A, i_mult_B              : std_logic_vector(15 downto 0);
+    signal  o_mult_C                        : std_logic_vector(16 downto 0);
 
 begin
 
@@ -49,8 +50,10 @@ begin
     -- Output Mux
     with ALU_Op select 
         ALU_C <=
-            o_adder_C when address_adder,
-            o_nand_C  when address_nand,
+            '0' & o_adder_C when address_adder,
+            '0' & o_nand_C  when address_nand,
+            '0' & o_bshl_A when address_bshl,
+            '0' & o_bshr_A when address_bshr,
             o_mult_C  when address_mult,
             (others => '0') when others;
     
@@ -72,7 +75,8 @@ begin
     port map(
         Test_A  => i_test_A,
         Test_N  => o_test_Z,
-        Test_Z  => o_test_N
+        Test_Z  => o_test_N,
+        Test_O  => o_test_O
     );
     
     BarrelShifterLeft_instance : entity work.BarrelShifterLeft
@@ -91,8 +95,8 @@ begin
 
     Mult_instance   : entity work.Mult
     port map(
-        Mult_A  => i_mult_A,
-        Mult_B  => i_mult_B,
+        Mult_A  => i_mult_A(15 downto 0),
+        Mult_B  => i_mult_B(15 downto 0),
         Mult_C  => o_mult_C
     );
     

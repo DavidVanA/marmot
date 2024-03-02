@@ -44,17 +44,20 @@ entity The_Marmot is
     Reset_and_Load      : IN std_logic;
     out_port            : OUT std_logic_vector(15 downto 0) ;
     
-    ALU_A_test          :OUT std_logic_vector(15 downto 0) ;
-    ALU_B_test          :OUT std_logic_vector(15 downto 0) ;
-    ALU_C_test          :OUT std_logic_vector(15 downto 0) ;
-    EX_MEM_test         :OUT std_logic_vector(15 downto 0); 
-    MEM_WB_test         :OUT std_logic_vector(15 downto 0) 
+    INS_port            : IN std_logic_vector(15 downto 0);
+    
+    ALU_A_test          :OUT std_logic_vector(16 downto 0) ;
+    ALU_B_test          :OUT std_logic_vector(16 downto 0) ;
+    ALU_C_test          :OUT std_logic_vector(16 downto 0) ;
+    EX_MEM_test         :OUT std_logic_vector(16 downto 0); 
+    MEM_WB_test         :OUT std_logic_vector(16 downto 0) 
     
   );
 end The_Marmot;
 
 architecture Behavioral of The_Marmot is
 
+    signal IF_ID_ins    :   std_logic_vector(15 downto 0);
     signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(16 downto 0);
     signal i_ALU_Op     :   std_logic_vector(2 downto 0);
     
@@ -62,6 +65,10 @@ architecture Behavioral of The_Marmot is
     signal ID_EX_val    :   std_logic_vector(ID_EX_width-1 downto 0);
     signal EX_MEM_val   :   std_logic_vector(EX_MEM_width-1 downto 0);
     signal MEM_WB_val   :   std_logic_vector(MEM_WB_width-1 downto 0);
+    
+    signal wr_index     :   std_logic_vector(2 downto 0);
+    signal wr_data      :   std_logic_vector(16 downto 0);    
+    signal wr_enable    :   std_logic;    
     
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
@@ -76,8 +83,22 @@ begin
         end if;
     end process IF_ID;
     
---   Registers_Latches_instance: entity work.Register_Latches
---   port map();
+    -- TO BE CHANGED --
+    IF_ID_ins <= INS_PORT;
+    wr_data <= "00000000000000000";
+    wr_index <= "000";
+    wr_enable <= '0';
+    
+    Registers_Latches_instance : entity work.register_file
+    port map(
+        rst => Reset_and_Execute,
+        clk => M_clock,
+        wr_index => wr_index,
+        wr_data => wr_data,
+        wr_enable => wr_enable,
+        rd_index1 => IF_ID_ins(5 downto 3),
+        rd_index2 => IF_ID_ins(2 downto 0)
+    );
     
 -----------------------------------   ID/EX   -------------------------------------------------   
 -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
