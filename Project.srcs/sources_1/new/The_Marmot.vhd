@@ -1,61 +1,24 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/21/2024 10:33:17 AM
--- Design Name: 
--- Module Name: The_Marmot - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
+use work.Marmot_Config.all;
 
 entity The_Marmot is
-
-  generic(
---    ALU_Op_Default :   std_logic_vector     := "001";
-    IF_ID_width    :   integer              := 17;   -- 16 bits for 1 word
-    ID_EX_width    :   integer              := 83;   -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
-    EX_MEM_width   :   integer              := 17;   -- 16 bits for 1 word
-    MEM_WB_width   :   integer              := 17;   -- 16 bits for 1 word
-    --                                          1234123412341234
-    Test_Val_1     :   std_logic_vector     := "00000000000000001";
-    Test_val_2     :   std_logic_vector     := "00000000000000001"
-    
-    );
-
   port (
-    in_port             : IN std_logic_vector(15 downto 0);
+    in_port             : IN std_logic_vector(ext_instr_width-1 downto 0);
     M_clock             : IN std_logic;
     Reset_and_Execute   : IN std_logic;
     Reset_and_Load      : IN std_logic;
-    out_port            : OUT std_logic_vector(15 downto 0) ;
-    
-    ALU_A_test          :OUT std_logic_vector(15 downto 0) ;
-    ALU_B_test          :OUT std_logic_vector(15 downto 0) ;
-    ALU_C_test          :OUT std_logic_vector(15 downto 0) ;
-    EX_MEM_test         :OUT std_logic_vector(15 downto 0); 
-    MEM_WB_test         :OUT std_logic_vector(15 downto 0) 
-    
+    out_port            : OUT std_logic_vector(ext_instr_width-1 downto 0)    
   );
 end The_Marmot;
 
 architecture Behavioral of The_Marmot is
-
-    signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(16 downto 0);
+    constant IF_ID_width     :   integer := ext_instr_width;   -- 16 bits for 1 word
+    constant ID_EX_width     :   integer := 2*ext_instr_width + 3*int_instr_width;   -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
+    constant EX_MEM_width    :   integer := int_instr_width;   -- 16 bits for 1 word
+    constant MEM_WB_width    :   integer := int_instr_width;   -- 16 bits for 1 word
+    
+    signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(int_instr_width-1 downto 0);
     signal i_ALU_Op     :   std_logic_vector(2 downto 0);
     
     signal IF_ID_val    :   std_logic_vector(IF_ID_width-1 downto 0);
@@ -90,13 +53,13 @@ begin
         end if;
     end process ID_EX;    
     
-    ALU_instance: entity work.ALU
-    port map( ALU_Op => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C );    
+--    ALU_instance: entity work.ALU
+--    port map( ALU_Op => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C );    
     
-    i_ALU_Op <= ID_EX_val(77 downto 75);
-    i_ALU_A <= "0" & x"000" & ID_EX_val(74 downto 71);
-    i_ALU_B <= "0" & x"000" & ID_EX_val(70 downto 67);
-
+--    i_ALU_Op <= (others => '0');--ID_EX_val(77 downto 75);
+--    i_ALU_A  <= (others => '0');--"0" & x"000" & ID_EX_val(74 downto 71);
+--    i_ALU_B  <= (others => '0');--"0" & x"000" & ID_EX_val(70 downto 67);
+    o_ALU_C <= '0' & ID_EX_val(82 downto 67);
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
@@ -107,7 +70,7 @@ begin
             EX_MEM_val <= o_ALU_C; -- Update register value on rising edge of clock
         end if;
     end process EX_MEM;    
-    EX_MEM_test <= EX_MEM_val;
+
 -----------------------------------   MEM/WB   -------------------------------------------------   
     MEM_WB: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
@@ -117,7 +80,7 @@ begin
             MEM_WB_val <= EX_MEM_val; -- Update register value on rising edge of clock
         end if;
     end process MEM_WB;   
-    MEM_WB_test <= MEM_WB_val;
+
 -----------------------------------   OUT Port   -------------------------------------------------   
     out_port <= MEM_WB_val(15 downto 0);
     

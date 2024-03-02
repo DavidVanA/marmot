@@ -10,24 +10,19 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT The_Marmot
     GENERIC(
-        IF_ID_width    : integer := 17;
-        ID_EX_width    : integer := 83;
-        EX_MEM_width   : integer := 17;
-        MEM_WB_width   : integer := 17;
-        Test_Val_1     : std_logic_vector := "00000000000000001";
-        Test_val_2     : std_logic_vector := "00000000000000001"
-    );
+--        IF_ID_width    : integer := 17;
+--        ID_EX_width    : integer := 83;
+--        EX_MEM_width   : integer := 17;
+--        MEM_WB_width   : integer := 17;
+--        Test_Val_1     : std_logic_vector := "00000000000000001";
+--        Test_val_2     : std_logic_vector := "00000000000000001"
+--    );
     PORT(
         in_port             : IN  std_logic_vector(15 downto 0);
         M_clock             : IN  std_logic;
         Reset_and_Execute   : IN  std_logic;
         Reset_and_Load      : IN  std_logic;
-        out_port            : OUT std_logic_vector(15 downto 0);
-        ALU_A_test          : OUT std_logic_vector(15 downto 0);
-        ALU_B_test          : OUT std_logic_vector(15 downto 0);
-        ALU_C_test          : OUT std_logic_vector(15 downto 0);
-        EX_MEM_test         : OUT std_logic_vector(15 downto 0);
-        MEM_WB_test         : OUT std_logic_vector(15 downto 0)
+        out_port            : OUT std_logic_vector(15 downto 0)
     );
     END COMPONENT;
    
