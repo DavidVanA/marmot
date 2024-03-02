@@ -9,11 +9,11 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT The_Marmot
     PORT(
-         in_port : IN  std_logic_vector(15 downto 0);
-         M_clock : IN  std_logic;
-         Reset_and_Execute : IN  std_logic;
-         Reset_and_Load : IN  std_logic;
-         out_port : OUT  std_logic_vector(15 downto 0)
+         in_port            : IN  std_logic_vector(15 downto 0);
+         M_clock            : IN  std_logic;
+         Reset_and_Execute  : IN  std_logic;
+         Reset_and_Load     : IN  std_logic;
+         out_port           : OUT  std_logic_vector(15 downto 0)
         );
     END COMPONENT;
    
@@ -58,17 +58,17 @@ BEGIN
         Reset_and_Load <= '0';
         wait for 10 ns;
 
-        -- Apply input
-        in_port <= "0000000000000001";
-        wait for 30 ns;
+        -- Add
+        in_port <= "0000" & "0001" & "0010" & "0011";
+        wait for 80 ns;
         
-        -- Apply another input
-        in_port <= "0000000000000010";
-        wait for 30 ns;
+        -- Nand
+        in_port <= "0000" & "0010" & "0111" & "1110";
+        wait for 80 ns;
 
-        -- Apply another input
-        in_port <= "0000000000000100";
-        wait for 30 ns;        
+        -- Multiply
+        in_port <= "0000" & "0011" & "0010" & "0010";
+        wait for 80 ns;        
         -- Finish simulation
         wait;
     end process;
