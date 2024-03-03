@@ -25,17 +25,18 @@ entity ALU is
         ALU_Ins     : IN    std_logic_vector(15 downto 0);
 --        ALU_Mode    : IN    std_logic_vector(2 downto 0);
         ALU_A,ALU_B : IN    std_logic_vector(16 downto 0);
-        ALU_C       : OUT   std_logic_vector(16 downto 0) 
+        ALU_C       : OUT   std_logic_vector(16 downto 0);
+        ALU_N       : OUT   std_logic;
+        ALU_Z       : OUT   std_logic
     );
 end ALU;
 
 architecture Behavioral of ALU is
 
     signal  i_adder_A, i_adder_B, o_adder_C : std_logic_vector(15 downto 0);
-    signal  i_sub_B, neg_i_sub_B             : std_logic_vector(15 downto 0);
+    signal  i_sub_B, neg_i_sub_B            : std_logic_vector(15 downto 0);
     signal  i_nand_A, i_nand_B, o_nand_C    : std_logic_vector(15 downto 0);
     signal  i_test_A                        : std_logic_vector(16 downto 0);
-    signal  o_test_Z, o_test_N,o_test_O     : std_logic;
     signal  i_bshl_A, o_bshl_A              : std_logic_vector(15 downto 0);
     signal  i_bshl_B                        : std_logic_vector(3 downto 0);
     signal  i_bshr_A, o_bshr_A              : std_logic_vector(15 downto 0);
@@ -103,9 +104,8 @@ begin
     Test_instance   : entity work.Test_Component
     port map(
         Test_A  => i_test_A,
-        Test_N  => o_test_Z,
-        Test_Z  => o_test_N,
-        Test_O  => o_test_O
+        Test_N  => ALU_N,
+        Test_Z  => ALU_Z
     );
     
     BarrelShifterLeft_instance : entity work.BarrelShifterLeft

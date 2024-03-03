@@ -112,6 +112,9 @@ BEGIN
         INS_port <= "0000011011010001" ;
         wait for 100 ns;          
         
+        INS_port <= "0000000000000000" ;
+        wait for 20ns;
+        
         wr_index <= "001";
         wr_data <= '0' & x"00FF";
         wr_enable <= '1';
@@ -127,6 +130,8 @@ BEGIN
         INS_port <= "0000100011010001" ;
         wait for 100 ns;        
         
+        INS_port <= "0000000000000000" ;
+        wait for 20ns;
         wr_index <= "001";
         wr_data <= '0' & x"0002";
         wr_enable <= '1';
@@ -146,10 +151,23 @@ BEGIN
         INS_port <= "0000110001000001" ;
         wait for 100 ns;
         
-        -- TEST R3
-        INS_port <= "0000111011000000" ;
+        -- TEST R3 with value 0x0002
+        INS_port <= "0000111001000000" ;
         wait for 100 ns;
         
+        -- TEST R3 with value 0x0002
+        INS_port <= "0000000000000000" ;
+        wait for 100 ns;
+        
+        wr_index <= "001";
+        wr_data <= '0' & x"8002";
+        wr_enable <= '1';
+        wait for 40 ns;
+        
+        -- TEST R1 with value 0x8002
+        INS_port <= "0000111001000000" ;
+        wait for 100 ns;
+
         -- OUT R3
         INS_port <= "0100000010000000" ;
         wait for 100 ns;  

@@ -77,6 +77,11 @@ architecture Behavioral of The_Marmot is
     signal MEM_WB_val   :   std_logic_vector(MEM_WB_width-1 downto 0);
     signal MEM_WB_ins   :   std_logic_vector(15 downto 0);
     
+    signal o_ALU_Z      :   std_logic;
+    signal FLAG_Z       :   std_logic;
+    signal o_ALU_N      :   std_logic;
+    signal FLAG_N       :   std_logic;
+    
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
 
@@ -132,7 +137,7 @@ begin
     end process ID_EX;
     
     ALU_instance: entity work.ALU
-    port map( ALU_Ins => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C );    
+    port map( ALU_Ins => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C, ALU_N => o_ALU_N, ALU_Z => o_ALU_Z );    
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
@@ -141,6 +146,10 @@ begin
         elsif rising_edge(M_clock) then
             EX_MEM_ins <= ID_EX_ins;
             EX_MEM_val <= o_ALU_C; -- Update register value on rising edge of clock
+            if ID_EX_ins(15 downto 9) = op_test then
+                FLAG_N <= o_ALU_N;
+                FLAG_Z <= o_ALU_Z;
+            end if;
         end if;
     end process EX_MEM;    
 -----------------------------------   MEM/WB   -------------------------------------------------   
