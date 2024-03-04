@@ -1,27 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.Marmot_Config.all;
 
 entity ALU is
 
-    generic(address_add   : std_logic_vector := "0000001";
-            address_sub     : std_logic_vector := "0000010";            
-            address_mult    : std_logic_vector := "0000011";
-            address_nand    : std_logic_vector := "0000100";
-            address_bshl    : std_logic_vector := "0000101";
-            address_bshr    : std_logic_vector := "0000110";
-            address_test    : std_logic_vector := "0000111";
-            address_out     : std_logic_vector := "0100000";
-            address_in      : std_logic_vector := "0100001";
-            
-            alu_mode_a0     : std_logic_vector := "000";
-            alu_mode_a1     : std_logic_vector := "001";
-            alu_mode_a2     : std_logic_vector := "010";
-            alu_mode_a3     : std_logic_vector := "011"
-    );
-    
     PORT(
-        
         ALU_Ins     : IN    std_logic_vector(15 downto 0);
 --        ALU_Mode    : IN    std_logic_vector(2 downto 0);
         ALU_A,ALU_B : IN    std_logic_vector(16 downto 0);
@@ -71,21 +55,23 @@ begin
             neg_i_sub_B when address_sub,
             ALU_B(15 downto 0) when address_add,
             (others => '0') when others;
+            
     i_bshl_B            <= ALU_ins(3 downto 0) when ALU_ins(15 downto 9) = address_bshl else x"0";
     i_bshr_B            <= ALU_ins(3 downto 0) when ALU_ins(15 downto 9) = address_bshr else x"0";
+
 
     -- Output Mux
     with ALU_ins(15 downto 9) select 
         ALU_C <=
-            '0' & o_adder_C when address_add,
-            '0' & o_adder_C when address_sub,
-            '0' & o_nand_C  when address_nand,
-            '0' & o_bshl_A when address_bshl,
-            '0' & o_bshr_A when address_bshr,
-            o_mult_C  when address_mult,
-            ALU_A when address_out,
-            ALU_A when address_in,
-            (others => '0') when others;
+             '0' & o_adder_C when address_add,
+             '0' & o_adder_C when address_sub,
+             '0' & o_nand_C  when address_nand,
+              '0' & o_bshl_A when address_bshl,
+              '0' & o_bshr_A when address_bshr,
+                    o_mult_C when address_mult,
+                       ALU_A when address_out,
+                       ALU_A when address_in,
+             (others => '0') when others;
     
     Adder_instance : entity work.Adder
     port map (

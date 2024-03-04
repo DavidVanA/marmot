@@ -1,6 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
+use work.Marmot_Config.all;
 
 ENTITY The_Marmot_tb IS
 END The_Marmot_tb;
@@ -9,12 +10,6 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
 
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT The_Marmot
-    GENERIC(
-        REG_width       :   integer             := 17;
-        ID_EX_width     :   integer             := 83;   -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
-        EX_MEM_width    :   integer             := 17;   -- 16 bits for 1 word
-        MEM_WB_width    :   integer             := 17   -- 16 bits for 1 word
-    );
     PORT(
         in_port             : IN  std_logic_vector(15 downto 0);
         M_clock             : IN  std_logic;
@@ -47,12 +42,6 @@ BEGIN
 
     -- Instantiate the Unit Under Test (UUT)
    uut: COMPONENT The_Marmot
-        GENERIC MAP (
-            REG_width => 17,
-            ID_EX_width => 83,
-            EX_MEM_width => 17,
-            MEM_WB_width => 17
-        )
         PORT MAP (
           in_port => in_port,
           M_clock => M_clock,

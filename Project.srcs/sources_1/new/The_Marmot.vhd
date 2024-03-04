@@ -1,49 +1,9 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/21/2024 10:33:17 AM
--- Design Name: 
--- Module Name: The_Marmot - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.Marmot_Config.all;
 
 
 entity The_Marmot is
-
-  generic(
---    ALU_Op_Default :   std_logic_vector     := "001";
-    REG_width       :   integer             := 17;
-    ID_EX_width     :   integer             := 83;   -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
-    EX_MEM_width    :   integer             := 17;   -- 16 bits for 1 word
-    MEM_WB_width    :   integer             := 17;   -- 16 bits for 1 word
-    
-    op_nop      : std_logic_vector := "0000000";
-    op_add      : std_logic_vector := "0000001";
-    op_sub      : std_logic_vector := "0000010";
-    op_mult     : std_logic_vector := "0000011";
-    op_nand     : std_logic_vector := "0000100";
-    op_bshl     : std_logic_vector := "0000101";
-    op_bshr     : std_logic_vector := "0000110";
-    op_test     : std_logic_vector := "0000111";
-    op_out      : std_logic_vector := "0100000";
-    op_in       : std_logic_vector := "0100001"
-
-    );
 
   port (
     in_port             : IN std_logic_vector(15 downto 0);
@@ -89,7 +49,7 @@ begin
     IF_ID: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            IF_ID_ins <= (others => '0'); -- Asynchronous reset
+            IF_ID_ins <= (others => '0');
         elsif rising_edge(M_clock) then
             IF_ID_ins <= INS_PORT;
         end if;
@@ -104,18 +64,17 @@ begin
             IF_ID_ins(8 downto 6) when op_test,
             IF_ID_ins(5 downto 3) when others;
 
-        
     Registers_Latches_instance : entity work.register_file
     port map(
-        rst => Reset_and_Execute,
-        clk => M_clock,
-        wr_index => wr_index,
-        wr_data => wr_data,
-        wr_enable => wr_enable,
-        rd_index1 => rd_index1,
-        rd_index2 => IF_ID_ins(2 downto 0),
-        rd_data1 => RB_data,
-        rd_data2 => RC_data
+        rst         => Reset_and_Execute,
+        clk         => M_clock,
+        wr_index    => wr_index,
+        wr_data     => wr_data,
+        wr_enable   => wr_enable,
+        rd_index1   => rd_index1,
+        rd_index2   => IF_ID_ins(2 downto 0),
+        rd_data1    => RB_data,
+        rd_data2    => RC_data
     );
     
 -----------------------------------   ID/EX   -------------------------------------------------   
@@ -126,7 +85,7 @@ begin
             ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
             ID_EX_ins <= IF_ID_ins;
-            i_ALU_Op <= IF_ID_ins;
+            i_ALU_Op  <= IF_ID_ins;
             if IF_ID_ins(15 downto 9) = op_in then
                 i_ALU_A <= '0' & in_port;
             else
@@ -137,31 +96,42 @@ begin
     end process ID_EX;
     
     ALU_instance: entity work.ALU
-    port map( ALU_Ins => i_ALU_Op, ALU_A => i_ALU_A, ALU_B => i_ALU_B, ALU_C => o_ALU_C, ALU_N => o_ALU_N, ALU_Z => o_ALU_Z );    
+    port map( 
+        ALU_Ins => i_ALU_Op, 
+        ALU_A   => i_ALU_A, 
+        ALU_B   => i_ALU_B, 
+        ALU_C   => o_ALU_C, 
+        ALU_N   => o_ALU_N, 
+        ALU_Z   => o_ALU_Z 
+    );    
+    
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            EX_MEM_val <= (others => '0'); -- Asynchronous reset
+            EX_MEM_val <= (others => '0');
+            EX_MEM_ins <= (others => '0');
         elsif rising_edge(M_clock) then
             EX_MEM_ins <= ID_EX_ins;
-            EX_MEM_val <= o_ALU_C; -- Update register value on rising edge of clock
+            EX_MEM_val <= o_ALU_C;
             if ID_EX_ins(15 downto 9) = op_test then
                 FLAG_N <= o_ALU_N;
                 FLAG_Z <= o_ALU_Z;
             end if;
         end if;
     end process EX_MEM;    
+    
 -----------------------------------   MEM/WB   -------------------------------------------------   
     MEM_WB: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            MEM_WB_val <= (others => '0'); -- Asynchronous reset
+            MEM_WB_val <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_ins <= EX_MEM_ins;
-            MEM_WB_val <= EX_MEM_val; -- Update register value on rising edge of clock
+            MEM_WB_val <= EX_MEM_val;
         end if;
     end process MEM_WB;   
+    
 -----------------------------------   OUT Port   -------------------------------------------------
     out_port <= MEM_WB_val(15 downto 0) when MEM_WB_ins(15 downto 9) = "0100000";
     

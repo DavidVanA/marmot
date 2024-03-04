@@ -3,8 +3,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Nand_Component is
   Port ( 
-  Nand_A, Nand_B    : IN std_logic_vector(15 downto 0);
-  Nand_C            : OUT std_logic_vector(15 downto 0)
+      Nand_A, Nand_B    : IN std_logic_vector(15 downto 0);
+      Nand_C            : OUT std_logic_vector(15 downto 0)
   );
 end Nand_Component;
 
