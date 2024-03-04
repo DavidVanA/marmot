@@ -5,8 +5,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity Adder is
     Port(
-        Adder_A,Adder_B     : IN std_logic_vector(16 downto 0);
-        Adder_C             : OUT std_logic_vector(16 downto 0)
+        Adder_A,Adder_B     : IN std_logic_vector(15 downto 0);
+        Adder_C             : OUT std_logic_vector(15 downto 0)
         );
 end Adder;
 
