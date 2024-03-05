@@ -1,0 +1,18 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../sources_1/new/The_Marmot_Config.vhd" \
+"../../../../sources_1/new/Adder.vhd" \
+"../../../../sources_1/new/Nand_Component.vhd" \
+"../../../../sources_1/new/Test_Component.vhd" \
+"../../../../sources_1/new/BarrelShifterLeft.vhd" \
+"../../../../sources_1/new/BarrelShifterRight.vhd" \
+"../../../../sources_1/new/Mult.vhd" \
+"../../../../sources_1/new/TwosCompliment.vhd" \
+"../../../../sources_1/new/ALU.vhd" \
+"../../../../sources_1/new/Control.vhd" \
+"../../../../sources_1/new/Register_Latches.vhd" \
+"../../../../sources_1/new/The_Marmot.vhd" \
+"../../../../sim_1/new/The_Marmot_tb.vhd" \
+
+# Do not sort compile order
+nosort
