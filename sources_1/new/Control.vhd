@@ -24,7 +24,7 @@ use work.Marmot_Config.all;
 entity Controller is
 
   port (    
-    INS_port            : IN std_logic_vector(15 downto 0);
+    INS_port            : IN std_logic_vector(INSTR_width-1 downto 0);
     ALU_Mode            : OUT std_logic_vector(ALU_Op_width-1 downto 0);
     MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
     WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)

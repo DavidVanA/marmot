@@ -6,15 +6,15 @@ use work.Marmot_Config.all;
 entity The_Marmot is
 
   port (
-    in_port             : IN std_logic_vector(15 downto 0);
+    in_port             : IN std_logic_vector(INSTR_width-1 downto 0);
     M_clock             : IN std_logic;
     Reset_and_Execute   : IN std_logic;
     Reset_and_Load      : IN std_logic;
-    out_port            : OUT std_logic_vector(15 downto 0) ;
+    out_port            : OUT std_logic_vector(INSTR_width-1 downto 0) ;
     
     INS_port            : IN std_logic_vector(15 downto 0);
     wr_data             : IN std_logic_vector(REG_width-1 downto 0);
-    wr_index            : IN std_logic_vector(2 downto 0);
+    wr_index            : IN std_logic_vector(REG_IDX_width-1 downto 0);
     wr_enable           : IN std_logic
         
   );
@@ -23,11 +23,14 @@ end The_Marmot;
 architecture Behavioral of The_Marmot is
 
     signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(16 downto 0);
-    signal i_ALU_Op     :   std_logic_vector(15 downto 0);
+    signal i_ALU_Op     :   std_logic_vector(15 downto 0); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
     
-    signal rd_index1    :   std_logic_vector(2 downto 0);
+    signal rd_index1    :   std_logic_vector(REG_IDX_width-1 downto 0);
     signal RB_data      :   std_logic_vector(REG_width-1 downto 0);
     signal RC_data      :   std_logic_vector(REG_width-1 downto 0);
+    
+-- Example declaration of record type
+--    signal IF_ID_latch  : IF_ID_rec;
     
     signal IF_ID_ins    :   std_logic_vector(15 downto 0);
     signal ID_EX_val    :   std_logic_vector(ID_EX_width-1 downto 0);
@@ -49,6 +52,10 @@ begin
     IF_ID: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
+            
+            -- Possible alternative naming scheme using custom record type:
+            --IF_ID_latch.INSTR <= (others => '0');
+            
             IF_ID_ins <= (others => '0');
         elsif rising_edge(M_clock) then
             IF_ID_ins <= INS_PORT;
