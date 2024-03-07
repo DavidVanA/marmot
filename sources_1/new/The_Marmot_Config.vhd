@@ -33,17 +33,32 @@ package Marmot_Config is
     constant WB_Op_width     :   integer         := 2;    
     
 -- Example of record type implementation of fields within latches    
---    type IF_ID_rec is record
---            INSTR: std_logic_vector(INSTR_width-1 downto 0);
---            NPC   : std_logic_vector(INSTR_width-1 downto 0);        
---    end record IF_ID_rec;
+   type IF_ID_rec is record
+           instr : std_logic_vector(INSTR_width-1 downto 0);
+           npc   : std_logic_vector(INSTR_width-1 downto 0);        
+   end record IF_ID_rec;
 
---    type ID_EX_rec is record
---            INSTR   : std_logic_vector(INSTR_width-1 downto 0);
---            NPC     : std_logic_vector(INSTR_width-1 downto 0);
---            ra_data : std_logic_vector(REG_width-1 downto 0);
---            rb_data : std_logic_vector(REG_width-1 downto 0);
---            rc_data : std_logic_vector(REG_width-1 downto 0);        
---    end record ID_EX_rec;
+   type ID_EX_rec is record
+           instr   : std_logic_vector(INSTR_width-1 downto 0);
+           npc     : std_logic_vector(INSTR_width-1 downto 0);
+           ra_data : std_logic_vector(REG_width-1 downto 0);
+           rb_data : std_logic_vector(REG_width-1 downto 0);
+           rc_data : std_logic_vector(REG_width-1 downto 0);        
+   end record ID_EX_rec;
+
+   type EX_MEM_rec is record
+           instr   : std_logic_vector(INSTR_width-1 downto 0);
+           npc     : std_logic_vector(INSTR_width-1 downto 0);
+           result  : std_logic_vector(REG_width-1 downto 0);
+           Z       : std_logic;
+           N       : std_logic;
+           OV      : std_logic;
+   end record EX_MEM_rec;
+
+   type MEM_WB_rec is record
+          instr    : std_logic_vector(INSTR_width-1 downto 0);
+          result   : std_logic_vector(REG_width-1 downto 0);
+          mem_data : std_logic_vector(INSTR_width-1 downto 0);
+   end record MEM_WB_rec;
     
 end package Marmot_Config;

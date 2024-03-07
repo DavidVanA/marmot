@@ -30,7 +30,10 @@ architecture Behavioral of The_Marmot is
     signal RC_data      :   std_logic_vector(REG_width-1 downto 0);
     
 -- Example declaration of record type
---    signal IF_ID_latch  : IF_ID_rec;
+    signal IF_ID_latch  : IF_ID_rec;
+    signal ID_EX_latch  : ID_EX_rec;
+    signal EX_MEM_latch : EX_MEM_rec;
+    signal MEM_WB_latch : MEM_WB_rec;
     
     signal IF_ID_ins    :   std_logic_vector(15 downto 0);
     signal ID_EX_val    :   std_logic_vector(ID_EX_width-1 downto 0);
@@ -54,23 +57,31 @@ begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
             
             -- Possible alternative naming scheme using custom record type:
-            --IF_ID_latch.INSTR <= (others => '0');
-            
-            IF_ID_ins <= (others => '0');
+            IF_ID_latch.instr <= (others => '0');
+            --IF_ID_ins <= (others => '0');
         elsif rising_edge(M_clock) then
-            IF_ID_ins <= INS_PORT;
+            IF_ID_latch.instr <= INS_PORT;
+            --IF_ID_ins <= INS_PORT;
+         -- TODO: IF_IF_Control <= IF_ID.instr -- Feed the controller the
+         -- current latch instruction.
         end if;
     end process IF_ID;
     
     -- ???? TODO: SHOULD BE PART OF CONTROLLER ?????
-    with IF_ID_ins(15 downto 9) select
+   with IF_ID_latch.instr(15 downto 9) select
+   --with IF_ID_ins(15 downto 9) select
         rd_index1 <=
-            IF_ID_ins(2 downto 0) when op_bshl,
-            IF_ID_ins(2 downto 0) when op_bshr,
-            IF_ID_ins(8 downto 6) when op_out,
-            IF_ID_ins(8 downto 6) when op_test,
-            IF_ID_ins(5 downto 3) when others;
-
+            -- IF_ID_ins(2 downto 0) when op_bshl,
+            -- IF_ID_ins(2 downto 0) when op_bshr,
+            -- IF_ID_ins(8 downto 6) when op_out,
+            -- IF_ID_ins(8 downto 6) when op_test,
+            -- IF_ID_ins(5 downto 3) when others;
+            IF_ID_latch.instr(2 downto 0) when op_bshl,
+            IF_ID_latch.instr(2 downto 0) when op_bshr,
+            IF_ID_latch.instr(8 downto 6) when op_out,
+            IF_ID_latch.instr(8 downto 6) when op_test,
+            IF_ID_latch.instr(5 downto 3) when others;
+ 
     Registers_Latches_instance : entity work.register_file
     port map(
         rst         => Reset_and_Execute,
@@ -79,7 +90,8 @@ begin
         wr_data     => wr_data,
         wr_enable   => wr_enable,
         rd_index1   => rd_index1,
-        rd_index2   => IF_ID_ins(2 downto 0),
+        rd_index2   => IF_ID_ins(2 downto 0), --rd gives data to bits 2..0 of
+                                              --the I_ID instr??
         rd_data1    => RB_data,
         rd_data2    => RC_data
     );
@@ -89,16 +101,22 @@ begin
     ID_EX: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            ID_EX_val <= (others => '0'); -- Asynchronous reset
+            ID_EX_latch.instr <= (others => '0');
+--            ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
-            ID_EX_ins <= IF_ID_ins;
-            i_ALU_Op  <= IF_ID_ins;
-            if IF_ID_ins(15 downto 9) = op_in then
+            ID_EX_latch.instr <= IF_ID_latch.instr;
+--            ID_EX_ins <= IF_ID_ins;
+            i_ALU_Op <= IF_ID_latch.instr;
+--            i_ALU_Op  <= IF_ID_ins;
+            -- TODO: IF_IF_Control <= IF_ID.instr -- Feed the controller the
+            -- current latch instruction.
+            if IF_ID_latch.instr(15 downto 9) = op_in then
+--            if IF_ID_ins(15 downto 9) = op_in then
                 i_ALU_A <= '0' & in_port;
             else
                 i_ALU_A <= RB_data;
             end if;
-            i_ALU_B <= RC_data;
+                i_ALU_B <= RC_data;
         end if;
     end process ID_EX;
     
@@ -116,12 +134,18 @@ begin
     EX_MEM: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            EX_MEM_val <= (others => '0');
-            EX_MEM_ins <= (others => '0');
+              EX_MEM_latch.instr <= (others => '0');
+              EX_MEM_latch.result <= (others => '0');
+--            EX_MEM_val <= (others => '0');
+--            EX_MEM_ins <= (others => '0');
         elsif rising_edge(M_clock) then
-            EX_MEM_ins <= ID_EX_ins;
-            EX_MEM_val <= o_ALU_C;
-            if ID_EX_ins(15 downto 9) = op_test then
+              EX_MEM_latch.instr <= ID_EX_latch.instr;
+              EX_MEM_latch.result <= o_ALU_C;
+--            EX_MEM_ins <= ID_EX_ins;
+--            EX_MEM_val <= o_ALU_C;
+            -- TODO: Feed the controller the current latch instruction
+            if ID_EX_latch.instr (15 downto 9) = op_test then
+--            if ID_EX_ins(15 downto 9) = op_test then
                 FLAG_N <= o_ALU_N;
                 FLAG_Z <= o_ALU_Z;
             end if;
@@ -132,14 +156,18 @@ begin
     MEM_WB: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            MEM_WB_val <= (others => '0');
+            MEM_WB_latch.result <= (others => '0');
+--            MEM_WB_val <= (others => '0');
         elsif rising_edge(M_clock) then
-            MEM_WB_ins <= EX_MEM_ins;
-            MEM_WB_val <= EX_MEM_val;
+            MEM_WB_latch.instr <= EX_MEM_latch.instr;
+            MEM_WB_latch.result <= EX_MEM_latch.result;
+--            MEM_WB_ins <= EX_MEM_ins;
+--            MEM_WB_val <= EX_MEM_val;
         end if;
     end process MEM_WB;   
     
 -----------------------------------   OUT Port   -------------------------------------------------
-    out_port <= MEM_WB_val(15 downto 0) when MEM_WB_ins(15 downto 9) = "0100000";
+    out_port <= MEM_WB_latch.result(15 downto 0) when MEM_WB_latch.instr(15 downto 9) = op_out;  
+--    out_port <= MEM_WB_val(15 downto 0) when MEM_WB_ins(15 downto 9) = "0100000";
     
 end Behavioral;
