@@ -31,8 +31,33 @@ package Marmot_Config is
     constant ALU_Op_width    :   integer         := 3;
     constant MEM_Op_width    :   integer         := 2;
     constant WB_Op_width     :   integer         := 2;    
+
+    -- Register specific ranges
+    subtype reg_range     is natural range 16 downto 0;
+    subtype reg_idx_range is natural range 2 downto 0;
+    -- ALU specific ranges
     
--- Example of record type implementation of fields within latches    
+    -- Instruction specific ranges --
+   
+    subtype instr_range  is natural range 15 downto 0;
+    subtype op_range     is natural range 15 downto 9;
+
+    -- A Instructions ranges
+    subtype ra_range     is natural range 8 downto 6;
+    subtype rb_range     is natural range 5 downto 3;
+    subtype rc_range     is natural range 2 downto 0;
+    subtype cl_range     is natural range 3 downto 0;
+
+    -- B Instructions
+    subtype disp_l_range is natural range 8 downto 0;
+    subtype disp_s_range is natural range 5 downto 0;
+
+    -- L instructions
+    subtype imm_range    is natural range 7 downto 0;
+    subtype r_rdest      is natural range 8 downto 6;
+    subtype r_src        is natural range 5 downto 3;
+    
+   -- Pipeline Latch Record Types --
    type IF_ID_rec is record
            instr : std_logic_vector(INSTR_width-1 downto 0);
            npc   : std_logic_vector(INSTR_width-1 downto 0);        
