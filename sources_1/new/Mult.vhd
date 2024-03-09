@@ -1,12 +1,12 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-
+use work.Marmot_Config.all;
 
 entity Mult is
     Port(
-        Mult_A,Mult_B     : IN std_logic_vector(15 downto 0);
-        Mult_C            : OUT std_logic_vector(16 downto 0)
+        Mult_A,Mult_B     : IN std_logic_vector(instr_width);
+        Mult_C            : OUT std_logic_vector(reg_width)
         );
 end Mult;
 
@@ -19,7 +19,7 @@ architecture Behavioral of Mult is
 begin
 
     -- perform 16 * 16 = 32
-    o_mult_result <= std_logic_vector(unsigned(Mult_A(15 downto 0)) * unsigned(Mult_B(15 downto 0)));
+    o_mult_result <= std_logic_vector(unsigned(Mult_A(instr_width)) * unsigned(Mult_B(instr_width)));
         
     -- test for overflow
     o_overflow <= o_mult_result(31) OR
@@ -40,7 +40,7 @@ begin
                   o_mult_result(16);                                       
             
     -- output the ovflow flag and the lower  2 bytes of the result
-    Mult_C     <= o_overflow & o_mult_result(15 downto 0);
+    Mult_C     <= o_overflow & o_mult_result(instr_width);
     
     
 end Behavioral;

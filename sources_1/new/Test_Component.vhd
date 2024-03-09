@@ -1,9 +1,10 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.Marmot_Config.all;
 
 entity Test_Component is
   Port ( 
-  Test_A			: IN std_logic_vector(16 downto 0);
+  Test_A			: IN std_logic_vector(reg_width);
   Test_Z			: OUT std_logic;
   Test_N			: OUT std_logic
   );

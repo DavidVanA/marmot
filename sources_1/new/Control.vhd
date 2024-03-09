@@ -21,27 +21,27 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.Marmot_Config.all;
 
 
-entity Control is
+entity Controller is
 
   port (    
-    IF_ID_PORT          : IN std_logic_vector(instr_range);
-    ID_EX_PORT          : IN std_logic_vector(instr_range);
-    EX_MEM_PORT         : IN std_logic_vector(instr_range);
-    MEM_WB_PORT         : IN std_logic_vector(instr_range);
---    INS_port            : IN std_logic_vector(INSTR_width-1 downto 0);
+    IF_ID_PORT          : IN std_logic_vector(instr_width);
+    ID_EX_PORT          : IN std_logic_vector(instr_width);
+    EX_MEM_PORT         : IN std_logic_vector(instr_width);
+    MEM_WB_PORT         : IN std_logic_vector(instr_width);
+--    INS_port            : IN std_logic_vector(instr_width);
     ALU_Mode            : OUT std_logic_vector(ALU_Op_width-1 downto 0);
     MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
     WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
     
     );
-end Control;
+end Controller;
 
-architecture Behavioral of Control is
+architecture Behavioral of Controller is
 
-    signal IF_ID_INS          : std_logic_vector(INSTR_range);
-    signal ID_EX_INS          : std_logic_vector(INSTR_range);
-    signal EX_MEM_INS         : std_logic_vector(INSTR_range);
-    signal MEM_WB_INS         : std_logic_vector(INSTR_range);
+    signal IF_ID_INS          : std_logic_vector(instr_width);
+    signal ID_EX_INS          : std_logic_vector(instr_width);
+    signal EX_MEM_INS         : std_logic_vector(instr_width);
+    signal MEM_WB_INS         : std_logic_vector(instr_width);
     
 begin
 -----------------------------------   IF/ID     -------------------------------------------------        
@@ -63,11 +63,11 @@ begin
 -- TODO: ALU input selector?
 -- TODO: rd_index_1 selector 
 -----------------------------------   ID/EX   -------------------------------------------------   
-    ID_EX_INS <= ID_EX_PORT;
+      ID_EX_INS <= ID_EX_PORT;
 -----------------------------------   EX/MEM   -------------------------------------------------   
-    EX_MEM_INS <= EX_MEM_PORT;
+      EX_MEM_INS <= EX_MEM_PORT;
 -----------------------------------   MEM/WB   -------------------------------------------------   
-    MEM_WB_INS <= MEM_WB_PORT;
+      MEM_WB_INS <= MEM_WB_PORT;
 -----------------------------------   OUT Port   -------------------------------------------------   
     
 end Behavioral;

@@ -1,11 +1,12 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.Marmot_Config.all;
 
 entity BarrelShifterRight is
   Port ( 
-  Sh_A    	        : IN std_logic_vector(15 downto 0);
-  Sh_B              : IN std_logic_vector(3 downto 0);
-  Sh_C            	: OUT std_logic_vector(15 downto 0)
+  Sh_A    	        : IN std_logic_vector(instr_width);
+  Sh_B              : IN std_logic_vector(cl_width);
+  Sh_C            	: OUT std_logic_vector(instr_width)
   );
 end BarrelShifterRight;
 
