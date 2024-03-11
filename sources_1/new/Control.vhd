@@ -29,9 +29,9 @@ entity Controller is
     EX_MEM_PORT         : IN std_logic_vector(instr_width);
     MEM_WB_PORT         : IN std_logic_vector(instr_width);
 --    INS_port            : IN std_logic_vector(instr_width);
-    ALU_Mode            : OUT std_logic_vector(ALU_Op_width-1 downto 0);
-    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
-    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
+    ALU_Mode            : OUT std_logic_vector(alu_mode_width)
+--    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
+--    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
     
     );
 end Controller;
@@ -45,19 +45,20 @@ architecture Behavioral of Controller is
     
 begin
 -----------------------------------   IF/ID     -------------------------------------------------        
-    IF_ID_INS <= IF_ID_PORT;
-    with IF_ID_INS(15 downto 9) select
+    IF_ID_INS   <= IF_ID_PORT;
+    ALU_Mode    <= IF_ID_INS(11 downto 9);
+    with IF_ID_INS(op_width) select
         ALU_Mode <= 
         "000" when op_nop,
         "001" when op_add,
-        "001" when op_sub,
-        "001" when op_mult,
-        "001" when op_nand,
-        "010" when op_bshl,
-        "010" when op_bshr,
-        "011" when op_test,
-        "011" when op_in,
-        "011" when op_out,
+        "010" when op_sub,
+        "011" when op_mult,
+        "100" when op_nand,
+        "101" when op_bshl,
+        "110" when op_bshr,
+        "111" when op_test,
+        "000" when op_in,
+        "001" when op_out,
         (others => '0') when others;
     
 -- TODO: ALU input selector?

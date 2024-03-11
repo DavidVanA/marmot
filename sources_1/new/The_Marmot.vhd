@@ -23,7 +23,7 @@ end The_Marmot;
 architecture Behavioral of The_Marmot is
 
     signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(reg_width);
-    signal i_ALU_Op     :   std_logic_vector(instr_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
+    signal i_ALU_Op     :   std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
     
     signal rd_index1      :   std_logic_vector(reg_idx_width); 
     signal RB_data        :   std_logic_vector(reg_width);
@@ -57,24 +57,24 @@ begin
 
 --         elsif rising_edge(M_clock) then
 --           -- Should this happen here or in the latches?
---           i_CON_IF_ID  <= IF_ID_latch.instr;
---           i_CON_ID_EX  <= ID_EX_latch.instr;
---           i_CON_EX_MEM <= EX_MEM_latch.instr;
---           i_CON_MEM_WB <= MEM_WB_latch.instr;
+    i_CON_IF_ID  <= IF_ID_latch.instr;
+    i_CON_ID_EX  <= ID_EX_latch.instr;
+    i_CON_EX_MEM <= EX_MEM_latch.instr;
+    i_CON_MEM_WB <= MEM_WB_latch.instr;
 --         end if;
 --     end process Controller;
 
---     Controller_instance: entity work.Controller
---     port map(
---       IF_ID_PORT  => i_CON_IF_ID,
---       ID_EX_PORT  => i_CON_ID_EX,
---       EX_MEM_PORT => i_CON_EX_MEM,
---       MEM_WB_PORT => i_CON_MEM_WB
--- --      ALU_Mode    => i_ALU_Op 
--- --      can happen
--- --      MEM_Op     =>;
--- --      WB_Op      =>;
---       );
+     Controller_instance: entity work.Controller
+     port map(
+       IF_ID_PORT  => i_CON_IF_ID,
+       ID_EX_PORT  => i_CON_ID_EX,
+       EX_MEM_PORT => i_CON_EX_MEM,
+       MEM_WB_PORT => i_CON_MEM_WB,
+       ALU_Mode    => i_ALU_Op 
+ --      can happen
+ --      MEM_Op     =>;
+ --      WB_Op      =>;
+       );
     
     
 -----------------------------------   IF/ID     -------------------------------------------------    
@@ -135,7 +135,7 @@ begin
 --            ID_EX_ins <= IF_ID_ins;
 
             -- <TODO> ALU_Mode port needs resizing before this can go away
-            i_ALU_Op <= IF_ID_latch.instr;
+--            i_ALU_Op <= IF_ID_latch.instr;
 
 --            i_ALU_Op  <= IF_ID_ins;
             -- <TODO> IF_IF_Control <= IF_ID.instr -- Feed the controller the
