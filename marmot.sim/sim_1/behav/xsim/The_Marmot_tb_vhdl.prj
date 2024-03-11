@@ -1,14 +1,27 @@
 # compile vhdl design source files
 vhdl xil_defaultlib  \
+"../../../../Project.srcs/sources_1/new/The_Marmot_Config.vhd" \
 "../../../../sources_1/new/The_Marmot_Config.vhd" \
+"../../../../Project.srcs/sources_1/new/Adder.vhd" \
+"../../../../sources_1/new/Adder4Bits.vhd" \
 "../../../../sources_1/new/Adder.vhd" \
+"../../../../Project.srcs/sources_1/new/Nand_Component.vhd" \
 "../../../../sources_1/new/Nand_Component.vhd" \
+"../../../../Project.srcs/sources_1/new/Test_Component.vhd" \
 "../../../../sources_1/new/Test_Component.vhd" \
 "../../../../sources_1/new/BarrelShifterLeft.vhd" \
 "../../../../sources_1/new/BarrelShifterRight.vhd" \
+"../../../../Project.srcs/sources_1/new/Mult.vhd" \
 "../../../../sources_1/new/Mult.vhd" \
+"../../../../Project.srcs/sources_1/new/TwosCompliment.vhd" \
 "../../../../sources_1/new/TwosCompliment.vhd" \
+"../../../../Project.srcs/sources_1/new/ALU.vhd" \
 "../../../../sources_1/new/ALU.vhd" \
+"../../../../Project.srcs/sources_1/new/Control.vhd" \
+"../../../../sources_1/new/Control.vhd" \
+"../../../../sources_1/new/FullAdder.vhd" \
+"../../../../sources_1/new/HalfAdder.vhd" \
+"../../../../Project.srcs/sources_1/new/Register_Latches.vhd" \
 "../../../../sources_1/new/Register_Latches.vhd" \
 "../../../../sources_1/new/The_Marmot.vhd" \
 "../../../../sim_1/new/The_Marmot_tb.vhd" \
