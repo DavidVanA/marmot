@@ -46,7 +46,6 @@ architecture Behavioral of Controller is
 begin
 -----------------------------------   IF/ID     -------------------------------------------------        
     IF_ID_INS   <= IF_ID_PORT;
---    ALU_Mode    <= IF_ID_INS(11 downto 9);
     with IF_ID_INS(op_width) select
         ALU_Mode <= 
         "000" when op_nop,

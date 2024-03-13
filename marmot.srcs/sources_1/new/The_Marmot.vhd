@@ -22,8 +22,9 @@ end The_Marmot;
 
 architecture Behavioral of The_Marmot is
 
+    -- ALU Signals
     signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(reg_width);
-    signal i_ALU_Op     :   std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
+    signal i_ALU_Op       :   std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
     
     signal rd_index1      :   std_logic_vector(reg_idx_width); 
     signal RB_data        :   std_logic_vector(reg_width);
@@ -57,6 +58,7 @@ begin
 
 --         elsif rising_edge(M_clock) then
 --           -- Should this happen here or in the latches?
+
     i_CON_IF_ID  <= IF_ID_latch.instr;
     i_CON_ID_EX  <= ID_EX_latch.instr;
     i_CON_EX_MEM <= EX_MEM_latch.instr;
@@ -76,6 +78,7 @@ begin
  --      WB_Op      =>;
        );
     
+      
     
 -----------------------------------   IF/ID     -------------------------------------------------    
     IF_ID: process(M_clock, Reset_and_Execute, Reset_and_Load)
