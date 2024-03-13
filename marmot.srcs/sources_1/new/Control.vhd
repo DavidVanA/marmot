@@ -42,7 +42,16 @@ architecture Behavioral of Controller is
     signal EX_MEM_INS         : std_logic_vector(instr_width);
     signal MEM_WB_INS         : std_logic_vector(instr_width);
     
+--    signal PCsrc        : std_logic;
+    signal branch_stage : std_logic;
+    signal branch_flag  : std_logic;
+    
 begin
+
+-----------------------------------   PC        -------------------------------------------------   
+
+    
+
 -----------------------------------   IF/ID     -------------------------------------------------        
     IF_ID_INS   <= IF_ID_PORT;
     

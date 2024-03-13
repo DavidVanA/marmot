@@ -125,7 +125,7 @@ begin
     
     ALU_instance: entity work.ALU
     port map( 
-        ALU_Mode  => i_ALU_Op, 
+        ALU_Mode => i_ALU_Op, 
         ALU_A    => i_ALU_A, 
         ALU_B    => i_ALU_B, 
         ALU_C    => o_ALU_C, 

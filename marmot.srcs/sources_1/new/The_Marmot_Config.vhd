@@ -3,6 +3,17 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 package Marmot_Config is
 
+    constant type_A0    : std_logic_vector(2 downto 0) := "000";
+    constant type_A1    : std_logic_vector(2 downto 0) := "001";
+    constant type_A2    : std_logic_vector(2 downto 0) := "010";
+    constant type_A3    : std_logic_vector(2 downto 0) := "011";
+    constant type_B1    : std_logic_vector(2 downto 0) := "100";
+    constant type_B2    : std_logic_vector(2 downto 0) := "101";
+    constant type_L1    : std_logic_vector(2 downto 0) := "110";
+    constant type_L2    : std_logic_vector(2 downto 0) := "111";
+
+    ---------------------------------------------------------------------
+
     constant op_nop          : std_logic_vector(6 downto 0) := "0000000";
     constant op_add          : std_logic_vector(6 downto 0) := "0000001";
     constant op_sub          : std_logic_vector(6 downto 0) := "0000010";
@@ -13,6 +24,25 @@ package Marmot_Config is
     constant op_test         : std_logic_vector(6 downto 0) := "0000111";
     constant op_out          : std_logic_vector(6 downto 0) := "0100000";
     constant op_in           : std_logic_vector(6 downto 0) := "0100001";
+    
+    constant op_brr_ov      : std_logic_vector(6 downto 0) := "0100001";
+    constant op_br_ov       : std_logic_vector(6 downto 0) := "0100001";
+    
+    constant op_brr         : std_logic_vector(6 downto 0) := "1000000";
+    constant op_brr_n       : std_logic_vector(6 downto 0) := "1000001";
+    constant op_brr_z       : std_logic_vector(6 downto 0) := "1000010";
+    constant op_br          : std_logic_vector(6 downto 0) := "1000011";
+    constant op_br_n        : std_logic_vector(6 downto 0) := "1000100";
+    constant op_br_z        : std_logic_vector(6 downto 0) := "1000101";
+    constant op_br_sub      : std_logic_vector(6 downto 0) := "1000110";
+    constant op_rtn         : std_logic_vector(6 downto 0) := "1000111";
+    
+    constant op_ld          : std_logic_vector(6 downto 0) := "0010000";
+    constant op_sd          : std_logic_vector(6 downto 0) := "0010001";
+    constant op_ld_imm      : std_logic_vector(6 downto 0) := "0010010";
+    constant op_mv          : std_logic_vector(6 downto 0) := "0010011";
+    
+    ---------------------------------------------------------------------
     
     constant alu_mode_a0     : std_logic_vector := "000";
     constant alu_mode_a1     : std_logic_vector := "001";
