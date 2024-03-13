@@ -28,7 +28,6 @@ entity Controller is
     ID_EX_PORT          : IN std_logic_vector(instr_width);
     EX_MEM_PORT         : IN std_logic_vector(instr_width);
     MEM_WB_PORT         : IN std_logic_vector(instr_width);
---    INS_port            : IN std_logic_vector(instr_width);
     ALU_Mode            : OUT std_logic_vector(alu_mode_width)
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
@@ -46,7 +45,7 @@ architecture Behavioral of Controller is
 begin
 -----------------------------------   IF/ID     -------------------------------------------------        
     IF_ID_INS   <= IF_ID_PORT;
---    ALU_Mode    <= IF_ID_INS(11 downto 9);
+    
     with IF_ID_INS(op_width) select
         ALU_Mode <= 
         "000" when op_nop,

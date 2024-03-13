@@ -6,24 +6,24 @@ use work.Marmot_Config.all;
 entity The_Marmot is
 
   port (
-    in_port             : IN std_logic_vector(instr_width);
-    M_clock             : IN std_logic;
-    Reset_and_Execute   : IN std_logic;
-    Reset_and_Load      : IN std_logic;
-    out_port            : OUT std_logic_vector(instr_width);
+    in_port               : IN std_logic_vector(instr_width);
+    M_clock               : IN std_logic;
+    Reset_and_Execute     : IN std_logic;
+    Reset_and_Load        : IN std_logic;
+    out_port              : OUT std_logic_vector(instr_width);
     
-    INS_port            : IN std_logic_vector(instr_width);
-    wr_data             : IN std_logic_vector(reg_width);
-    wr_index            : IN std_logic_vector(reg_idx_width);
-    wr_enable           : IN std_logic
+    INS_port              : IN std_logic_vector(instr_width);
+    wr_data               : IN std_logic_vector(reg_width);
+    wr_index              : IN std_logic_vector(reg_idx_width);
+    wr_enable             : IN std_logic
         
   );
 end The_Marmot;
 
 architecture Behavioral of The_Marmot is
 
-    signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(reg_width);
-    signal i_ALU_Op     :   std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
+    signal i_ALU_A, i_ALU_B, o_ALU_C : std_logic_vector(reg_width);
+    signal i_ALU_Op                  :   std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
     
     signal rd_index1      :   std_logic_vector(reg_idx_width); 
     signal RB_data        :   std_logic_vector(reg_width);
@@ -35,34 +35,26 @@ architecture Behavioral of The_Marmot is
     signal i_CON_MEM_WB   :   std_logic_vector(instr_width);
     
     -- Pipeline Latch Signals
-    signal IF_ID_latch  : IF_ID_rec;
-    signal ID_EX_latch  : ID_EX_rec;
-    signal EX_MEM_latch : EX_MEM_rec;
-    signal MEM_WB_latch : MEM_WB_rec;
+    signal IF_ID_latch    :   IF_ID_rec;
+    signal ID_EX_latch    :   ID_EX_rec;
+    signal EX_MEM_latch   :   EX_MEM_rec;
+    signal MEM_WB_latch   :   MEM_WB_rec;
     
-    signal o_ALU_Z      :   std_logic;
-    signal FLAG_Z       :   std_logic;
-    signal o_ALU_N      :   std_logic;
-    signal FLAG_N       :   std_logic;
+    signal o_ALU_Z        :   std_logic;
+    signal FLAG_Z         :   std_logic;
+    signal o_ALU_N        :   std_logic;
+    signal FLAG_N         :   std_logic;
     
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
 
 
 -----------------------------------   Control   -------------------------------------------------
--- <TODO> Cannot get this block to compile
---     Controller : process(M_clock, Reset_and_Execute, Reset_and_Load)
---     begin
---         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
 
---         elsif rising_edge(M_clock) then
---           -- Should this happen here or in the latches?
     i_CON_IF_ID  <= IF_ID_latch.instr;
     i_CON_ID_EX  <= ID_EX_latch.instr;
     i_CON_EX_MEM <= EX_MEM_latch.instr;
     i_CON_MEM_WB <= MEM_WB_latch.instr;
---         end if;
---     end process Controller;
 
      Controller_instance: entity work.Controller
      port map(
@@ -81,13 +73,9 @@ begin
     IF_ID: process(M_clock, Reset_and_Execute, Reset_and_Load)
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
-            
-            -- Possible alternative naming scheme using custom record type:
             IF_ID_latch.instr <= (others => '0');
-            --IF_ID_ins <= (others => '0');
         elsif rising_edge(M_clock) then
             IF_ID_latch.instr <= INS_PORT;
-            --IF_ID_ins <= INS_PORT;
          -- <TODO> IF_IF_Control <= IF_ID.instr -- Feed the controller the
          -- current latch instruction.
         end if;
@@ -95,13 +83,7 @@ begin
     
     -- ???? <TODO> SHOULD BE PART OF CONTROLLER ?????
    with IF_ID_latch.instr(op_width) select
-   --with IF_ID_ins(15 downto 9) select
         rd_index1 <=
-            -- IF_ID_ins(2 downto 0) when op_bshl,
-            -- IF_ID_ins(2 downto 0) when op_bshr,
-            -- IF_ID_ins(8 downto 6) when op_out,
-            -- IF_ID_ins(8 downto 6) when op_test,
-            -- IF_ID_ins(5 downto 3) when others;
             IF_ID_latch.instr(2 downto 0) when op_bshl,
             IF_ID_latch.instr(2 downto 0) when op_bshr,
             IF_ID_latch.instr(8 downto 6) when op_out,
@@ -129,19 +111,10 @@ begin
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
             ID_EX_latch.instr <= (others => '0');
---            ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
             ID_EX_latch.instr <= IF_ID_latch.instr;
---            ID_EX_ins <= IF_ID_ins;
 
-            -- <TODO> ALU_Mode port needs resizing before this can go away
---            i_ALU_Op <= IF_ID_latch.instr;
-
---            i_ALU_Op  <= IF_ID_ins;
-            -- <TODO> IF_IF_Control <= IF_ID.instr -- Feed the controller the
-            -- current latch instruction.
             if IF_ID_latch.instr(op_width) = op_in then
---            if IF_ID_ins(15 downto 9) = op_in then
                 i_ALU_A <= '0' & in_port;
             else
                 i_ALU_A <= RB_data;
@@ -152,8 +125,7 @@ begin
     
     ALU_instance: entity work.ALU
     port map( 
---        ALU_Mode => 
-        ALU_Ins  => i_ALU_Op, 
+        ALU_Mode  => i_ALU_Op, 
         ALU_A    => i_ALU_A, 
         ALU_B    => i_ALU_B, 
         ALU_C    => o_ALU_C, 
@@ -167,16 +139,10 @@ begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
               EX_MEM_latch.instr <= (others => '0');
               EX_MEM_latch.result <= (others => '0');
---            EX_MEM_val <= (others => '0');
---            EX_MEM_ins <= (others => '0');
         elsif rising_edge(M_clock) then
               EX_MEM_latch.instr <= ID_EX_latch.instr;
               EX_MEM_latch.result <= o_ALU_C;
---            EX_MEM_ins <= ID_EX_ins;
---            EX_MEM_val <= o_ALU_C;
-            -- TODO: Feed the controller the current latch instruction
             if ID_EX_latch.instr (op_width) = op_test then
---            if ID_EX_ins(15 downto 9) = op_test then
                 FLAG_N <= o_ALU_N;
                 FLAG_Z <= o_ALU_Z;
             end if;
@@ -188,17 +154,13 @@ begin
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
             MEM_WB_latch.result <= (others => '0');
---            MEM_WB_val <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_latch.instr <= EX_MEM_latch.instr;
             MEM_WB_latch.result <= EX_MEM_latch.result;
---            MEM_WB_ins <= EX_MEM_ins;
---            MEM_WB_val <= EX_MEM_val;
         end if;
     end process MEM_WB;   
     
 -----------------------------------   OUT Port   -------------------------------------------------
     out_port <= MEM_WB_latch.result(instr_width) when MEM_WB_latch.instr(op_width) = op_out;  
---    out_port <= MEM_WB_val(instr_width) when MEM_WB_ins(15 downto 9) = "0100000";
     
 end Behavioral;

@@ -6,8 +6,8 @@ use work.Marmot_Config.all;
 entity ALU is
 
     PORT(
-        ALU_Ins     : IN    std_logic_vector(alu_mode_width);
---        ALU_Mode    : IN    std_logic_vector(alu_mode_width);
+--        ALU_Ins     : IN    std_logic_vector(alu_mode_width);
+        ALU_Mode    : IN    std_logic_vector(alu_mode_width);
         ALU_A,ALU_B : IN    std_logic_vector(reg_width);
         ALU_C       : OUT   std_logic_vector(reg_width);
         ALU_N       : OUT   std_logic;
@@ -37,11 +37,11 @@ begin
       
   
     input_demux_A : for i in instr_width generate
-        i_nand_A(i)     <= ALU_A(i) when ALU_ins = op_nand else '0';
-        i_test_A(i)     <= ALU_A(i) when ALU_ins = op_test else '0';
-        i_bshl_A(i)     <= ALU_A(i) when ALU_ins = op_bshl else '0';
-        i_bshr_A(i)     <= ALU_A(i) when ALU_ins = op_bshr else '0';
-        i_mult_A(i)     <= ALU_A(i) when ALU_ins = op_mult else '0';
+        i_nand_A(i)     <= ALU_A(i) when ALU_Mode = op_nand else '0';
+        i_test_A(i)     <= ALU_A(i) when ALU_Mode = op_test else '0';
+        i_bshl_A(i)     <= ALU_A(i) when ALU_Mode = op_bshl else '0';
+        i_bshr_A(i)     <= ALU_A(i) when ALU_Mode = op_bshr else '0';
+        i_mult_A(i)     <= ALU_A(i) when ALU_Mode = op_mult else '0';
     end generate input_demux_A;
     
 --    with ALU_ins select
@@ -51,23 +51,23 @@ begin
 --            (others => '0') when others;
     
     input_demux_B : for i in instr_width generate
-        i_nand_B(i)     <= ALU_B(i) when ALU_ins = op_nand else '0';
-        i_mult_B(i)     <= ALU_B(i) when ALU_ins = op_mult else '0';
+        i_nand_B(i)     <= ALU_B(i) when ALU_Mode = op_nand else '0';
+        i_mult_B(i)     <= ALU_B(i) when ALU_Mode = op_mult else '0';
     end generate input_demux_B;
     
-    i_sub_B <= ALU_B(15 downto 0) when ALU_ins = op_sub(alu_mode_width) else x"0000";
-    with ALU_ins select
+    i_sub_B <= ALU_B(15 downto 0) when ALU_Mode = op_sub(alu_mode_width) else x"0000";
+    with ALU_Mode select
         i_adder_B <=
             neg_i_sub_B         when op_sub(alu_mode_width),
             ALU_B(instr_width)  when op_add(alu_mode_width),
             (others => '0') when others;
             
-    i_bshl_B <= ALU_ins(cl_width) when ALU_ins = op_bshl else x"0";
-    i_bshr_B <= ALU_ins(cl_width) when ALU_ins = op_bshr else x"0";
+    i_bshl_B <= ALU_Mode(cl_width) when ALU_Mode = op_bshl else x"0";
+    i_bshr_B <= ALU_Mode(cl_width) when ALU_Mode = op_bshr else x"0";
 
 
     -- Output Mux
-    with ALU_ins select 
+    with ALU_Mode select 
         ALU_C <=
                    o_adder_C when op_add(alu_mode_width),
                    o_adder_C when op_sub(alu_mode_width),
