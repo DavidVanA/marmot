@@ -34,7 +34,7 @@ package Marmot_Config is
     constant op_mov          : std_logic_vector(op_code) := "0010011";
 
     -- ALU Mode
-    -- <TODO>: a0 cannot be zero due to use of with select others => '0' statements
+    -- Redundant?
     constant alu_mode_a0     : std_logic_vector := "000";
     constant alu_mode_a1     : std_logic_vector := "001";
     constant alu_mode_a2     : std_logic_vector := "010";
@@ -86,6 +86,7 @@ package Marmot_Config is
    type ID_EX_rec is record
            instr   : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
+           br_addr : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);
            rc_data : std_logic_vector(reg_width);        
@@ -105,5 +106,12 @@ package Marmot_Config is
           result   : std_logic_vector(reg_width);
           mem_data : std_logic_vector(instr_width);
    end record MEM_WB_rec;
+
+    -- Status Flag Latch Record Type
+    type Status_Flags_rec is record
+         zero     : std_logic;
+         neg      : std_logic;
+         overflow : std_logic;
+    end record Status_Flags;
     
 end package Marmot_Config;

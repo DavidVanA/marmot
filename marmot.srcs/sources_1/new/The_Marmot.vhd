@@ -1,4 +1,4 @@
-library IEEE;
+library IEEE;                           --
 use IEEE.STD_LOGIC_1164.ALL;
 use work.Marmot_Config.all;
 
@@ -15,15 +15,14 @@ entity The_Marmot is
     INS_port              : IN std_logic_vector(instr_width);
     wr_data               : IN std_logic_vector(reg_width);
     wr_index              : IN std_logic_vector(reg_idx_width);
-    wr_enable             : IN std_logic
-        
-  );
+    wr_enable             : IN std_logic        
+    );
 end The_Marmot;
 
 architecture Behavioral of The_Marmot is
 
     signal i_ALU_A, i_ALU_B, o_ALU_C : std_logic_vector(reg_width);
-    signal i_ALU_Op                  : std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
+    signal i_ALU_Op                  : std_logic_vector(alu_mode_width); 
     
     signal rd_index1      :   std_logic_vector(reg_idx_width); 
     signal RB_data        :   std_logic_vector(reg_width);
@@ -45,10 +44,10 @@ architecture Behavioral of The_Marmot is
     signal Reset_EX_MEM   :  std_logic;
     signal Reset_MEM_WB   :  std_logic;
     
-    signal o_ALU_Z        :   std_logic;
-    signal FLAG_Z         :   std_logic;
-    signal o_ALU_N        :   std_logic;
-    signal FLAG_N         :   std_logic;
+    signal o_ALU_Z        :  std_logic;
+    signal FLAG_Z         :  std_logic;
+    signal o_ALU_N        :  std_logic;
+    signal FLAG_N         :  std_logic;
     
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
@@ -73,7 +72,9 @@ begin
        ID_EX_PORT         => i_CON_ID_EX,
        EX_MEM_PORT        => i_CON_EX_MEM,
        MEM_WB_PORT        => i_CON_MEM_WB,
-       ALU_Mode           => i_ALU_Op 
+       ALU_Mode           => i_ALU_Op, 
+       ALU_N              => o_ALU_N,
+       ALU_Z              => o_ALU_Z
  --      can happen
  --      MEM_Op     =>;
  --      WB_Op      =>;
@@ -87,12 +88,9 @@ begin
             IF_ID_latch.instr <= (others => '0');
         elsif rising_edge(M_clock) then
             IF_ID_latch.instr <= INS_PORT;
-         -- <TODO> IF_IF_Control <= IF_ID.instr -- Feed the controller the
-         -- current latch instruction.
         end if;
     end process IF_ID;
-    
-    -- ???? <TODO> - Remove when we no longer needed
+    -- ???? <TODO> - What is happening here??
    with IF_ID_latch.instr(op_width) select
         rd_index1 <=
             IF_ID_latch.instr(2 downto 0) when op_bshl,
@@ -133,7 +131,15 @@ begin
                 i_ALU_B <= RC_data;
         end if;
     end process ID_EX;
-    
+
+     -- Branch resolution --
+     -- On the PCSrc signal we need to check if we should have taken the branch
+     -- See Pg. C-38 of textbook
+     -- Check if ID_EX_latch.br_addr == IF_ID_latch.npc = 1 -- Branch not take
+     --          ID_EX_latch.br_addr == IF_ID_latch.npc = 1 -- Branch taken
+     -----------------------
+
+     
     ALU_instance: entity work.ALU
     port map( 
         ALU_Mode => i_ALU_Op, 

@@ -6,7 +6,8 @@ entity Test_Component is
   Port ( 
   Test_A			: IN std_logic_vector(reg_width);
   Test_Z			: OUT std_logic;
-  Test_N			: OUT std_logic
+  Test_N			: OUT std_logic;
+  Test_Ov           : OUT std_logic
   );
 end Test_Component;
 

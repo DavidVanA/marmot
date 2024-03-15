@@ -98,6 +98,7 @@ begin
         Test_A  => i_test_A,
         Test_N  => ALU_N,
         Test_Z  => ALU_Z
+--        Test_Ov => ALU_Ov
     );
     
     BarrelShifterLeft_instance : entity work.BarrelShifterLeft

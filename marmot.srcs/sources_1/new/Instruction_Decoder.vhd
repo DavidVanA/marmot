@@ -3,10 +3,11 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.Marmot_Config.all;
 
 entity Instruction_Decoder is
-
   Port(
     Instr_Port      : IN  std_logic_vector(op_code);
     Instr_Type_Port : OUT std_logic_vector(instr_type_width)
+    -- Instr_Operand1
+    -- Instr_Operand2
     );
 
 end Instruction_Decoder;
@@ -15,7 +16,8 @@ architecture Behavioral of Instruction_Decoder is
 
   signal i_Instr_Op      : std_logic_vector(op_code);
   signal o_Instr_Type    : std_logic_vector(instr_type_width);
-
+  -- Should this also output the reg_idx the instruction specifies?
+  
 begin
 
   i_Instr_Op <= Instr_Port;
@@ -39,8 +41,6 @@ begin
                    b2_instr when op_br_n,
                    b2_instr when op_br_z,
                    b2_instr when op_br_sub,
-                 --b2_instr when op_br_ov,
-                 --b2_instr when op_br_cov
                    l1_instr when op_load_imm,
                    l1_instr when op_mov,
                    l2_instr when op_load,
@@ -50,4 +50,3 @@ begin
   instr_Type_Port <= o_Instr_Type;
   
 end Behavioral;
- 
