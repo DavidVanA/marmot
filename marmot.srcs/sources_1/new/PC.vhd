@@ -41,8 +41,10 @@ entity PC is
     
 --    PCsrc                       :   IN std_logic;
     IF_ID_INS                   :   IN std_logic_vector(instr_width);
+    INS_type                    :   IN std_logic_vector(2 downto 0);
     branch_stage, branch_flag   :   IN std_logic;
     FLAG_Z, FLAG_N, FLAG_OV     :   IN std_logic
+    
     
   );
 end PC;
@@ -58,6 +60,7 @@ architecture Behavioral of PC is
     
     signal disp_l       : std_logic_vector(disp_l_width);
     signal disp_s       : std_logic_vector(disp_s_width);
+    signal sign_ex
     signal sign_ex_l    : std_logic_vector(instr_width);
     signal sign_ex_s    : std_logic_vector(instr_width);
     signal shft_l       : std_logic_vector(instr_width);
