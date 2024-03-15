@@ -5,26 +5,28 @@ use work.Marmot_Config.all;
 entity Branch_Resolver is
   Port ( 
     Status        : IN  Status_Flags_rec;
-    Opcode        : IN  std_logic_vector(op_code); -- Rename to Opcode?
-    Branch_Timing : IN  std_logic;
-    PCsrc         : OUT std_logic  
+    Opcode        : IN  std_logic_vector(op_code); 
+    PCSrc_Port    : OUT std_logic  
   );
 end Branch_Resolver;
 
 architecture Behavioral of Branch_Resolver is
 
-    signal is_flag      : std_logic;
-    signal is_test      : std_logic_vector(1 downto 0);
+    signal PCSrc_res : std_logic;
     
 begin
 
     with Opcode select
-        is_flag <=  '1'         when (op_brr    OR  op_br),
-                    Status.neg  when (op_brr_n  OR  op_br_n),
-                    Status.zero when (op_brr_z  OR  op_br_z),
--- '1' when (((Instr = op_brr_ov) OR (Instr = op_br_ov))) AND (Status.overflow = '1') AND (Branch_Timing = '1'),
+         PCSrc_res   <=  '1' when op_brr,
+                     '1' when op_br,
+                    Status.neg  when op_brr_n,
+                    Status.neg  when op_br_n,
+                    Status.zero when op_brr_z,
+                    Status.zero when op_br_z,
+                    --Status.overflow when op_br_ov,
+                    --Status.overflow when op_brr_ov,
                    '0' when others; 
-      
-    PCsrc <= Branch_Timing AND is_flag;
 
+    PCSrc_Port <= PCSrc_res;
+    
 end Behavioral;

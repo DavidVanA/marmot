@@ -59,7 +59,8 @@ package Marmot_Config is
     subtype instr_type_width is natural range 2 downto 0;
     
     -- Instruction specific ranges    
-    subtype instr_width      is natural range 15 downto 0;
+    subtype instr_addr_width is natural range 16 downto 0; -- Address of an Instr
+    subtype instr_width      is natural range 15 downto 0; -- The Instr
     subtype op_width         is natural range 15 downto 9;
 
     -- A Instructions ranges
@@ -78,14 +79,20 @@ package Marmot_Config is
     subtype r_src            is natural range 5 downto 3;
     
    -- Pipeline Latch Record Types
-   type IF_ID_rec is record
+    type PC_rec is record
+           instr   : std_logic_vector(instr_width);
+           npc     : std_logic_vector(instr_width);
+           br      : std_logic_vector(instr_width);
+    end record PC;
+
+    type IF_ID_rec is record
            instr : std_logic_vector(instr_width);
            npc   : std_logic_vector(instr_width);        
    end record IF_ID_rec;
 
    type ID_EX_rec is record
            instr   : std_logic_vector(instr_width);
-           npc     : std_logic_vector(instr_width);
+--           npc     : std_logic_vector(instr_width);
            br_addr : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);

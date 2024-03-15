@@ -1,7 +1,7 @@
 library IEEE;                           --
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 use work.Marmot_Config.all;
-
 
 entity The_Marmot is
 
@@ -34,11 +34,13 @@ architecture Behavioral of The_Marmot is
     signal i_CON_MEM_WB   :   std_logic_vector(instr_width);
     
     -- Pipeline Latch Signals
+    signal PC             :   PC_rec;
     signal IF_ID_latch    :   IF_ID_rec;
     signal ID_EX_latch    :   ID_EX_rec;
     signal EX_MEM_latch   :   EX_MEM_rec;
     signal MEM_WB_latch   :   MEM_WB_rec;
 
+    signal Reset_PC       :  std_logic;
     signal Reset_IF_ID    :  std_logic;
     signal Reset_ID_EX    :  std_logic;
     signal Reset_EX_MEM   :  std_logic;
@@ -48,7 +50,8 @@ architecture Behavioral of The_Marmot is
     signal FLAG_Z         :  std_logic;
     signal o_ALU_N        :  std_logic;
     signal FLAG_N         :  std_logic;
-    
+
+    signal PCSrc          : std_logic;
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
 
@@ -64,6 +67,7 @@ begin
      port map(
        Reset_Execute_Port => Reset_and_Execute,
        Reset_Load_Port    => Reset_and_Load,
+       Reset_PC           => Reset_PC,
        Reset_IF_ID        => Reset_IF_ID,
        Reset_ID_EX        => Reset_ID_EX,
        Reset_EX_MEM       => Reset_EX_MEM,
@@ -74,13 +78,32 @@ begin
        MEM_WB_PORT        => i_CON_MEM_WB,
        ALU_Mode           => i_ALU_Op, 
        ALU_N              => o_ALU_N,
-       ALU_Z              => o_ALU_Z
+       ALU_Z              => o_ALU_Z,
+       Conn_PCSrc_Port    => PCSrc
  --      can happen
  --      MEM_Op     =>;
  --      WB_Op      =>;
        );
-    
-    
+
+----------------------------------     PC       -------------------------------------------------
+
+    PC_process: process(M_clock, Reset_PC)
+    begin
+        if Reset_PC = '1' then
+            PC.instr <= (others => '0');
+        elsif rising_edge(M_clock) then
+            -- Instr_mem.in <= PC.instro
+            if PCSrc = '0' then
+                PC.instr <= PC.npc;
+            else
+                PC.instr <= PC.br;
+            end if;
+        end if;
+    end process PC_process;
+
+    PC.npc <= std_logic_vector(unsigned(PC.instr) + 2);
+    IF_ID_latch.npc <= PC.npc;
+     
 -----------------------------------   IF/ID     -------------------------------------------------    
     IF_ID: process(M_clock, Reset_IF_ID)
     begin
