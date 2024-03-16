@@ -80,6 +80,7 @@ begin
        EX_MEM_PORT        => i_CON_EX_MEM,
        MEM_WB_PORT        => i_CON_MEM_WB,
        WB_EN              => o_CON_Wb_En,
+       DATA_SRC           => o_CON_Data_Src,
        ALU_Mode           => i_ALU_Op, 
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,

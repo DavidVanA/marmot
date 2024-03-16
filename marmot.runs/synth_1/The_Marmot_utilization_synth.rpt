@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
-| Date         : Fri Mar 15 21:54:34 2024
+| Date         : Fri Mar 15 22:09:29 2024
 | Host         : david-pc-win running 64-bit major release  (build 9200)
 | Command      : report_utilization -file The_Marmot_utilization_synth.rpt -pb The_Marmot_utilization_synth.pb
 | Design       : The_Marmot
@@ -31,8 +31,8 @@ Table of Contents
 +-------------------------+------+-------+------------+-----------+-------+
 |        Site Type        | Used | Fixed | Prohibited | Available | Util% |
 +-------------------------+------+-------+------------+-----------+-------+
-| Slice LUTs*             |  330 |     0 |          0 |     20800 |  1.59 |
-|   LUT as Logic          |  330 |     0 |          0 |     20800 |  1.59 |
+| Slice LUTs*             |  347 |     0 |          0 |     20800 |  1.67 |
+|   LUT as Logic          |  347 |     0 |          0 |     20800 |  1.67 |
 |   LUT as Memory         |    0 |     0 |          0 |      9600 |  0.00 |
 | Slice Registers         |  254 |     0 |          0 |     41600 |  0.61 |
 |   Register as Flip Flop |  238 |     0 |          0 |     41600 |  0.57 |
@@ -152,10 +152,10 @@ Warning! LUT value is adjusted to account for LUT combining.
 +----------+------+---------------------+
 | Ref Name | Used | Functional Category |
 +----------+------+---------------------+
-| LUT6     |  177 |                 LUT |
+| LUT6     |  193 |                 LUT |
 | FDRE     |  170 |        Flop & Latch |
 | FDCE     |   68 |        Flop & Latch |
-| LUT4     |   66 |                 LUT |
+| LUT4     |   67 |                 LUT |
 | LUT5     |   58 |                 LUT |
 | LUT3     |   47 |                 LUT |
 | MUXF7    |   43 |               MuxFx |
