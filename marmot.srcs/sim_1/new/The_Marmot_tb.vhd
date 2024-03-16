@@ -61,9 +61,13 @@ BEGIN
     begin        
         -- Initialize Inputs
         in_port <= (others => '0');
+        Reset_and_Execute <= '1';
+        Reset_and_Load <= '1';
+        wait for 20 ns;
+        
+        -- Clear resets
         Reset_and_Execute <= '0';
         Reset_and_Load <= '0';
-        wait for 20 ns;  
 
         -- IN to R1
         INS_port <= "0100001001000000" ;

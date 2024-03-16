@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2023.1 (win64) Build 3865809 Sun May  7 15:05:29 MDT 2023
-| Date         : Sat Mar 16 02:03:10 2024
+| Date         : Sat Mar 16 10:47:12 2024
 | Host         : david-pc-win running 64-bit major release  (build 9200)
 | Command      : report_utilization -file The_Marmot_utilization_synth.rpt -pb The_Marmot_utilization_synth.pb
 | Design       : The_Marmot
@@ -57,9 +57,9 @@ Warning! LUT value is adjusted to account for LUT combining.
 | 0     |            _ |       Reset |            - |
 | 0     |          Yes |           - |            - |
 | 0     |          Yes |           - |          Set |
-| 90    |          Yes |           - |        Reset |
+| 100   |          Yes |           - |        Reset |
 | 0     |          Yes |         Set |            - |
-| 170   |          Yes |       Reset |            - |
+| 160   |          Yes |       Reset |            - |
 +-------+--------------+-------------+--------------+
 
 
@@ -153,9 +153,9 @@ Warning! LUT value is adjusted to account for LUT combining.
 | Ref Name | Used | Functional Category |
 +----------+------+---------------------+
 | LUT6     |  260 |                 LUT |
-| FDRE     |  170 |        Flop & Latch |
+| FDRE     |  160 |        Flop & Latch |
+| FDCE     |   84 |        Flop & Latch |
 | LUT4     |   74 |                 LUT |
-| FDCE     |   74 |        Flop & Latch |
 | LUT5     |   50 |                 LUT |
 | IBUF     |   35 |                  IO |
 | MUXF7    |   32 |               MuxFx |

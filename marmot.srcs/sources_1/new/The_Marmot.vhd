@@ -211,6 +211,7 @@ begin
     begin
         if Reset_MEM_WB = '1' then
             MEM_WB_latch.result <= (others => '0');
+            MEM_WB_latch.instr <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_latch.instr <= EX_MEM_latch.instr;
             if o_CON_Data_Src = '0' then
