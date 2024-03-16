@@ -39,12 +39,12 @@ entity Controller is
     EX_MEM_PORT         : IN  std_logic_vector(instr_width);
     MEM_WB_PORT         : IN  std_logic_vector(instr_width);
     -- ALU Ports
-    ALU_N               : IN std_logic;
-    ALU_Z               : IN std_logic;
+    ALU_N               : IN  std_logic;
+    ALU_Z               : IN  std_logic;
     ALU_Mode            : OUT std_logic_vector(alu_mode_width);
     -- Control Signal Ports
-    Conn_PCSrc_Port     : OUT std_logic
-    
+    Conn_PCSrc_Port     : OUT std_logic;
+    Disp_Select_Port    : OUT std_logic_vector(instr_type_width)
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
 
@@ -86,8 +86,9 @@ architecture Behavioral of Controller is
     signal Status_Flags      : Status_Flags_rec;
     -- Control Signals
     signal Branch_Flag       : std_logic;
+    
     signal PCSrc_conn        : std_logic;
-
+    
     
 begin
     
@@ -142,6 +143,7 @@ begin
         Instr_Type_Port => IF_ID_INS_type
        );
 
+    Disp_Select_Port <= IF_ID_INS_type;
     
     -- TODO: rd_index_1 selector 
 

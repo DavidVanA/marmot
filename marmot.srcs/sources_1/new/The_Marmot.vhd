@@ -52,6 +52,8 @@ architecture Behavioral of The_Marmot is
     signal FLAG_N         :  std_logic;
 
     signal PCSrc          : std_logic;
+    signal Disp_Select    : std_logic_vector(instr_type_width);
+    
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
 
@@ -79,8 +81,9 @@ begin
        ALU_Mode           => i_ALU_Op, 
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,
-       Conn_PCSrc_Port    => PCSrc
- --      can happen
+       Conn_PCSrc_Port    => PCSrc,
+       Disp_Select_Port   => Disp_Select
+      --      can happen
  --      MEM_Op     =>;
  --      WB_Op      =>;
        );
@@ -113,6 +116,7 @@ begin
             IF_ID_latch.instr <= INS_PORT;
         end if;
     end process IF_ID;
+
     -- ???? <TODO> - What is happening here??
    with IF_ID_latch.instr(op_width) select
         rd_index1 <=
@@ -121,7 +125,15 @@ begin
             IF_ID_latch.instr(8 downto 6) when op_out,
             IF_ID_latch.instr(8 downto 6) when op_test,
             IF_ID_latch.instr(5 downto 3) when others;
- 
+
+    Branch_Calculator_instance: entity work.Branch_Calculator
+      port map (
+        Instr_Port => IF_ID_latch.instr,
+        NPC => IF_ID_latch.npc,
+        Disp_Selector => Disp_Select,
+        Br_Addr_Port => ID_EX_latch.br_addr
+        );
+     
     Registers_Latches_instance : entity work.register_file
     port map(
         rst         => Reset_and_Execute,
@@ -146,6 +158,7 @@ begin
         elsif rising_edge(M_clock) then
             ID_EX_latch.instr <= IF_ID_latch.instr;
 
+            -- Replace with case statement to demultiplex ALU inputs
             if IF_ID_latch.instr(op_width) = op_in then
                 i_ALU_A <= '0' & in_port;
             else
@@ -154,24 +167,16 @@ begin
                 i_ALU_B <= RC_data;
         end if;
     end process ID_EX;
-
-     -- Branch resolution --
-     -- On the PCSrc signal we need to check if we should have taken the branch
-     -- See Pg. C-38 of textbook
-     -- Check if ID_EX_latch.br_addr == IF_ID_latch.npc = 1 -- Branch not take
-     --          ID_EX_latch.br_addr == IF_ID_latch.npc = 1 -- Branch taken
-     -----------------------
-
      
     ALU_instance: entity work.ALU
-    port map( 
+      port map( 
         ALU_Mode => i_ALU_Op, 
         ALU_A    => i_ALU_A, 
         ALU_B    => i_ALU_B, 
         ALU_C    => o_ALU_C, 
         ALU_N    => o_ALU_N, 
         ALU_Z    => o_ALU_Z 
-    );    
+        );    
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_EX_MEM)
