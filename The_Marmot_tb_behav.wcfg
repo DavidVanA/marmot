@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="481.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="693.854 ns"></ZoomEndTime>
-      <Cursor1Time time="621.673 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="283.341 ns"></ZoomEndTime>
+      <Cursor1Time time="43.269 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="165"></NameColumnWidth>
+      <NameColumnWidth column_width="161"></NameColumnWidth>
       <ValueColumnWidth column_width="58"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="14" />
+   <WVObjectSize size="15" />
    <wvobject fp_name="/The_Marmot_tb/M_clock" type="logic">
       <obj_property name="ElementShortName">M_clock</obj_property>
       <obj_property name="ObjectShortName">M_clock</obj_property>
@@ -90,12 +90,16 @@
       <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/o_CON_alu_src_1" type="array">
-      <obj_property name="ElementShortName">o_CON_alu_src_1[2:0]</obj_property>
-      <obj_property name="ObjectShortName">o_CON_alu_src_1[2:0]</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/PC.instr" type="array">
+      <obj_property name="ElementShortName">.instr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.instr[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/o_CON_alu_src_2" type="array">
-      <obj_property name="ElementShortName">o_CON_alu_src_2[2:0]</obj_property>
-      <obj_property name="ObjectShortName">o_CON_alu_src_2[2:0]</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/PC.npc" type="array">
+      <obj_property name="ElementShortName">.npc[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.npc[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/PC.br" type="array">
+      <obj_property name="ElementShortName">.br[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.br[15:0]</obj_property>
    </wvobject>
 </wave_config>

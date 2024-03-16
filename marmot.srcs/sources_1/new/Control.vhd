@@ -122,6 +122,7 @@ begin
 
 ----------------------------------     PC       ------------------------------------------------
 
+    Reset_PC <= Reset_Execute or Reset_Load;
 -- PC_Calculatr_instance: entity work.PC
 --         port map(
 
