@@ -12,11 +12,7 @@ entity The_Marmot is
     Reset_and_Load      : IN std_logic;
     out_port            : OUT std_logic_vector(instr_width);
     
-    INS_port            : IN std_logic_vector(instr_width);
-    wr_data             : IN std_logic_vector(reg_width);
-    wr_index            : IN std_logic_vector(reg_idx_width);
-    wr_enable           : IN std_logic
-        
+    INS_port            : IN std_logic_vector(instr_width)
   );
 end The_Marmot;
 
@@ -29,10 +25,17 @@ architecture Behavioral of The_Marmot is
     signal RB_data        :   std_logic_vector(reg_width);
     signal RC_data        :   std_logic_vector(reg_width);
 
+    -- Instruction for each stage to controller
     signal i_CON_IF_ID    :   std_logic_vector(instr_width);
     signal i_CON_ID_EX    :   std_logic_vector(instr_width);
     signal i_CON_EX_MEM   :   std_logic_vector(instr_width);
     signal i_CON_MEM_WB   :   std_logic_vector(instr_width);
+
+    -- Writeback enable from controller
+    signal o_CON_Wb_En    :   std_logic;
+    
+    -- Data source select from controller (IN or ALU)
+    signal o_CON_Data_Src :   std_logic;
     
     -- Pipeline Latch Signals
     signal IF_ID_latch  : IF_ID_rec;
@@ -70,7 +73,9 @@ begin
        ID_EX_PORT  => i_CON_ID_EX,
        EX_MEM_PORT => i_CON_EX_MEM,
        MEM_WB_PORT => i_CON_MEM_WB,
-       ALU_Mode    => i_ALU_Op 
+       ALU_Mode    => i_ALU_Op,
+       WB_EN       => o_CON_Wb_En,
+       DATA_SRC    => o_CON_Data_Src
  --      can happen
  --      MEM_Op     =>;
  --      WB_Op      =>;
@@ -112,9 +117,9 @@ begin
     port map(
         rst         => Reset_and_Execute,
         clk         => M_clock,
-        wr_index    => wr_index,
-        wr_data     => wr_data,
-        wr_enable   => wr_enable,
+        wr_index    => MEM_WB_latch.instr(ra_width),
+        wr_data     => MEM_WB_latch.result,
+        wr_enable   => o_CON_wb_en,
         rd_index1   => rd_index1,
         rd_index2   => IF_ID_latch.instr(2 downto 0), --??
 --        rd_index2   => IF_ID_ins(2 downto 0), --rd gives data to bits 2..0 of
@@ -188,14 +193,16 @@ begin
     begin
         if Reset_and_Execute = '1' or Reset_and_Load = '1' then
             MEM_WB_latch.result <= (others => '0');
---            MEM_WB_val <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_latch.instr <= EX_MEM_latch.instr;
-            MEM_WB_latch.result <= EX_MEM_latch.result;
---            MEM_WB_ins <= EX_MEM_ins;
---            MEM_WB_val <= EX_MEM_val;
+            if o_CON_data_src = '0' then
+              MEM_WB_latch.result <= EX_MEM_latch.result;
+            else
+              MEM_WB_latch.result <= '0' & in_port;
+            end if;
         end if;
     end process MEM_WB;   
+
     
 -----------------------------------   OUT Port   -------------------------------------------------
     out_port <= MEM_WB_latch.result(instr_width) when MEM_WB_latch.instr(op_width) = op_out;  

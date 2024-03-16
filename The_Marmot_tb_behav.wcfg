@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="The_Marmot_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="The_Marmot_tb" />
+            <top_module name="marmot_config" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
+      <ZoomEndTime time="307.087 ns"></ZoomEndTime>
+      <Cursor1Time time="149.557 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="138"></NameColumnWidth>
+      <ValueColumnWidth column_width="84"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="13" />
+   <wvobject fp_name="/The_Marmot_tb/M_clock" type="logic">
+      <obj_property name="ElementShortName">M_clock</obj_property>
+      <obj_property name="ObjectShortName">M_clock</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/INS_port" type="array">
+      <obj_property name="ElementShortName">INS_port[15:0]</obj_property>
+      <obj_property name="ObjectShortName">INS_port[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/in_port" type="array">
+      <obj_property name="ElementShortName">in_port[15:0]</obj_property>
+      <obj_property name="ObjectShortName">in_port[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/out_port" type="array">
+      <obj_property name="ElementShortName">out_port[15:0]</obj_property>
+      <obj_property name="ObjectShortName">out_port[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/Registers_Latches_instance/reg_file" type="array">
+      <obj_property name="ElementShortName">reg_file[0:7][16:0]</obj_property>
+      <obj_property name="ObjectShortName">reg_file[0:7][16:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/IF_ID_latch.instr" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">.instr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.instr[15:0]</obj_property>
+      <obj_property name="label">IF/ID INS</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/ID_EX_latch.instr" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">.instr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.instr[15:0]</obj_property>
+      <obj_property name="label">ID/EX INS</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/EX_MEM_latch.instr" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">.instr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.instr[15:0]</obj_property>
+      <obj_property name="label">EX/MEM INS</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/MEM_WB_latch.instr" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">.instr[15:0]</obj_property>
+      <obj_property name="ObjectShortName">.instr[15:0]</obj_property>
+      <obj_property name="label">MEM/WB INS</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/EX_MEM_latch.result" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">.result[16:0]</obj_property>
+      <obj_property name="ObjectShortName">.result[16:0]</obj_property>
+      <obj_property name="label">EX/MEM Res</obj_property>
+      <obj_property name="CustomSignalColor">#808000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/MEM_WB_latch.result" type="array">
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="ElementShortName">.result[16:0]</obj_property>
+      <obj_property name="ObjectShortName">.result[16:0]</obj_property>
+      <obj_property name="label">MEM/WB Res</obj_property>
+      <obj_property name="CustomSignalColor">#808000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/i_adder_A" type="array">
+      <obj_property name="ElementShortName">i_adder_A[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_adder_A[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/i_adder_B" type="array">
+      <obj_property name="ElementShortName">i_adder_B[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_adder_B[15:0]</obj_property>
+   </wvobject>
+</wave_config>

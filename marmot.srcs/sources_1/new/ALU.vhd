@@ -32,29 +32,26 @@ architecture Behavioral of ALU is
 
 begin
 
--- Input_demux_A
---    with ALU_mode select
-      
+-- Input demux A
   
     input_demux_A : for i in instr_width generate
+        i_adder_A(i)    <= ALU_A(i) when ALU_ins = op_add else '0';
         i_nand_A(i)     <= ALU_A(i) when ALU_ins = op_nand else '0';
         i_test_A(i)     <= ALU_A(i) when ALU_ins = op_test else '0';
         i_bshl_A(i)     <= ALU_A(i) when ALU_ins = op_bshl else '0';
         i_bshr_A(i)     <= ALU_A(i) when ALU_ins = op_bshr else '0';
         i_mult_A(i)     <= ALU_A(i) when ALU_ins = op_mult else '0';
     end generate input_demux_A;
-    
---    with ALU_ins select
---        i_adder_A <= 
---            ALU_A(instr_width) when op_add(alu_mode_width),
---            ALU_A(instr_width) when op_sub(alu_mode_width),
---            (others => '0') when others;
-    
+
+-- Input demux B
+
     input_demux_B : for i in instr_width generate
         i_nand_B(i)     <= ALU_B(i) when ALU_ins = op_nand else '0';
         i_mult_B(i)     <= ALU_B(i) when ALU_ins = op_mult else '0';
     end generate input_demux_B;
-    
+
+-- Adder input B demux
+
     i_sub_B <= ALU_B(15 downto 0) when ALU_ins = op_sub(alu_mode_width) else x"0000";
     with ALU_ins select
         i_adder_B <=
@@ -65,8 +62,7 @@ begin
     i_bshl_B <= ALU_ins(cl_width) when ALU_ins = op_bshl else x"0";
     i_bshr_B <= ALU_ins(cl_width) when ALU_ins = op_bshr else x"0";
 
-
-    -- Output Mux
+-- Output Mux
     with ALU_ins select 
         ALU_C <=
                    o_adder_C when op_add(alu_mode_width),
@@ -75,8 +71,6 @@ begin
              '0' & o_bshl_A  when op_bshl(alu_mode_width),
              '0' & o_bshr_A  when op_bshr(alu_mode_width),
                    o_mult_C  when op_mult(alu_mode_width),
---                       ALU_A when op_out(alu_mode_width),
---                       ALU_A when op_in(alu_mode_width),
              (others => '0') when others;
     
     Adder_instance : entity work.Adder

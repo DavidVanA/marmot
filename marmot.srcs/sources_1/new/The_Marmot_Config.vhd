@@ -39,6 +39,9 @@ package Marmot_Config is
     constant alu_mode_a2     : std_logic_vector := "010";
     constant alu_mode_a3     : std_logic_vector := "011";
     
+--    constant data_src_alu    : std_logic := '0';
+--    constant data_src_in     : std_logic := '1';
+    
     -- constant OPC_width       :   integer         := 7;
     -- constant ALU_Op_width    :   integer         := 3;
     -- constant MEM_Op_width    :   integer         := 2;
