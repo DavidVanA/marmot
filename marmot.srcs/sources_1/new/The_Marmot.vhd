@@ -19,7 +19,7 @@ end The_Marmot;
 architecture Behavioral of The_Marmot is
 
     signal i_ALU_A, i_ALU_B, o_ALU_C: std_logic_vector(reg_width);
-    signal i_ALU_Op     :   std_logic_vector(alu_mode_width); -- Is there a reason we're feeding the ALU the entire instruction vbs. just op?
+    signal i_ALU_Op     :   std_logic_vector(alu_mode_width);
     
     signal rd_index1      :   std_logic_vector(reg_idx_width); 
     signal RB_data        :   std_logic_vector(reg_width);
@@ -137,12 +137,7 @@ begin
 --            ID_EX_val <= (others => '0'); -- Asynchronous reset
         elsif rising_edge(M_clock) then
             ID_EX_latch.instr <= IF_ID_latch.instr;
---            ID_EX_ins <= IF_ID_ins;
 
-            -- <TODO> ALU_Mode port needs resizing before this can go away
---            i_ALU_Op <= IF_ID_latch.instr;
-
---            i_ALU_Op  <= IF_ID_ins;
             -- <TODO> IF_IF_Control <= IF_ID.instr -- Feed the controller the
             -- current latch instruction.
             if IF_ID_latch.instr(op_width) = op_in then

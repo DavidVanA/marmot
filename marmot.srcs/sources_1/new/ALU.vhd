@@ -32,22 +32,24 @@ architecture Behavioral of ALU is
 
 begin
 
--- Input demux A
-  
+-- Input demux
+
     input_demux_A : for i in instr_width generate
-        i_adder_A(i)    <= ALU_A(i) when ALU_ins = op_add else '0';
-        i_nand_A(i)     <= ALU_A(i) when ALU_ins = op_nand else '0';
-        i_test_A(i)     <= ALU_A(i) when ALU_ins = op_test else '0';
-        i_bshl_A(i)     <= ALU_A(i) when ALU_ins = op_bshl else '0';
-        i_bshr_A(i)     <= ALU_A(i) when ALU_ins = op_bshr else '0';
-        i_mult_A(i)     <= ALU_A(i) when ALU_ins = op_mult else '0';
+        i_adder_A(i)    <= ALU_A(i) when ALU_ins = op_add(alu_mode_width)
+                                      or ALU_ins = op_sub(alu_mode_width) else '0';
+        i_nand_A(i)     <= ALU_A(i) when ALU_ins = op_nand(alu_mode_width) else '0';
+        i_bshl_A(i)     <= ALU_A(i) when ALU_ins = op_bshl(alu_mode_width) else '0';
+        i_bshr_A(i)     <= ALU_A(i) when ALU_ins = op_bshr(alu_mode_width) else '0';
+        i_mult_A(i)     <= ALU_A(i) when ALU_ins = op_mult(alu_mode_width) else '0';
     end generate input_demux_A;
+    
+    i_test_A     <= ALU_A when ALU_ins = op_test(alu_mode_width) else (others => '0');
 
 -- Input demux B
 
     input_demux_B : for i in instr_width generate
-        i_nand_B(i)     <= ALU_B(i) when ALU_ins = op_nand else '0';
-        i_mult_B(i)     <= ALU_B(i) when ALU_ins = op_mult else '0';
+        i_nand_B(i)     <= ALU_B(i) when ALU_ins = op_nand(alu_mode_width) else '0';
+        i_mult_B(i)     <= ALU_B(i) when ALU_ins = op_mult(alu_mode_width) else '0';
     end generate input_demux_B;
 
 -- Adder input B demux
@@ -59,8 +61,8 @@ begin
             ALU_B(instr_width)  when op_add(alu_mode_width),
             (others => '0') when others;
             
-    i_bshl_B <= ALU_ins(cl_width) when ALU_ins = op_bshl else x"0";
-    i_bshr_B <= ALU_ins(cl_width) when ALU_ins = op_bshr else x"0";
+    i_bshl_B <= ALU_B(3 downto 0) when ALU_ins = op_bshl(alu_mode_width) else x"0";
+    i_bshr_B <= ALU_B(3 downto 0) when ALU_ins = op_bshr(alu_mode_width) else x"0";
 
 -- Output Mux
     with ALU_ins select 

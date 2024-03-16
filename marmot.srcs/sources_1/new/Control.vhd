@@ -50,9 +50,13 @@ architecture Behavioral of Controller is
     
 begin
 -----------------------------------   IF/ID     -------------------------------------------------        
-    IF_ID_INS   <= IF_ID_PORT;
---    ALU_Mode    <= IF_ID_INS(11 downto 9);
-    with IF_ID_INS(op_width) select
+-- TODO: ALU input selector?
+-- TODO: rd_index_1 selector 
+-----------------------------------   ID/EX   -------------------------------------------------   
+      ID_EX_INS <= ID_EX_PORT;
+      
+      IF_ID_INS   <= IF_ID_PORT;
+      with ID_EX_INS(op_width) select
         ALU_Mode <= 
         "000" when op_nop,
         "001" when op_add,
@@ -62,16 +66,8 @@ begin
         "101" when op_bshl,
         "110" when op_bshr,
         "111" when op_test,
-        "000" when op_in,
-        "001" when op_out,
         (others => '0') when others;
-        
-    
-    
--- TODO: ALU input selector?
--- TODO: rd_index_1 selector 
------------------------------------   ID/EX   -------------------------------------------------   
-      ID_EX_INS <= ID_EX_PORT;
+
 -----------------------------------   EX/MEM   -------------------------------------------------   
       EX_MEM_INS <= EX_MEM_PORT;
       
