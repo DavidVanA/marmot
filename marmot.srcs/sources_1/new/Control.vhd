@@ -24,40 +24,109 @@ use work.Marmot_Config.all;
 entity Controller is
 
   port (    
-    IF_ID_PORT          : IN std_logic_vector(instr_width);
-    ID_EX_PORT          : IN std_logic_vector(instr_width);
-    EX_MEM_PORT         : IN std_logic_vector(instr_width);
-    MEM_WB_PORT         : IN std_logic_vector(instr_width);
---    INS_port            : IN std_logic_vector(instr_width);
+    -- Reset Ports
+    Reset_Execute_Port  : IN  std_logic;
+    Reset_Load_Port     : IN  std_logic;
+    Reset_PC            : OUT std_logic;
+    Reset_IF_ID         : OUT std_logic;
+    Reset_ID_EX         : OUT std_logic;
+    Reset_EX_MEM        : OUT std_logic;
+    Reset_MEM_WB        : OUT std_logic;
+    -- Latch Ports
+--    PC_PORT             : in  std_logic_vector(instr_addr_width);
+    IF_ID_PORT          : IN  std_logic_vector(instr_width);
+    ID_EX_PORT          : IN  std_logic_vector(instr_width);
+    EX_MEM_PORT         : IN  std_logic_vector(instr_width);
+    MEM_WB_PORT         : IN  std_logic_vector(instr_width);
+    -- ALU Ports
+    ALU_N               : IN std_logic;
+    ALU_Z               : IN std_logic;
     ALU_Mode            : OUT std_logic_vector(alu_mode_width);
-    
+    -- Control Signal Ports
+    Conn_PCSrc_Port     : OUT std_logic
+
     DATA_SRC            : OUT std_logic;
     
     WB_EN               : OUT std_logic
 
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
+
+    -- Flush Lines
+    -- IF_ID_Flush_Port    : OUT std_logic;
+    -- ID_EX_Flush_Port    : OUT std_logic;
+    -- EX_MEM_Flush_Port   : OUT std_logic;
+    -- MEM_WB_Flush_Port   : OUT std_logic
+    
+   -- Control flag
+    --PCSCr_Port        : OUT std_logic_vector();
     
     );
 end Controller;
 
 architecture Behavioral of Controller is
 
+    -- Global Reset Signals
+    signal Reset_Execute      : std_logic;
+    signal Reset_Load         : std_logic;
+
+    -- Latch Signals
     signal IF_ID_INS          : std_logic_vector(instr_width);
     signal ID_EX_INS          : std_logic_vector(instr_width);
     signal EX_MEM_INS         : std_logic_vector(instr_width);
     signal MEM_WB_INS         : std_logic_vector(instr_width);
+    signal IF_ID_INS_type     : std_logic_vector(instr_type_width);
+    signal ID_EX_INS_type     : std_logic_vector(instr_type_width);
+    signal EX_MEM_INS_type    : std_logic_vector(instr_type_width);
+    signal MEM_WB_INS_type    : std_logic_vector(instr_type_width);
+
+    -- Flush lines - not clear if these need to be distinct from Reset lines
+    -- signal IF_ID_Flush        : std_logic;
+    -- signal ID_EX_Flush        : std_logic;
+    -- signal EX_MEM_Flush       : std_logic;
+    -- signal MEM_WB_Flush       : std_logic;
+
+    -- Status Flag Signals
+    signal Status_Flags      : Status_Flags_rec;
+    -- Control Signals
+    signal Branch_Flag       : std_logic;
+    signal PCSrc_conn        : std_logic;
+
     
 begin
------------------------------------   IF/ID     -------------------------------------------------        
-    IF_ID_INS   <= IF_ID_PORT;
     
--- TODO: ALU input selector?
--- TODO: rd_index_1 selector 
------------------------------------   ID/EX   -------------------------------------------------   
-      ID_EX_INS <= ID_EX_PORT;
-      
-      with ID_EX_INS(op_width) select
+    Reset_Execute <= Reset_Execute_Port;
+    Reset_Load <= Reset_Load_Port;
+
+-----------------------------------   Hazards    ------------------------------------------------
+
+    -- Data Hazards
+
+    -- Check instrction relative positions 
+       -- A , A
+       -- 
+    -- Check operands - Dependencies
+       -- RAR:
+    
+    -- Set forwarding signals
+       -- ALUSrc1
+       -- ALUSec2?
+    
+    -- Control Hazards
+
+----------------------------------     PC       ------------------------------------------------
+
+-- PC_Calculatr_instance: entity work.PC
+--         port map(
+
+--             );    
+    
+-----------------------------------   IF/ID     -------------------------------------------------        
+    Reset_IF_ID <= Reset_Execute or Reset_Load; -- OR whatever else
+    IF_ID_INS   <= IF_ID_PORT;
+
+    -- Should this become an entity?
+    with IF_ID_INS(op_width) select
         ALU_Mode <= 
         "000" when op_nop,
         "001" when op_add,
@@ -68,15 +137,61 @@ begin
         "110" when op_bshr,
         "111" when op_test,
         (others => '0') when others;
+    
+     IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
+       port map(
+        Instr_Port      => IF_ID_INS(op_width),
+        Instr_Type_Port => IF_ID_INS_type
+       );
 
+    
+    -- TODO: rd_index_1 selector 
+
+-----------------------------------   ID/EX   -------------------------------------------------   
+      Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
+
+      ID_EX_INS <= ID_EX_PORT;
+    
+      ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
+       port map(
+        Instr_Port      => ID_EX_INS(op_width),
+        Instr_Type_Port => ID_EX_INS_type
+       );
+
+     Status_Flags.zero <= ALU_Z;
+     Status_Flags.neg  <= ALU_N;
+    
+     Branch_Resolver_instance: entity work.Branch_Resolver
+       port map(
+         Status => Status_Flags,
+         Opcode => ID_EX_INS(op_width),
+         PCSrc_Port => PCSrc_conn
+       );
+
+    Conn_PCSrc_Port <= PCSrc_conn;
+    
+    -- IF PCScr == 1 we chose wrong (we are Branching) need to Flush
+    -- IF_ID_Flush <= PCScr;
+    -- ID_EC_Flush <= PCScr;
+    
 -----------------------------------   EX/MEM   -------------------------------------------------   
+      Reset_EX_MEM <= Reset_Execute or Reset_Load; -- OR whatever else
+
       EX_MEM_INS <= EX_MEM_PORT;
       
       DATA_SRC <= '1' when 
         EX_MEM_INS(op_width) = op_in
         else '0';
         
+      EX_MEM_Instr_Decode_instance: entity work.Instruction_Decoder
+       port map(
+        Instr_Port      => EX_MEM_INS(op_width),
+        Instr_Type_Port => EX_MEM_INS_type
+       );
+    
 -----------------------------------   MEM/WB   -------------------------------------------------   
+      Reset_MEM_WB <= Reset_Execute or Reset_Load; -- OR whatever else 
+
       MEM_WB_INS <= MEM_WB_PORT;
       
       WB_EN <= '1' when 
@@ -89,6 +204,12 @@ begin
         MEM_WB_PORT(op_width) = op_in
         else '0';
         
+      MEM_WB_Instr_Decode_instance: entity work.Instruction_Decoder
+       port map(
+        Instr_Port      => MEM_WB_INS(op_width),
+        Instr_Type_Port => MEM_WB_INS_type
+       );
+       
 -----------------------------------   OUT Port   -------------------------------------------------   
     
 end Behavioral;
