@@ -126,7 +126,7 @@ BEGIN
         INS_port <= "0000110001000001" ;
         wait for 20 ns;
         
-        -- TEST R3
+        -- TEST R1
         INS_port <= "0000111001000000" ;
         wait for 20 ns;
         
