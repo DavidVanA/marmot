@@ -63,6 +63,7 @@ architecture Behavioral of The_Marmot is
     signal FLAG_N         :  std_logic;
 
     signal PCSrc          : std_logic;
+    signal Disp_Select    : std_logic_vector(instr_type_width);
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
 
@@ -95,7 +96,8 @@ begin
        RD_INDEX_1         => o_CON_Rd_Index1,
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,
-       Conn_PCSrc_Port    => PCSrc
+       Conn_PCSrc_Port    => PCSrc,
+       Disp_Select_Port   => Disp_Select
        );
 
 ----------------------------------     PC       -------------------------------------------------
@@ -130,6 +132,14 @@ begin
     -- Select register read index
     rd_index1 <= o_CON_Rd_Index1;
     rd_index2 <= IF_ID_latch.instr(rc_width);
+
+    Branch_Calculator_instance: entity work.Branch_Calculator
+        port map (
+            Instr_Port => IF_ID_latch.instr,
+            NPC => IF_ID_latch.npc,
+            Disp_Selector => Disp_Select,
+            Br_Addr_Port => ID_EX_latch.br_addr
+        );
  
     Registers_Latches_instance : entity work.register_file
     port map(
@@ -157,6 +167,8 @@ begin
         end if;
     end process ID_EX;
     
+    PC.br <= ID_EX_latch.br_addr;
+    
     with o_CON_alu_src_1 select
       i_ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,
@@ -172,14 +184,6 @@ begin
         '0' & x"000" & ID_EX_latch.instr(cl_width) when alu_src_cl,
         (others => '0') when others;
 
-     -- Branch resolution --
-     -- On the PCSrc signal we need to check if we should have taken the branch
-     -- See Pg. C-38 of textbook
-     -- Check if ID_EX_latch.br_addr == IF_ID_latch.npc = 1 -- Branch not take
-     --          ID_EX_latch.br_addr == IF_ID_latch.npc = 1 -- Branch taken
-     -----------------------
-
-     
     ALU_instance: entity work.ALU
     port map( 
         ALU_Mode => i_ALU_Op, 

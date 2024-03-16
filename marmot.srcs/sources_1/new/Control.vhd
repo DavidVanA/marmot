@@ -44,6 +44,7 @@ entity Controller is
     ALU_Mode            : OUT std_logic_vector(alu_mode_width);
     -- Control Signal Ports
     Conn_PCSrc_Port     : OUT std_logic;
+    Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
 
     DATA_SRC            : OUT std_logic;
     WB_EN               : OUT std_logic;
@@ -132,6 +133,8 @@ begin
     Reset_IF_ID <= Reset_Execute or Reset_Load; -- OR whatever else
     IF_ID_INS   <= IF_ID_PORT;
 
+    Disp_Select_Port <= IF_ID_INS_type;
+
     -- Should this become an entity?
      IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
@@ -139,6 +142,13 @@ begin
         Instr_Type_Port => IF_ID_INS_type
        );
        
+           
+     Branch_Resolver_instance: entity work.Branch_Resolver
+       port map(
+         Status => Status_Flags,
+         Opcode => IF_ID_INS(op_width),
+         PCSrc_Port => PCSrc_conn
+       );
              
       RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
                     IF_ID_INS(ra_width);
@@ -181,13 +191,6 @@ begin
 
      Status_Flags.zero <= ALU_Z;
      Status_Flags.neg  <= ALU_N;
-    
-     Branch_Resolver_instance: entity work.Branch_Resolver
-       port map(
-         Status => Status_Flags,
-         Opcode => ID_EX_INS(op_width),
-         PCSrc_Port => PCSrc_conn
-       );
 
     Conn_PCSrc_Port <= PCSrc_conn;
     
