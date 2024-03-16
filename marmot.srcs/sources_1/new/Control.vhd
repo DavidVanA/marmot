@@ -46,8 +46,12 @@ entity Controller is
     Conn_PCSrc_Port     : OUT std_logic;
 
     DATA_SRC            : OUT std_logic;
+    WB_EN               : OUT std_logic;
     
-    WB_EN               : OUT std_logic
+    RD_INDEX_1          : OUT std_logic_vector(rd_index_width);
+    
+    ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
+    ALU_SRC_2           : OUT std_logic_vector(alu_src_width)
 
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
@@ -91,6 +95,8 @@ architecture Behavioral of Controller is
     -- Control Signals
     signal Branch_Flag       : std_logic;
     signal PCSrc_conn        : std_logic;
+    
+    
 
     
 begin
@@ -131,10 +137,11 @@ begin
         Instr_Port      => IF_ID_INS(op_width),
         Instr_Type_Port => IF_ID_INS_type
        );
-
-    
-    -- TODO: rd_index_1 selector 
-
+       
+             
+      RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
+                    IF_ID_INS(ra_width);
+              
 -----------------------------------   ID/EX   -------------------------------------------------   
       Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
 
@@ -151,9 +158,20 @@ begin
         "110" when op_bshr,
         "111" when op_test,
         (others => '0') when others;
-    
-
-    
+        
+        
+        ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = EX_MEM_INS(ra_width)) else
+                     alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = EX_MEM_INS(ra_width)) else
+                     alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = MEM_WB_INS(ra_width)) else
+                     alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = MEM_WB_INS(ra_width)) else
+                     alu_src_rd;
+                        
+        ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
+                     alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = EX_MEM_INS(ra_width)) else
+                     alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(rc_width) = MEM_WB_INS(ra_width)) else
+                     alu_src_rd;
+              
+      
       ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
         Instr_Port      => ID_EX_INS(op_width),

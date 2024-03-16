@@ -39,6 +39,11 @@ package Marmot_Config is
     constant alu_mode_a1     : std_logic_vector := "001";
     constant alu_mode_a2     : std_logic_vector := "010";
     constant alu_mode_a3     : std_logic_vector := "011";
+    
+    constant alu_src_rd     : std_logic_vector := "000";
+    constant alu_src_fd1    : std_logic_vector := "001";
+    constant alu_src_fd2    : std_logic_vector := "010";
+    constant alu_src_cl     : std_logic_vector := "011";
 
     -- Instruction types
     constant a0_instr        : std_logic_vector := "000";
@@ -49,7 +54,7 @@ package Marmot_Config is
     constant b2_instr        : std_logic_vector := "101";
     constant l1_instr        : std_logic_vector := "110";
     constant l2_instr        : std_logic_vector := "111";
-    
+        
     -- Register specific ranges
     subtype reg_width        is natural range 16 downto 0;
     subtype reg_idx_width    is natural range 2 downto 0;
@@ -78,6 +83,13 @@ package Marmot_Config is
     subtype r_rdest          is natural range 8 downto 6;
     subtype r_src            is natural range 5 downto 3;
     
+    -- rd index mux
+    subtype rd_index_width    is natural range 2 downto 0;
+    
+    -- alu src mux
+    subtype alu_src_width     is natural range 2 downto 0;
+
+    
    -- Pipeline Latch Record Types
     type PC_rec is record
            instr   : std_logic_vector(instr_width);
@@ -96,7 +108,6 @@ package Marmot_Config is
            br_addr : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);
-           rc_data : std_logic_vector(reg_width);        
    end record ID_EX_rec;
 
    type EX_MEM_rec is record

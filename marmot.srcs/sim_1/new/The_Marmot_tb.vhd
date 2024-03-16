@@ -103,27 +103,53 @@ BEGIN
         -- Add stimulus here 
         
         -- ADD R5 R2 R1
-        INS_port <= "0000001101010001" ;
+        INS_port <= op_add & "101" & "010" & "001";
         wait for 20 ns;          
         
-        -- SUB R5 R2 R1
-        INS_port <= "0000010101010001" ;
+        -- ADD R5 R2 R1
+        INS_port <= op_add & "101" & "101" & "001";
+        wait for 20 ns;
+        
+        -- ADD R5 R5 R1
+        INS_port <= op_add & "101" & "010" & "001";
         wait for 20 ns;
 
+        INS_port <= op_nop & "000000000";
+        wait for 20ns;
+        
+        -- ADD R5 R2 R1
+        INS_port <= op_add & "101" & "101" & "001";
+        wait for 20 ns;
+        
+        -- SUB R5 R5 R1
+        INS_port <= op_sub & "101" & "010" & "001";
+        wait for 20 ns;
+        
         -- MUL R5 R2 R1
-        INS_port <= "0000011101010001" ;
+        INS_port <= op_mult & "101" & "101" & "001";
         wait for 20 ns;          
         
         -- NAND R5 R2 R1
-        INS_port <= "0000100101011100" ;
+        INS_port <= op_nand & "101" & "010" & "001";
         wait for 20 ns;        
         
-        -- SHL R1 #2
-        INS_port <= "0000101001000001" ;
-        wait for 20 ns;  
+        -- SHL R4 #1
+        INS_port <= op_bshl & "100" & "00" & "0001";
+        wait for 20 ns;
         
-        -- SHR R1 #1
-        INS_port <= "0000110001000001" ;
+        INS_port <= (others => '0');
+        wait for 60ns;
+        
+        -- SHR R4 #1
+        INS_port <= op_bshr & "100" & "00" & "0001";
+        wait for 20 ns;
+        
+        -- SHL R4 #1
+        INS_port <= op_bshl & "100" & "00" & "0001";
+        wait for 20 ns;
+        
+        -- SHR R4 #1
+        INS_port <= op_bshr & "100" & "00" & "0001";
         wait for 20 ns;
         
         -- TEST R1

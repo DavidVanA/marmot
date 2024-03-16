@@ -22,8 +22,9 @@ architecture Behavioral of The_Marmot is
     signal i_ALU_Op                  : std_logic_vector(alu_mode_width); 
     
     signal rd_index1      :   std_logic_vector(reg_idx_width); 
-    signal RB_data        :   std_logic_vector(reg_width);
-    signal RC_data        :   std_logic_vector(reg_width);
+    signal rd_index2      :   std_logic_vector(reg_idx_width); 
+    signal r1_data        :   std_logic_vector(reg_width);
+    signal r2_data        :   std_logic_vector(reg_width);
 
     signal i_CON_IF_ID    :   std_logic_vector(instr_width);
     signal i_CON_ID_EX    :   std_logic_vector(instr_width);
@@ -35,6 +36,13 @@ architecture Behavioral of The_Marmot is
 
     -- Data source select from controller (IN or ALU)
     signal o_CON_Data_Src :   std_logic;
+    
+    -- MUX for REG read index 1
+    signal o_CON_Rd_Index1:   std_logic_vector(rd_index_width);
+
+    -- MUX for ALU A and B
+    signal o_CON_alu_src_1:   std_logic_vector(alu_src_width);    
+    signal o_CON_alu_src_2:   std_logic_vector(alu_src_width);
     
     -- Pipeline Latch Signals
     signal PC             :   PC_rec;
@@ -79,15 +87,15 @@ begin
        ID_EX_PORT         => i_CON_ID_EX,
        EX_MEM_PORT        => i_CON_EX_MEM,
        MEM_WB_PORT        => i_CON_MEM_WB,
+       ALU_Mode           => i_ALU_Op, 
        WB_EN              => o_CON_Wb_En,
        DATA_SRC           => o_CON_Data_Src,
-       ALU_Mode           => i_ALU_Op, 
+       ALU_SRC_1          => o_CON_alu_src_1,
+       ALU_SRC_2          => o_CON_alu_src_2,
+       RD_INDEX_1         => o_CON_Rd_Index1,
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,
        Conn_PCSrc_Port    => PCSrc
- --      can happen
- --      MEM_Op     =>;
- --      WB_Op      =>;
        );
 
 ----------------------------------     PC       -------------------------------------------------
@@ -118,14 +126,10 @@ begin
             IF_ID_latch.instr <= INS_PORT;
         end if;
     end process IF_ID;
-    -- ???? <TODO> - What is happening here??
-   with IF_ID_latch.instr(op_width) select
-        rd_index1 <=
-            IF_ID_latch.instr(2 downto 0) when op_bshl,
-            IF_ID_latch.instr(2 downto 0) when op_bshr,
-            IF_ID_latch.instr(8 downto 6) when op_out,
-            IF_ID_latch.instr(8 downto 6) when op_test,
-            IF_ID_latch.instr(5 downto 3) when others;
+
+    -- Select register read index
+    rd_index1 <= o_CON_Rd_Index1;
+    rd_index2 <= IF_ID_latch.instr(rc_width);
  
     Registers_Latches_instance : entity work.register_file
     port map(
@@ -135,11 +139,9 @@ begin
         wr_data     => MEM_WB_latch.result,
         wr_enable   => o_CON_Wb_En,
         rd_index1   => rd_index1,
-        rd_index2   => IF_ID_latch.instr(2 downto 0), --??
---        rd_index2   => IF_ID_ins(2 downto 0), --rd gives data to bits 2..0 of
-                                              --the I_ID instr??
-        rd_data1    => RB_data,
-        rd_data2    => RC_data
+        rd_index2   => rd_index2,
+        rd_data1    => r1_data,
+        rd_data2    => r2_data
     );
     
 -----------------------------------   ID/EX   -------------------------------------------------   
@@ -150,15 +152,25 @@ begin
             ID_EX_latch.instr <= (others => '0');
         elsif rising_edge(M_clock) then
             ID_EX_latch.instr <= IF_ID_latch.instr;
-
-            if IF_ID_latch.instr(op_width) = op_in then
-                i_ALU_A <= '0' & in_port;
-            else
-                i_ALU_A <= RB_data;
-            end if;
-                i_ALU_B <= RC_data;
+            ID_EX_latch.ra_data <= r1_data;
+            ID_EX_latch.rb_data <= r2_data;
         end if;
     end process ID_EX;
+    
+    with o_CON_alu_src_1 select
+      i_ALU_A <= 
+        ID_EX_latch.ra_data when alu_src_rd,
+        EX_MEM_latch.result when alu_src_fd1,
+        MEM_WB_latch.result when alu_src_fd2,
+        (others => '0') when others;
+        
+    with o_CON_alu_src_2 select
+      i_ALU_B <= 
+        ID_EX_latch.rb_data when alu_src_rd,
+        EX_MEM_latch.result when alu_src_fd1,
+        MEM_WB_latch.result when alu_src_fd2,
+        '0' & x"000" & ID_EX_latch.instr(cl_width) when alu_src_cl,
+        (others => '0') when others;
 
      -- Branch resolution --
      -- On the PCSrc signal we need to check if we should have taken the branch
