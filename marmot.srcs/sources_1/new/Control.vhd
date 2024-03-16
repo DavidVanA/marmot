@@ -28,7 +28,13 @@ entity Controller is
     ID_EX_PORT          : IN std_logic_vector(instr_width);
     EX_MEM_PORT         : IN std_logic_vector(instr_width);
     MEM_WB_PORT         : IN std_logic_vector(instr_width);
-    ALU_Mode            : OUT std_logic_vector(alu_mode_width)
+--    INS_port            : IN std_logic_vector(instr_width);
+    ALU_Mode            : OUT std_logic_vector(alu_mode_width);
+    
+    DATA_SRC            : OUT std_logic;
+    
+    WB_EN               : OUT std_logic
+
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
     
@@ -46,7 +52,12 @@ begin
 -----------------------------------   IF/ID     -------------------------------------------------        
     IF_ID_INS   <= IF_ID_PORT;
     
-    with IF_ID_INS(op_width) select
+-- TODO: ALU input selector?
+-- TODO: rd_index_1 selector 
+-----------------------------------   ID/EX   -------------------------------------------------   
+      ID_EX_INS <= ID_EX_PORT;
+      
+      with ID_EX_INS(op_width) select
         ALU_Mode <= 
         "000" when op_nop,
         "001" when op_add,
@@ -56,18 +67,28 @@ begin
         "101" when op_bshl,
         "110" when op_bshr,
         "111" when op_test,
-        "000" when op_in,
-        "001" when op_out,
         (others => '0') when others;
-    
--- TODO: ALU input selector?
--- TODO: rd_index_1 selector 
------------------------------------   ID/EX   -------------------------------------------------   
-      ID_EX_INS <= ID_EX_PORT;
+
 -----------------------------------   EX/MEM   -------------------------------------------------   
       EX_MEM_INS <= EX_MEM_PORT;
+      
+      DATA_SRC <= '1' when 
+        EX_MEM_INS(op_width) = op_in
+        else '0';
+        
 -----------------------------------   MEM/WB   -------------------------------------------------   
       MEM_WB_INS <= MEM_WB_PORT;
+      
+      WB_EN <= '1' when 
+        MEM_WB_PORT(op_width) = op_add OR
+        MEM_WB_PORT(op_width) = op_sub OR
+        MEM_WB_PORT(op_width) = op_mult OR
+        MEM_WB_PORT(op_width) = op_nand OR
+        MEM_WB_PORT(op_width) = op_bshl OR
+        MEM_WB_PORT(op_width) = op_bshr OR
+        MEM_WB_PORT(op_width) = op_in
+        else '0';
+        
 -----------------------------------   OUT Port   -------------------------------------------------   
     
 end Behavioral;
