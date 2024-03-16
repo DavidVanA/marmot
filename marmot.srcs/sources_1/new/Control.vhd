@@ -43,7 +43,7 @@ entity Controller is
     ALU_Z               : IN std_logic;
     ALU_Mode            : OUT std_logic_vector(alu_mode_width);
     -- Control Signal Ports
-    Conn_PCSrc_Port     : OUT std_logic
+    Conn_PCSrc_Port     : OUT std_logic;
 
     DATA_SRC            : OUT std_logic;
     
@@ -126,18 +126,6 @@ begin
     IF_ID_INS   <= IF_ID_PORT;
 
     -- Should this become an entity?
-    with IF_ID_INS(op_width) select
-        ALU_Mode <= 
-        "000" when op_nop,
-        "001" when op_add,
-        "010" when op_sub,
-        "011" when op_mult,
-        "100" when op_nand,
-        "101" when op_bshl,
-        "110" when op_bshr,
-        "111" when op_test,
-        (others => '0') when others;
-    
      IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
         Instr_Port      => IF_ID_INS(op_width),
@@ -151,6 +139,20 @@ begin
       Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
 
       ID_EX_INS <= ID_EX_PORT;
+      
+      with ID_EX_INS(op_width) select
+        ALU_Mode <= 
+        "000" when op_nop,
+        "001" when op_add,
+        "010" when op_sub,
+        "011" when op_mult,
+        "100" when op_nand,
+        "101" when op_bshl,
+        "110" when op_bshr,
+        "111" when op_test,
+        (others => '0') when others;
+    
+
     
       ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(

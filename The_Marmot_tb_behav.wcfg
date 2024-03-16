@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="169.001 ns"></ZoomEndTime>
-      <Cursor1Time time="452.141 ns"></Cursor1Time>
+      <ZoomStartTime time="155.957 ns"></ZoomStartTime>
+      <ZoomEndTime time="381.903 ns"></ZoomEndTime>
+      <Cursor1Time time="244.511 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="128"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="139"></NameColumnWidth>
+      <ValueColumnWidth column_width="124"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="15" />
+   <WVObjectSize size="16" />
    <wvobject fp_name="/The_Marmot_tb/M_clock" type="logic">
       <obj_property name="ElementShortName">M_clock</obj_property>
       <obj_property name="ObjectShortName">M_clock</obj_property>
@@ -39,7 +39,6 @@
    <wvobject fp_name="/The_Marmot_tb/uut/Registers_Latches_instance/reg_file" type="array">
       <obj_property name="ElementShortName">reg_file[0:7][16:0]</obj_property>
       <obj_property name="ObjectShortName">reg_file[0:7][16:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/The_Marmot_tb/uut/IF_ID_latch.instr" type="array">
       <obj_property name="DisplayName">label</obj_property>
@@ -91,18 +90,20 @@
       <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/ALU_Ins" type="array">
-      <obj_property name="ElementShortName">ALU_Ins[2:0]</obj_property>
-      <obj_property name="ObjectShortName">ALU_Ins[2:0]</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/i_adder_A" type="array">
+      <obj_property name="ElementShortName">i_adder_A[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_adder_A[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/FLAG_Z" type="logic">
-      <obj_property name="ElementShortName">FLAG_Z</obj_property>
-      <obj_property name="ObjectShortName">FLAG_Z</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/i_adder_B" type="array">
+      <obj_property name="ElementShortName">i_adder_B[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_adder_B[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/FLAG_N" type="logic">
-      <obj_property name="ElementShortName">FLAG_N</obj_property>
-      <obj_property name="ObjectShortName">FLAG_N</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/o_adder_C" type="array">
+      <obj_property name="ElementShortName">o_adder_C[16:0]</obj_property>
+      <obj_property name="ObjectShortName">o_adder_C[16:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/ALU_instance/ALU_Mode" type="array">
+      <obj_property name="ElementShortName">ALU_Mode[2:0]</obj_property>
+      <obj_property name="ObjectShortName">ALU_Mode[2:0]</obj_property>
    </wvobject>
 </wave_config>

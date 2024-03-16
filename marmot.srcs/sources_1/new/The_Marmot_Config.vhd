@@ -83,7 +83,7 @@ package Marmot_Config is
            instr   : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
            br      : std_logic_vector(instr_width);
-    end record PC;
+    end record PC_rec;
 
     type IF_ID_rec is record
            instr : std_logic_vector(instr_width);
@@ -119,6 +119,6 @@ package Marmot_Config is
          zero     : std_logic;
          neg      : std_logic;
          overflow : std_logic;
-    end record Status_Flags;
+    end record Status_Flags_rec;
     
 end package Marmot_Config;
