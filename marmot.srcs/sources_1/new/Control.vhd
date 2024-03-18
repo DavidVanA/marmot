@@ -153,7 +153,8 @@ begin
        
            
     RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
-                    IF_ID_INS(ra_width);
+                  "111" when IF_ID_INS(op_width) = op_return else
+                  IF_ID_INS(ra_width);
               
 -----------------------------------   ID/EX   -------------------------------------------------   
       Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else

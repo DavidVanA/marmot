@@ -110,27 +110,23 @@ BEGIN
         INS_port <= op_add & "101" & "010" & "001";
         wait for 20 ns;          
         
-        -- ADD R5 R2 R1
-        INS_port <= op_add & "101" & "101" & "001";
-        wait for 20 ns;
-        
         -- BRR 
-        INS_port <= op_brr & "011" & "010000";
-        wait for 20ns;
-        
-        -- ADD R5 R5 R1
-        INS_port <= op_add & "101" & "010" & "001";
-        wait for 20 ns;
-
-        INS_port <= op_add & "101" & "010" & "001";
-        wait for 20ns;
-        
-        -- ADD R5 R2 R1
-        INS_port <= op_add & "101" & "101" & "001";
-        wait for 20 ns;
-        
         INS_port <= op_br_sub & "011" & "010000";
         wait for 20ns;
+        
+        wait for 40ns;
+        
+        -- ADD R0 R5 R1
+        INS_port <= op_add & "000" & "101" & "001";
+        wait for 20 ns;
+
+        -- Return from subroutine
+        INS_port <= op_return & "000000000";
+        wait for 20ns;
+        
+        -- ADD R5 R2 R1
+        INS_port <= op_add & "101" & "101" & "001";
+        wait for 20 ns;
         
         -- SUB R5 R5 R1
         INS_port <= op_sub & "101" & "010" & "001";

@@ -20,6 +20,7 @@ begin
          PCSrc_res   <=  '1' when op_brr,
                      '1' when op_br,
                      '1' when op_br_sub,
+                     '1' when op_return,
                     Status.neg  when op_brr_n,
                     Status.neg  when op_br_n,
                     Status.zero when op_brr_z,
