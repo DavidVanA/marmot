@@ -115,7 +115,7 @@ BEGIN
         wait for 20 ns;
         
         -- BRR 
-        INS_port <= op_brr & "000010000";
+        INS_port <= op_brr & "011" & "010000";
         wait for 20ns;
         
         -- ADD R5 R5 R1
@@ -129,7 +129,7 @@ BEGIN
         INS_port <= op_add & "101" & "101" & "001";
         wait for 20 ns;
         
-        INS_port <= op_br_sub & "000100000";
+        INS_port <= op_br_sub & "011" & "010000";
         wait for 20ns;
         
         -- SUB R5 R5 R1

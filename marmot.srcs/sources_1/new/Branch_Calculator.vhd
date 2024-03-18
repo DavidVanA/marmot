@@ -24,6 +24,7 @@ entity Branch_Calculator is
     signal shft_s       : std_logic_vector(instr_width);
     signal br_addr      : std_logic_vector(instr_width);
     signal br_addr_s    : std_logic_vector(instr_width);
+    signal br_addr_s_int: std_logic_vector(instr_width);
     signal br_addr_l    : std_logic_vector(instr_width);
     
     begin
@@ -41,16 +42,16 @@ entity Branch_Calculator is
     shft_s      <= sign_ex_s(14 downto 0) & '0';
     
     -- add NPC and shift left
+    br_addr_s_int <= std_logic_vector(signed(Ra) + signed(shft_s));
+    
     br_addr_l <= std_logic_vector(signed(NPC) + signed(shft_l));
-    br_addr_s <= std_logic_vector(signed(Ra) + signed(shft_s)); 
-    
-    
-    
-    
+    br_addr_s <= br_addr_s_int(15 downto 0) when IF_ID_INS(op_width) = op_br else
+                 br_addr_s_int(15 downto 1) & '0';
     
     with Disp_Selector select
       br_addr <= br_addr_l when b1_instr,
                  br_addr_s when b2_instr,
+                 
                  (others => '0') when others; 
 
     Br_Addr_Port <= br_addr;

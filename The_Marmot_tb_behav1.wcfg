@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="346074000fs"></ZoomStartTime>
-      <ZoomEndTime time="410013801fs"></ZoomEndTime>
-      <Cursor1Time time="381874000fs"></Cursor1Time>
+      <ZoomStartTime time="252822000fs"></ZoomStartTime>
+      <ZoomEndTime time="390333371fs"></ZoomEndTime>
+      <Cursor1Time time="348238000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="126"></ValueColumnWidth>
+      <ValueColumnWidth column_width="114"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="21" />
+   <WVObjectSize size="19" />
    <wvobject fp_name="/The_Marmot_tb/M_clock" type="logic">
       <obj_property name="ElementShortName">M_clock</obj_property>
       <obj_property name="ObjectShortName">M_clock</obj_property>
@@ -84,10 +84,7 @@
    <wvobject fp_name="/The_Marmot_tb/uut/PC" type="array">
       <obj_property name="ElementShortName">PC</obj_property>
       <obj_property name="ObjectShortName">PC</obj_property>
-   </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/Reset_IF_ID" type="logic">
-      <obj_property name="ElementShortName">Reset_IF_ID</obj_property>
-      <obj_property name="ObjectShortName">Reset_IF_ID</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/The_Marmot_tb/uut/ID_EX_latch.br_addr" type="array">
       <obj_property name="ElementShortName">.br_addr[15:0]</obj_property>
@@ -97,32 +94,28 @@
       <obj_property name="ElementShortName">MEM_WB_INDEX[2:0]</obj_property>
       <obj_property name="ObjectShortName">MEM_WB_INDEX[2:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/o_CON_Ex_Mem_Res_Src" type="logic">
-      <obj_property name="ElementShortName">o_CON_Ex_Mem_Res_Src</obj_property>
-      <obj_property name="ObjectShortName">o_CON_Ex_Mem_Res_Src</obj_property>
-   </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/EX_MEM_latch.result" type="array">
-      <obj_property name="ElementShortName">.result[16:0]</obj_property>
-      <obj_property name="ObjectShortName">.result[16:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/MEM_WB_latch.result" type="array">
-      <obj_property name="ElementShortName">.result[16:0]</obj_property>
-      <obj_property name="ObjectShortName">.result[16:0]</obj_property>
-   </wvobject>
    <wvobject fp_name="/The_Marmot_tb/uut/ID_EX_latch.npc" type="array">
       <obj_property name="ElementShortName">.npc[15:0]</obj_property>
       <obj_property name="ObjectShortName">.npc[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/Registers_Latches_instance/wr_index" type="array">
-      <obj_property name="ElementShortName">wr_index[2:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_index[2:0]</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/Branch_Calculator_instance/Ra" type="array">
+      <obj_property name="ElementShortName">Ra[15:0]</obj_property>
+      <obj_property name="ObjectShortName">Ra[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/Registers_Latches_instance/wr_data" type="array">
-      <obj_property name="ElementShortName">wr_data[16:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_data[16:0]</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/Branch_Calculator_instance/br_addr_s" type="array">
+      <obj_property name="ElementShortName">br_addr_s[15:0]</obj_property>
+      <obj_property name="ObjectShortName">br_addr_s[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/The_Marmot_tb/uut/Registers_Latches_instance/wr_enable" type="logic">
-      <obj_property name="ElementShortName">wr_enable</obj_property>
-      <obj_property name="ObjectShortName">wr_enable</obj_property>
+   <wvobject fp_name="/The_Marmot_tb/uut/Branch_Calculator_instance/br_addr_l" type="array">
+      <obj_property name="ElementShortName">br_addr_l[15:0]</obj_property>
+      <obj_property name="ObjectShortName">br_addr_l[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/rd_index1" type="array">
+      <obj_property name="ElementShortName">rd_index1[2:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_index1[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/The_Marmot_tb/uut/Branch_Calculator_instance/Br_Addr_Port" type="array">
+      <obj_property name="ElementShortName">Br_Addr_Port[15:0]</obj_property>
+      <obj_property name="ObjectShortName">Br_Addr_Port[15:0]</obj_property>
    </wvobject>
 </wave_config>
