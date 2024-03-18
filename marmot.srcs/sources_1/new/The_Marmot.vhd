@@ -149,7 +149,8 @@ begin
     Branch_Calculator_instance: entity work.Branch_Calculator
         port map (
             Instr_Port => IF_ID_latch.instr,
-            NPC => IF_ID_latch.npc,
+            NPC => ID_Ex_latch.npc,
+            Ra  => r1_data(instr_width),
             Disp_Selector => Disp_Select,
             Br_Addr_Port => br_addr
         );
