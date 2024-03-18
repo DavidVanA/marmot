@@ -10,6 +10,7 @@ vhdl xil_defaultlib  \
 "../../../../marmot.srcs/sources_1/new/Mult.vhd" \
 "../../../../marmot.srcs/sources_1/new/TwosCompliment.vhd" \
 "../../../../marmot.srcs/sources_1/new/ALU.vhd" \
+"../../../../marmot.srcs/sources_1/new/Branch_Calculator.vhd" \
 "../../../../marmot.srcs/sources_1/new/Branch_Resolver.vhd" \
 "../../../../marmot.srcs/sources_1/new/Instruction_Decoder.vhd" \
 "../../../../marmot.srcs/sources_1/new/Control.vhd" \

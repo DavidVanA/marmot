@@ -49,10 +49,13 @@ entity Controller is
     DATA_SRC            : OUT std_logic;
     WB_EN               : OUT std_logic;
     
+    MEM_WB_INDEX        : OUT std_logic_vector(reg_idx_width);
     RD_INDEX_1          : OUT std_logic_vector(rd_index_width);
     
     ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
-    ALU_SRC_2           : OUT std_logic_vector(alu_src_width)
+    ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
+    
+    EX_MEM_RES_SRC      : OUT std_logic
 
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
@@ -130,27 +133,20 @@ begin
 --             );    
     
 -----------------------------------   IF/ID     -------------------------------------------------        
-    Reset_IF_ID <= Reset_Execute or Reset_Load; -- OR whatever else
+    Reset_IF_ID <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
     IF_ID_INS   <= IF_ID_PORT;
 
     Disp_Select_Port <= IF_ID_INS_type;
 
     -- Should this become an entity?
-     IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
-       port map(
-        Instr_Port      => IF_ID_INS(op_width),
-        Instr_Type_Port => IF_ID_INS_type
-       );
+    IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
+      port map(
+       Instr_Port      => IF_ID_INS(op_width),
+       Instr_Type_Port => IF_ID_INS_type
+    );
        
            
-     Branch_Resolver_instance: entity work.Branch_Resolver
-       port map(
-         Status => Status_Flags,
-         Opcode => IF_ID_INS(op_width),
-         PCSrc_Port => PCSrc_conn
-       );
-             
-      RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
+    RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
                     IF_ID_INS(ra_width);
               
 -----------------------------------   ID/EX   -------------------------------------------------   
@@ -171,26 +167,34 @@ begin
         (others => '0') when others;
         
         
-        ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = EX_MEM_INS(ra_width)) else
-                     alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = EX_MEM_INS(ra_width)) else
-                     alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = MEM_WB_INS(ra_width)) else
-                     alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = MEM_WB_INS(ra_width)) else
-                     alu_src_rd;
+    ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = EX_MEM_INS(ra_width)) else
+                 alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = EX_MEM_INS(ra_width)) else
+                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = MEM_WB_INS(ra_width)) else
+                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = MEM_WB_INS(ra_width)) else
+                 alu_src_rd;
                         
-        ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
-                     alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = EX_MEM_INS(ra_width)) else
-                     alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(rc_width) = MEM_WB_INS(ra_width)) else
-                     alu_src_rd;
-              
+    ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
+                 alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = EX_MEM_INS(ra_width)) else
+                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(rc_width) = MEM_WB_INS(ra_width)) else
+                 alu_src_rd;
+                 
+    EX_MEM_RES_SRC <= '1' when ID_EX_INS(op_width) = op_br_sub else '0';
       
-      ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
-       port map(
+    ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
+      port map(
         Instr_Port      => ID_EX_INS(op_width),
         Instr_Type_Port => ID_EX_INS_type
-       );
-
-     Status_Flags.zero <= ALU_Z;
-     Status_Flags.neg  <= ALU_N;
+      );
+      
+    Branch_Resolver_instance: entity work.Branch_Resolver
+      port map(
+        Status => Status_Flags,
+        Opcode => ID_EX_INS(op_width),
+        PCSrc_Port => PCSrc_conn
+    );
+               
+    Status_Flags.zero <= ALU_Z;
+    Status_Flags.neg  <= ALU_N;
 
     Conn_PCSrc_Port <= PCSrc_conn;
     
@@ -225,8 +229,12 @@ begin
         MEM_WB_PORT(op_width) = op_nand OR
         MEM_WB_PORT(op_width) = op_bshl OR
         MEM_WB_PORT(op_width) = op_bshr OR
-        MEM_WB_PORT(op_width) = op_in
+        MEM_WB_PORT(op_width) = op_in OR
+        MEM_WB_PORT(op_width) = op_br_sub
         else '0';
+      
+      MEM_WB_INDEX <= "111" when MEM_WB_PORT(op_width) = op_br_sub else
+                      MEM_WB_PORT(ra_width);
         
       MEM_WB_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
