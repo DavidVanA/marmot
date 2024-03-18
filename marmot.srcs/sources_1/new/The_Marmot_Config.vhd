@@ -104,7 +104,7 @@ package Marmot_Config is
 
    type ID_EX_rec is record
            instr   : std_logic_vector(instr_width);
---           npc     : std_logic_vector(instr_width);
+           npc     : std_logic_vector(instr_width);
            br_addr : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);

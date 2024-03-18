@@ -25,6 +25,8 @@ architecture Behavioral of The_Marmot is
     signal rd_index2      :   std_logic_vector(reg_idx_width); 
     signal r1_data        :   std_logic_vector(reg_width);
     signal r2_data        :   std_logic_vector(reg_width);
+    
+    signal br_addr        :   std_logic_vector(instr_width);
 
     signal i_CON_IF_ID    :   std_logic_vector(instr_width);
     signal i_CON_ID_EX    :   std_logic_vector(instr_width);
@@ -43,6 +45,12 @@ architecture Behavioral of The_Marmot is
     -- MUX for ALU A and B
     signal o_CON_alu_src_1:   std_logic_vector(alu_src_width);    
     signal o_CON_alu_src_2:   std_logic_vector(alu_src_width);
+    
+    -- MUX for EX_MEM result
+    signal o_CON_Ex_Mem_Res_Src: std_logic;
+    
+    -- MUX for MEM_WB write index
+    signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
     
     -- Pipeline Latch Signals
     signal PC             :   PC_rec;
@@ -94,6 +102,8 @@ begin
        DATA_SRC           => o_CON_Data_Src,
        ALU_SRC_1          => o_CON_alu_src_1,
        ALU_SRC_2          => o_CON_alu_src_2,
+       EX_MEM_RES_SRC     => o_CON_Ex_Mem_Res_Src,
+       MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
        RD_INDEX_1         => o_CON_Rd_Index1,
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,
@@ -141,14 +151,14 @@ begin
             Instr_Port => IF_ID_latch.instr,
             NPC => IF_ID_latch.npc,
             Disp_Selector => Disp_Select,
-            Br_Addr_Port => ID_EX_latch.br_addr
+            Br_Addr_Port => br_addr
         );
  
     Registers_Latches_instance : entity work.register_file
     port map(
         rst         => Reset_and_Execute,
         clk         => M_clock,
-        wr_index    => MEM_WB_latch.instr(ra_width),
+        wr_index    => o_CON_Mem_Wb_Index,
         wr_data     => MEM_WB_latch.result,
         wr_enable   => o_CON_Wb_En,
         rd_index1   => rd_index1,
@@ -167,6 +177,8 @@ begin
             ID_EX_latch.instr <= IF_ID_latch.instr;
             ID_EX_latch.ra_data <= r1_data;
             ID_EX_latch.rb_data <= r2_data;
+            ID_EX_latch.npc <= IF_ID_latch.npc;
+            ID_EX_latch.br_addr <= br_addr;
         end if;
     end process ID_EX;
     
@@ -204,12 +216,19 @@ begin
               EX_MEM_latch.instr <= (others => '0');
               EX_MEM_latch.result <= (others => '0');
         elsif rising_edge(M_clock) then
-              EX_MEM_latch.instr <= ID_EX_latch.instr;
+            EX_MEM_latch.instr <= ID_EX_latch.instr;
+            
+            if o_CON_Ex_Mem_Res_Src = '0' then
               EX_MEM_latch.result <= o_ALU_C;
+            else
+              EX_MEM_latch.result <= '0' & ID_EX_latch.npc;
+            end if;
+            
             if ID_EX_latch.instr (op_width) = op_test then
                 FLAG_N <= o_ALU_N;
                 FLAG_Z <= o_ALU_Z;
             end if;
+            
         end if;
     end process EX_MEM;    
     

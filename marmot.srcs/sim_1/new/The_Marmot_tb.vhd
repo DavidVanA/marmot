@@ -102,7 +102,7 @@ BEGIN
         in_port <= "0000111100001111";
 
         -- Clear the pipeline
-        wait for 60ns;
+        wait for 40ns;
 
         -- Add stimulus here 
         
@@ -122,12 +122,15 @@ BEGIN
         INS_port <= op_add & "101" & "010" & "001";
         wait for 20 ns;
 
-        INS_port <= op_nop & "000000000";
+        INS_port <= op_add & "101" & "010" & "001";
         wait for 20ns;
         
         -- ADD R5 R2 R1
         INS_port <= op_add & "101" & "101" & "001";
         wait for 20 ns;
+        
+        INS_port <= op_br_sub & "000100000";
+        wait for 20ns;
         
         -- SUB R5 R5 R1
         INS_port <= op_sub & "101" & "010" & "001";
