@@ -64,6 +64,7 @@ architecture Behavioral of The_Marmot is
 
     signal PCSrc          : std_logic;
     signal Disp_Select    : std_logic_vector(instr_type_width);
+    
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
 
@@ -98,6 +99,7 @@ begin
        ALU_Z              => o_ALU_Z,
        Conn_PCSrc_Port    => PCSrc,
        Disp_Select_Port   => Disp_Select
+       
        );
 
 ----------------------------------     PC       -------------------------------------------------
@@ -106,7 +108,7 @@ begin
     begin
         if Reset_PC = '1' then
             PC.instr <= (others => '0');
-        elsif rising_edge(M_clock) then
+        elsif falling_edge(M_clock) then
             -- Instr_mem.in <= PC.instro
             if PCSrc = '0' then
                 PC.instr <= PC.npc;
@@ -132,6 +134,7 @@ begin
     -- Select register read index
     rd_index1 <= o_CON_Rd_Index1;
     rd_index2 <= IF_ID_latch.instr(rc_width);
+
 
     Branch_Calculator_instance: entity work.Branch_Calculator
         port map (

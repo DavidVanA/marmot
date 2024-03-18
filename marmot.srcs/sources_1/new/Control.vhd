@@ -65,6 +65,8 @@ entity Controller is
     
    -- Control flag
     --PCSCr_Port        : OUT std_logic_vector();
+--    PC_PORT             : IN PC_rec;
+--    PC_BR_PORT          : OUT std_logic_vector(instr_width)
     
     );
 end Controller;
@@ -97,7 +99,8 @@ architecture Behavioral of Controller is
     signal Branch_Flag       : std_logic;
     signal PCSrc_conn        : std_logic;
     
-    
+    -- PC Counter Calculator
+    signal PC          : PC_rec;
 
     
 begin
@@ -124,22 +127,26 @@ begin
 ----------------------------------     PC       ------------------------------------------------
 
     Reset_PC <= Reset_Execute or Reset_Load;
--- PC_Calculatr_instance: entity work.PC
+-- PC_Calculatr_instance: entity work.Branch_Calculator
 --         port map(
-
---             );    
+--                Instr_Port      => IF_ID_INS,
+--                NPC             => PC.npc,
+--                Disp_Selector   => IF_ID_INS_type,
+--                Br_Addr_Port    => PC_BR_PORT
+--             );
+                      
     
 -----------------------------------   IF/ID     -------------------------------------------------        
     Reset_IF_ID <= Reset_Execute or Reset_Load; -- OR whatever else
     IF_ID_INS   <= IF_ID_PORT;
 
-    Disp_Select_Port <= IF_ID_INS_type;
+--    Disp_Select_Port <= IF_ID_INS_type;
 
     -- Should this become an entity?
      IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
         Instr_Port      => IF_ID_INS(op_width),
-        Instr_Type_Port => IF_ID_INS_type
+        Instr_Type_Port => Disp_Select_Port
        );
        
            

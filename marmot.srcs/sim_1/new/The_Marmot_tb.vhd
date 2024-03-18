@@ -172,6 +172,12 @@ BEGIN
         INS_port <= "0100000010000000" ;
         wait for 20 ns;  
         
+        ---------------------------------------------
+        -- Test Branches
+        -- Test BRR
+        INS_port <= op_brr & '0' & x"FF";
+        wait for 20 ns;
+        
     end process;
 
 END;
