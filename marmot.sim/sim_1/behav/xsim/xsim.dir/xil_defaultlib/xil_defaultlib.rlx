@@ -8,7 +8,7 @@ C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Adder.vh
 C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Adder4Bits.vhd,1710790530,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Adder.vhd,,,adder4bits,,,,,,,,
 C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/BarrelShifterLeft.vhd,1710790530,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/ALU.vhd,,,barrelshifterleft,,,,,,,,
 C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/BarrelShifterRight.vhd,1710790530,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/ALU.vhd,,,barrelshifterright,,,,,,,,
-C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Branch_Calculator.vhd,1710799521,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/The_Marmot.vhd,,,branch_calculator,,,,,,,,
+C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Branch_Calculator.vhd,1710800215,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/The_Marmot.vhd,,,branch_calculator,,,,,,,,
 C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Branch_Resolver.vhd,1710799789,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Control.vhd,,,branch_resolver,,,,,,,,
 C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/Control.vhd,1710795663,vhdl,C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/The_Marmot.vhd,,,controller,,,,,,,,
 C:/Users/dvanacken/My Documents/ece449/marmot/marmot.srcs/sources_1/new/FullAdder.vhd,1710790530,vhdl,,,,fulladder,,,,,,,,

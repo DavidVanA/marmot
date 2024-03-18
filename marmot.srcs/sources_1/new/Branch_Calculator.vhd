@@ -45,8 +45,7 @@ entity Branch_Calculator is
     br_addr_s_int <= std_logic_vector(signed(Ra) + signed(shft_s));
     
     br_addr_l <= std_logic_vector(signed(NPC) + signed(shft_l));
-    br_addr_s <= br_addr_s_int(15 downto 0) when IF_ID_INS(op_width) = op_br else
-                 br_addr_s_int(15 downto 1) & '0';
+    br_addr_s <= br_addr_s_int(15 downto 1) & '0';
     
     with Disp_Selector select
       br_addr <= br_addr_l when b1_instr,
