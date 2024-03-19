@@ -41,6 +41,7 @@ entity Controller is
     -- ALU Ports
     ALU_N               : IN std_logic;
     ALU_Z               : IN std_logic;
+    ALU_Ov              : IN std_logic;
     ALU_Mode            : OUT std_logic_vector(alu_mode_width);
     -- Control Signal Ports
     Conn_PCSrc_Port     : OUT std_logic;
@@ -129,15 +130,7 @@ begin
 
 ----------------------------------     PC       ------------------------------------------------
 
-    Reset_PC <= Reset_Execute or Reset_Load;
--- PC_Calculatr_instance: entity work.Branch_Calculator
---         port map(
---                Instr_Port      => IF_ID_INS,
---                NPC             => PC.npc,
---                Disp_Selector   => IF_ID_INS_type,
---                Br_Addr_Port    => PC_BR_PORT
---             );
-                      
+    Reset_PC <= Reset_Execute or Reset_Load;                      
     
 -----------------------------------   IF/ID     -------------------------------------------------        
     Reset_IF_ID <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
@@ -173,7 +166,7 @@ begin
         "111" when op_test,
         (others => '0') when others;
         
-        
+    -- <TODO>: This is gnarly look at - make it a block?
     ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = EX_MEM_INS(ra_width)) else
                  alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = EX_MEM_INS(ra_width)) else
                  alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = MEM_WB_INS(ra_width)) else
@@ -200,9 +193,10 @@ begin
         PCSrc_Port => PCSrc_conn
     );
                
-    Status_Flags.zero <= ALU_Z;
-    Status_Flags.neg  <= ALU_N;
-
+    Status_Flags.zero     <= ALU_Z;
+    Status_Flags.neg      <= ALU_N;
+    Status_Flags.overflow <= ALU_Ov;
+    
     Conn_PCSrc_Port <= PCSrc_conn;
     
     -- IF PCScr == 1 we chose wrong (we are Branching) need to Flush

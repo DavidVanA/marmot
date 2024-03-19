@@ -5,33 +5,34 @@ package Marmot_Config is
 
     subtype op_code is natural range 6 downto 0;
 
-    -- A format
-    constant op_nop          : std_logic_vector(op_code) := "0000000"; -- A0
-    constant op_return       : std_logic_vector(op_code) := "1000111"; 
-    constant op_add          : std_logic_vector(op_code) := "0000001"; -- A1
-    constant op_sub          : std_logic_vector(op_code) := "0000010";
-    constant op_mult         : std_logic_vector(op_code) := "0000011";
-    constant op_nand         : std_logic_vector(op_code) := "0000100";
-    constant op_bshl         : std_logic_vector(op_code) := "0000101"; -- A2
-    constant op_bshr         : std_logic_vector(op_code) := "0000110";
-    constant op_test         : std_logic_vector(op_code) := "0000111"; -- A3
-    constant op_out          : std_logic_vector(op_code) := "0100000"; -- A4
-    constant op_in           : std_logic_vector(op_code) := "0100001";
+    -- A format   
+    constant op_nop          : std_logic_vector(op_code) := "0000000"; --  0  -- A0
+    constant op_return       : std_logic_vector(op_code) := "1000111"; -- 71
+    constant op_add          : std_logic_vector(op_code) := "0000001"; --  1  -- A1
+    constant op_sub          : std_logic_vector(op_code) := "0000010"; --  2
+    constant op_mult         : std_logic_vector(op_code) := "0000011"; --  3
+    constant op_nand         : std_logic_vector(op_code) := "0000100"; --  4
+    constant op_bshl         : std_logic_vector(op_code) := "0000101"; --  5  -- A2
+    constant op_bshr         : std_logic_vector(op_code) := "0000110"; --  6
+    constant op_test         : std_logic_vector(op_code) := "0000111"; --  7  -- A3
+    constant op_out          : std_logic_vector(op_code) := "0100000"; --  32 -- A4
+    constant op_in           : std_logic_vector(op_code) := "0100001"; --  33
     -- B format
-    constant op_brr          : std_logic_vector(op_code) := "1000000"; -- B1
-    constant op_brr_n        : std_logic_vector(op_code) := "1000001";
-    constant op_brr_z        : std_logic_vector(op_code) := "1000010";
-    constant op_br           : std_logic_vector(op_code) := "1000011"; -- B2
-    constant op_br_n         : std_logic_vector(op_code) := "1000100";
-    constant op_br_z         : std_logic_vector(op_code) := "1000101";
-    constant op_br_sub       : std_logic_vector(op_code) := "1000110";
-    --constant  op_br_ov
-    --constant op_br_cov
+    constant op_brr          : std_logic_vector(op_code) := "1000000"; -- 64  -- B1
+    constant op_brr_n        : std_logic_vector(op_code) := "1000001"; -- 65
+    constant op_brr_z        : std_logic_vector(op_code) := "1000010"; -- 66 
+    constant op_brr_ov       : std_logic_vector(op_code) := "1001001"; -- 73
+    constant op_br           : std_logic_vector(op_code) := "1000011"; -- 67  -- B2
+    constant op_br_n         : std_logic_vector(op_code) := "1000100"; -- 68
+    constant op_br_z         : std_logic_vector(op_code) := "1000101"; -- 69
+    constant op_br_sub       : std_logic_vector(op_code) := "1000110"; -- 70
+    constant op_br_ov        : std_logic_vector(op_code) := "1001000"; -- 72
+
     -- L format
-    constant op_load         : std_logic_vector(op_code) := "0010000"; -- L2 
-    constant op_store        : std_logic_vector(op_code) := "0010001";
-    constant op_load_imm     : std_logic_vector(op_code) := "0010010"; -- L1 
-    constant op_mov          : std_logic_vector(op_code) := "0010011";
+    constant op_load         : std_logic_vector(op_code) := "0010000"; -- 16 -- L2 
+    constant op_store        : std_logic_vector(op_code) := "0010001"; -- 17
+    constant op_load_imm     : std_logic_vector(op_code) := "0010010"; -- 18 -- L1 
+    constant op_mov          : std_logic_vector(op_code) := "0010011"; -- 19
 
     -- ALU Mode
     -- Redundant?
@@ -84,10 +85,10 @@ package Marmot_Config is
     subtype r_src            is natural range 5 downto 3;
     
     -- rd index mux
-    subtype rd_index_width    is natural range 2 downto 0;
+    subtype rd_index_width   is natural range 2 downto 0;
     
     -- alu src mux
-    subtype alu_src_width     is natural range 2 downto 0;
+    subtype alu_src_width    is natural range 2 downto 0;
 
     
    -- Pipeline Latch Record Types

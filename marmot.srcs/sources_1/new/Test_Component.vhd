@@ -22,4 +22,6 @@ begin
                   
     Test_N <= Test_A(15);
 
+    Test_Ov <= Test_A(16);
+    
 end Behavioral;

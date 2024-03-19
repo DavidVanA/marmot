@@ -25,8 +25,8 @@ begin
                     Status.neg  when op_br_n,
                     Status.zero when op_brr_z,
                     Status.zero when op_br_z,
-                    --Status.overflow when op_br_ov,
-                    --Status.overflow when op_brr_ov,
+                    Status.overflow when op_br_ov,
+                    Status.overflow when op_brr_ov,
                    '0' when others; 
 
     PCSrc_Port <= PCSrc_res;

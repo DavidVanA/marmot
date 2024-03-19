@@ -11,7 +11,8 @@ entity ALU is
         ALU_A,ALU_B : IN    std_logic_vector(reg_width);
         ALU_C       : OUT   std_logic_vector(reg_width);
         ALU_N       : OUT   std_logic;
-        ALU_Z       : OUT   std_logic
+        ALU_Z       : OUT   std_logic;
+        ALU_Ov      : out   std_logic
     );
 end ALU;
 
@@ -36,7 +37,7 @@ begin
 
     input_demux_A : for i in instr_width generate
         i_adder_A(i)    <= ALU_A(i) when ALU_Mode = op_add(alu_mode_width)
-                                      or ALU_Mode = op_sub(alu_mode_width) else '0';
+                                      or ALU_Mode = op_sub(alu_mode_width)  else '0';
         i_nand_A(i)     <= ALU_A(i) when ALU_Mode = op_nand(alu_mode_width) else '0';
         i_bshl_A(i)     <= ALU_A(i) when ALU_Mode = op_bshl(alu_mode_width) else '0';
         i_bshr_A(i)     <= ALU_A(i) when ALU_Mode = op_bshr(alu_mode_width) else '0';
@@ -59,10 +60,10 @@ begin
         i_adder_B <=
             neg_i_sub_B         when op_sub(alu_mode_width),
             ALU_B(instr_width)  when op_add(alu_mode_width),
-            (others => '0') when others;
+            (others => '0')     when others;
             
-    i_bshl_B <= ALU_B(3 downto 0) when ALU_Mode = op_bshl(alu_mode_width) else x"0";
-    i_bshr_B <= ALU_B(3 downto 0) when ALU_Mode = op_bshr(alu_mode_width) else x"0";
+    i_bshl_B <= ALU_B(cl_width) when ALU_Mode = op_bshl(alu_mode_width) else x"0";
+    i_bshr_B <= ALU_B(cl_width) when ALU_Mode = op_bshr(alu_mode_width) else x"0";
 
 -- Output Mux
     with ALU_Mode select 
@@ -93,8 +94,8 @@ begin
     port map(
         Test_A  => i_test_A,
         Test_N  => ALU_N,
-        Test_Z  => ALU_Z
---        Test_Ov => ALU_Ov
+        Test_Z  => ALU_Z,
+        Test_Ov => ALU_Ov
     );
     
     BarrelShifterLeft_instance : entity work.BarrelShifterLeft
@@ -115,7 +116,7 @@ begin
     port map(
         Mult_A  => i_mult_A(instr_width),
         Mult_B  => i_mult_B(instr_width),
-        MULT_C  => O_MULT_C
+        Mult_C  => o_Mult_C
     );
     
     TwosCompliment_instance : entity work.TwosComplement

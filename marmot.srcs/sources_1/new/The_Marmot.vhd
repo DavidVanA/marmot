@@ -69,6 +69,8 @@ architecture Behavioral of The_Marmot is
     signal FLAG_Z         :  std_logic;
     signal o_ALU_N        :  std_logic;
     signal FLAG_N         :  std_logic;
+    signal o_ALU_Ov       :  std_logic;
+    signal FLAG_Ov        :  std_logic;
 
     signal PCSrc          : std_logic;
     signal Disp_Select    : std_logic_vector(instr_type_width);
@@ -107,6 +109,7 @@ begin
        RD_INDEX_1         => o_CON_Rd_Index1,
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,
+       ALU_Ov             => o_ALU_Ov,
        Conn_PCSrc_Port    => PCSrc,
        Disp_Select_Port   => Disp_Select
        
@@ -207,8 +210,9 @@ begin
         ALU_B    => i_ALU_B, 
         ALU_C    => o_ALU_C, 
         ALU_N    => o_ALU_N, 
-        ALU_Z    => o_ALU_Z 
-    );    
+        ALU_Z    => o_ALU_Z, 
+        ALU_Ov   => o_ALU_Ov
+        );    
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_EX_MEM)
@@ -226,8 +230,9 @@ begin
             end if;
             
             if ID_EX_latch.instr (op_width) = op_test then
-                FLAG_N <= o_ALU_N;
-                FLAG_Z <= o_ALU_Z;
+                FLAG_N  <= o_ALU_N;
+                FLAG_Z  <= o_ALU_Z;
+                FLAG_Ov <= o_ALU_Ov;
             end if;
             
         end if;
