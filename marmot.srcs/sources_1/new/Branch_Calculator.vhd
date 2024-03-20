@@ -5,11 +5,11 @@ use work.Marmot_Config.ALL;
 
 entity Branch_Calculator is
   port (
-    signal Instr_Port   : IN  std_logic_vector(instr_width);
-    signal NPC          : IN  std_logic_vector(instr_width);
-    signal Ra           : IN std_logic_vector(instr_width);
+    signal Instr_Port     : IN  std_logic_vector(instr_width);
+    signal NPC            : IN  std_logic_vector(instr_width);
+    signal Ra             : IN std_logic_vector(instr_width);
     signal Disp_Selector  : IN  std_logic_vector(instr_type_width);
-    signal Br_Addr_Port : OUT std_logic_vector(instr_width)
+    signal Br_Addr_Port   : OUT std_logic_vector(instr_width)
     );
   end Branch_Calculator;
 
