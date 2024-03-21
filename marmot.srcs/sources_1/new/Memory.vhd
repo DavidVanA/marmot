@@ -54,26 +54,28 @@ begin
                        Instr_Addr(10) OR
                        Instr_Addr(9);
     
-        RAM_clka  <= Clk;
-        RAM_clkb  <= Clk;
-        RAM_addrb <= Instr_Addr(instr_mem_width);  
-        Instr     <= RAM_doutb;
-        RAM_enb   <= not ROM_Not_RAM;
-        RAM_rstb  <= Reset;
+        RAM_clka   <= Clk;
+        RAM_clkb   <= Clk;
+        RAM_addrb  <= Instr_Addr(instr_mem_width);  
+        Instr      <= RAM_doutb;
+        RAM_enb    <= not ROM_Not_RAM;
+        RAM_rstb   <= Reset;
 
-        ROM_clka  <= Clk;
-        ROM_ena   <= ROM_Not_RAM;
-        Instr     <= ROM_douta;
-        ROM_rsta  <= Reset;
+        ROM_clka   <= Clk;
+        ROM_ena    <= ROM_Not_RAM;
+        ROM_rsta   <= Reset;
+        ROM_regcea <= Reset;
+        Instr      <= ROM_douta;
+        
  
 -----------------------------------   IF/ID   -------------------------------------------------   
 
-        RAM_addra <= Data_Addr;
-        RAM_wea   <= Write_Not_Read;
-        RAM_dina  <= Write_Data;
-        Read_Data <= RAM_douta;
-        RAM_ena   <= not ROM_Not_RAM;
-        RAM_rsta  <= Reset;
+        RAM_addra  <= Data_Addr;
+        RAM_wea    <= Write_Not_Read;
+        RAM_dina   <= Write_Data;
+        Read_Data  <= RAM_douta;
+        RAM_ena    <= not ROM_Not_RAM;
+        RAM_rsta   <= Reset;
 
 -----------------------------------   MEM/WB   -------------------------------------------------   
     
@@ -128,40 +130,46 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     doutb                   => RAM_doutb
   );
 
-xpm_memory_sprom_inst : xpm_memory_sprom
-generic map (
-     ADDR_WIDTH_A               => 9,               -- DECIMAL
-     AUTO_SLEEP_TIME            => 0,               -- DECIMAL
-     ECC_MODE                   => "no_ecc",        -- String
-     MEMORY_INIT_FILE           => "none",          -- String
-     MEMORY_INIT_PARAM          => "0",             -- String
-     MEMORY_OPTIMIZATION        => "true",          -- String
-     MEMORY_PRIMITIVE           => "auto",          -- String
-     MEMORY_SIZE                => 8192,            -- DECIMAL
-     MESSAGE_CONTROL            => 0,               -- DECIMAL
-     READ_DATA_WIDTH_A          => 16,              -- DECIMAL
-     READ_LATENCY_A             => 2,               -- DECIMAL
-     READ_RESET_VALUE_A         => "0",             -- String
-     RST_MODE_A                 => "SYNC",          -- String
-     USE_MEM_INIT               => 1,               -- DECIMAL
-     WAKEUP_TIME                => "disable_sleep"  -- String
-)
-port map (
-     --dbiterra           => ROM_dbiterra,  -- 1-bit output: Leave open.
-     douta              => ROM_douta,       -- READ_DATA_WIDTH_A-bit output: Data output for port A read operations.
-     --sbiterra           => ROM_sbiterra,  -- 1-bit output: Leave open.     
-     addra              => ROM_addra,       -- ADDR_WIDTH_A-bit input: Address for port A read operations.
-     clka               => ROM_clka,        -- 1-bit input: Clock signal for port A.
-     ena                => ROM_ena,         -- 1-bit input: Memory enable signal for port A. Must be high on clock
-     -- cycles when read operations are initiated. Pipelined internally.
-     injectdbiterra     => '0',             -- 1-bit input: Do not change from the provided value.
-     injectsbiterra     => '0',             -- 1-bit input: Do not change from the provided value.
-     regcea             => '1',             -- 1-bit input: Do not change from the provided value.
-     rsta               => '0',        -- 1-bit input: Reset signal for the final port A output register
-                                        -- stage. Synchronously resets output port douta to the value specified
-                                        -- by parameter READ_RESET_VALUE_A.
-     sleep              => ROM_sleep    -- 1-bit input: sleep signal to enable the dynamic power saving feature.
-);
 
+xpm_memory_sprom_inst : xpm_memory_sprom
+  generic map (
+
+    -- Common module generics
+    MEMORY_SIZE             => 8192,            --positive integer
+    MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
+    MEMORY_INIT_FILE        => "none",          --string; "none" or "<filename>.mem" 
+    MEMORY_INIT_PARAM       => "0",              --string;
+    USE_MEM_INIT            => 1,               --integer; 0,1
+    WAKEUP_TIME             => "disable_sleep", --string; "disable_sleep" or "use_sleep_pin" 
+    MESSAGE_CONTROL         => 0,               --integer; 0,1
+    ECC_MODE                => "no_ecc",        --string; "no_ecc", "encode_only", "decode_only" or "both_encode_and_decode" 
+    AUTO_SLEEP_TIME         => 0,               --Do not Change
+    MEMORY_OPTIMIZATION     => "true",          --string; "true", "false" 
+
+    -- Port A module generics
+    READ_DATA_WIDTH_A       => 16,              --positive integer
+    ADDR_WIDTH_A            => 9,               --positive integer
+    READ_RESET_VALUE_A      => "0",             --string
+    READ_LATENCY_A          => 2                --non-negative integer
+  )
+  port map (
+
+    -- Common module ports
+    sleep                   => '0',
+
+    -- Port A module ports
+    clka                    => ROM_clka,
+    rsta                    => ROM_rsta,
+    ena                     => ROM_ena,
+    regcea                  => ROM_regcea,
+    addra                   => ROM_addra,
+    injectsbiterra          => '0',   --do not change
+    injectdbiterra          => '0',   --do not change
+    douta                   => ROM_douta,
+    sbiterra                => open,  --do not change
+    dbiterra                => open   --do not change
+  );
+
+-- End of xpm_memory_sprom_inst instance declaration
         
 end Behavioral;
