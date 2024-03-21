@@ -1,7 +1,10 @@
+Library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
 Library xpm;
 use xpm.vcomponents.all;
+use work.Marmot_Config.all;
 
-entity RAM is
+entity Memory is
     port(
         Reset           : IN  std_logic;
         Clk             : IN  std_logic;
@@ -9,14 +12,34 @@ entity RAM is
         Instr           : OUT std_logic_vector(instr_width);
         Data_Addr       : IN  std_logic_vector(instr_width);
         Read_Data       : OUT std_logic_vector(instr_width);
-        Write_Data      : IN  std_logic_vector(instr_width); -- <TODO>:
-        Write_Not_Read  : IN  std_logic_vector(1..0); -- 2 bits for byte addressability                                                            
-                                                            
+        Write_Data      : IN  std_logic_vector(instr_width); 
+        Write_Not_Read  : IN  std_logic_vector(1 downto 0) 
         );
+end Memory;
     
-architecture Behavioral of RAM is
+architecture Behavioral of Memory is
 
-    signal ROM_Not_RAM std_logic;
+    signal ROM_Not_RAM : std_logic;
+    signal RAM_clka    : std_logic;
+    signal RAM_clkb    : std_logic;
+    signal RAM_addrb   : std_logic_vector(instr_width);
+    signal RAM_doutb   : std_logic_vector(instr_width);
+    signal RAM_enb     : std_logic;
+    signal RAM_rstb    : std_logic;
+         
+    signal ROM_clka    : std_logic;
+    signal ROM_ena     : std_logic;
+    signal ROM_addra   : std_logic;
+    signal ROM_douta   : std_logic_vector(instr_width); 
+    signal ROM_rsta    : std_logic;
+    signal ROM_sleep   : std_logic;
+
+    signal RAM_addra   : std_logic_vector(instr_width);
+    signal RAM_wea     : std_logic_vector(1 downto 0);
+    signal RAM_dina    : std_logic_vector(instr_width);
+    signal RAM_douta   : std_logic_vector(instr_width);
+    signal RAM_ena     : std_logic;
+    signal RAM_rsta    : std_logic;
 
     
 begin
@@ -34,21 +57,21 @@ begin
         RAM_clka  <= Clk;
         RAM_clkb  <= Clk;
         RAM_addrb <= Instr_Addr(instr_mem_width);  
-        RAM_doutb <= Instr;
+        Instr     <= RAM_doutb;
         RAM_enb   <= not ROM_Not_RAM;
         RAM_rstb  <= Reset;
 
         ROM_clka  <= Clk;
         ROM_ena   <= ROM_Not_RAM;
-        ROM_douta <= Instr;
+        Instr     <= ROM_douta;
         ROM_rsta  <= Reset;
-        ROM_sleep <= ;
+ 
 -----------------------------------   IF/ID   -------------------------------------------------   
 
         RAM_addra <= Data_Addr;
         RAM_wea   <= Write_Not_Read;
         RAM_dina  <= Write_Data;
-        RAM_douta <= Read_Data;
+        Read_Data <= RAM_douta;
         RAM_ena   <= not ROM_Not_RAM;
         RAM_rsta  <= Reset;
 
@@ -105,8 +128,6 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     doutb                   => RAM_doutb
   );
 
-
-
 xpm_memory_sprom_inst : xpm_memory_sprom
 generic map (
      ADDR_WIDTH_A               => 9,               -- DECIMAL
@@ -126,18 +147,17 @@ generic map (
      WAKEUP_TIME                => "disable_sleep"  -- String
 )
 port map (
-     dbiterra           => dbiterra,    -- 1-bit output: Leave open.
+     --dbiterra           => ROM_dbiterra,  -- 1-bit output: Leave open.
      douta              => ROM_douta,       -- READ_DATA_WIDTH_A-bit output: Data output for port A read operations.
-     sbiterra           => sbiterra,    -- 1-bit output: Leave open.
-     
+     --sbiterra           => ROM_sbiterra,  -- 1-bit output: Leave open.     
      addra              => ROM_addra,       -- ADDR_WIDTH_A-bit input: Address for port A read operations.
      clka               => ROM_clka,        -- 1-bit input: Clock signal for port A.
      ena                => ROM_ena,         -- 1-bit input: Memory enable signal for port A. Must be high on clock
      -- cycles when read operations are initiated. Pipelined internally.
-     injectdbiterra     => injectdbiterra, -- 1-bit input: Do not change from the provided value.
-     injectsbiterra     => injectsbiterra, -- 1-bit input: Do not change from the provided value.
-     regcea             => regcea,      -- 1-bit input: Do not change from the provided value.
-     rsta               => rsta,        -- 1-bit input: Reset signal for the final port A output register
+     injectdbiterra     => '0',             -- 1-bit input: Do not change from the provided value.
+     injectsbiterra     => '0',             -- 1-bit input: Do not change from the provided value.
+     regcea             => '1',             -- 1-bit input: Do not change from the provided value.
+     rsta               => '0',        -- 1-bit input: Reset signal for the final port A output register
                                         -- stage. Synchronously resets output port douta to the value specified
                                         -- by parameter READ_RESET_VALUE_A.
      sleep              => ROM_sleep    -- 1-bit input: sleep signal to enable the dynamic power saving feature.

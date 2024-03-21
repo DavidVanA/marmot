@@ -55,7 +55,17 @@ package Marmot_Config is
     constant b2_instr        : std_logic_vector := "101";
     constant l1_instr        : std_logic_vector := "110";
     constant l2_instr        : std_logic_vector := "111";
-        
+
+    -- Memory constants
+    constant read_mem        : std_logic_vector := "00";
+    constant write_high_byte : std_logic_vector := "10";
+    constant write_low_byte  : std_logic_vector := "01";
+    constant write_word      : std_logic_vector := "11";
+    
+    -- Memory specific ranges
+    subtype instr_mem_width  is natural range 8 downto 0;
+    subtype byte_addressable is natural range 1 downto 0;
+    
     -- Register specific ranges
     subtype reg_width        is natural range 16 downto 0;
     subtype reg_idx_width    is natural range 2 downto 0;
@@ -118,6 +128,7 @@ package Marmot_Config is
            Z       : std_logic;
            N       : std_logic;
            OV      : std_logic;
+           r_src   : std_logic_vector(reg_width);
    end record EX_MEM_rec;
 
    type MEM_WB_rec is record
