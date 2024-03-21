@@ -237,7 +237,27 @@ begin
             
         end if;
     end process EX_MEM;    
-    
+
+     RAM_instance: entity work.RAM
+         port map(
+             -- Port A
+             clka => M_clock;
+             rsta => ;
+             ena => ;
+--             regcea => ;
+             wea => ;
+             addra => ;
+             dina => ;
+             douta => ;
+             -- Port B
+             clkb => M_clock; -- Might not need this as mem is config'd for
+                              -- common clk
+             rstb => ;
+             enb => ;
+--             regceb => ; -- internally mapped to 1 & marked DO NOT CHANGE
+             addrb => ;
+             doutb => ;
+             );
 -----------------------------------   MEM/WB   -------------------------------------------------   
     MEM_WB: process(M_clock, Reset_MEM_WB)
     begin
