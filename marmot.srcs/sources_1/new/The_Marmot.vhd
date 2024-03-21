@@ -35,9 +35,6 @@ architecture Behavioral of The_Marmot is
     
     -- Writeback enable from controller
     signal o_CON_Wb_En    :   std_logic;
-
-    -- Data source select from controller (IN or ALU)
-    signal o_CON_Data_Src :   std_logic;
     
     -- MUX for REG read index 1
     signal o_CON_Rd_Index1:   std_logic_vector(rd_index_width);
@@ -51,6 +48,12 @@ architecture Behavioral of The_Marmot is
     
     -- MUX for MEM_WB write index
     signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
+
+    -- MUX for memory data address
+    signal o_CON_Data_Addr_Src: std_logic;
+
+    -- MUX for writeback source
+    signal o_CON_Wb_Src:     std_logic_vector(wb_src_width);
     
     -- Pipeline Latch Signals
     signal PC             :   PC_rec;
@@ -72,6 +75,7 @@ architecture Behavioral of The_Marmot is
     signal o_ALU_Ov       :  std_logic;
     signal FLAG_Ov        :  std_logic;
 
+    signal wb_data        : std_logic_vector(reg_width);
     signal PCSrc          : std_logic;
     signal Disp_Select    : std_logic_vector(instr_type_width);
     
@@ -101,7 +105,7 @@ begin
        MEM_WB_PORT        => i_CON_MEM_WB,
        ALU_Mode           => i_ALU_Op, 
        WB_EN              => o_CON_Wb_En,
-       DATA_SRC           => o_CON_Data_Src,
+       MEM_DATA_ADDR_SRC  => o_CON_Data_Addr_Src,
        ALU_SRC_1          => o_CON_alu_src_1,
        ALU_SRC_2          => o_CON_alu_src_2,
        EX_MEM_RES_SRC     => o_CON_Ex_Mem_Res_Src,
@@ -222,6 +226,8 @@ begin
               EX_MEM_latch.result <= (others => '0');
         elsif rising_edge(M_clock) then
             EX_MEM_latch.instr <= ID_EX_latch.instr;
+            EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
+            EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
             
             if o_CON_Ex_Mem_Res_Src = '0' then
               EX_MEM_latch.result <= o_ALU_C;
@@ -238,26 +244,18 @@ begin
         end if;
     end process EX_MEM;    
 
-     RAM_instance: entity work.RAM
-         port map(
-             -- Port A
-             clka => M_clock;
-             rsta => ;
-             ena => ;
---             regcea => ;
-             wea => ;
-             addra => ;
-             dina => ;
-             douta => ;
-             -- Port B
-             clkb => M_clock; -- Might not need this as mem is config'd for
-                              -- common clk
-             rstb => ;
-             enb => ;
---             regceb => ; -- internally mapped to 1 & marked DO NOT CHANGE
-             addrb => ;
-             doutb => ;
-             );
+    with o_CON_Wb_Src select
+        wb_data <=
+           EX_MEM_latch.result       when wb_src_alu,
+--           MEM_read_data             when wb_src_mem,
+           '0' & EX_MEM_latch.npc    when wb_src_npc,
+           '0' & EX_MEM_latch.instr(imm_width) & EX_MEM_latch.ra_data(7 downto 0) when wb_src_imm_upper,
+           '0' & EX_MEM_latch.ra_data(15 downto 8) & EX_MEM_latch.instr(imm_width) when wb_src_imm_lower,
+           EX_MEM_latch.rb_data      when wb_src_rb,
+           '0' & in_port             when wb_src_in,
+           (others => '0')           when others;
+           
+           
 -----------------------------------   MEM/WB   -------------------------------------------------   
     MEM_WB: process(M_clock, Reset_MEM_WB)
     begin
@@ -266,11 +264,6 @@ begin
             MEM_WB_latch.instr <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_latch.instr <= EX_MEM_latch.instr;
-            if o_CON_Data_Src = '0' then
-                MEM_WB_latch.result <= EX_MEM_latch.result;
-            else
-                Mem_WB_latch.result <= '0' & in_port;
-            end if;
         end if;
     end process MEM_WB;   
     

@@ -212,17 +212,33 @@
 Library xpm;
 use xpm.vcomponents.all;
 
-
+library IEEE;                           --
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+use work.Marmot_Config.all;
 
 entity RAM is
-    port(
+    port (
+        -- Port A module ports
+        clka                    : in std_logic;
+        rsta                    : in std_logic;
+        ena                     : in std_logic;
+        wea                     : in std_logic_vector;
+        addra                   : in std_logic_vector(10 - 1 downto 0);
+        dina                    : in std_logic_vector(16 - 1 downto 0);
+        douta                   : out std_logic_vector(16 - 1 downto 0);
 
-
-        );
+        -- Port B module ports
+        clkb                    : in std_logic;
+        rstb                    : in std_logic;
+        enb                     : in std_logic;
+        addrb                   : in std_logic_vector(6 - 1 downto 0);
+        doutb                   : out std_logic_vector(32 - 1 downto 0)
+    );
+end RAM;
     
 architecture Behavioral of RAM is
-
-
+    
     begin
         
 -- <--Cut the following instance declaration and paste it into the architecture statement part of the design-->
@@ -232,7 +248,7 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
   generic map (
 
     -- Common module generics
-    MEMORY_SIZE             => 65536,           --positive integer
+    MEMORY_SIZE             => 8192,           --positive integer
     CLOCKING_MODE           => "common_clock", --string; "common_clock", "independent_clock" 
     MEMORY_INIT_FILE        => "none",         --string; "none" or "<filename>.mem" 
     MEMORY_INIT_PARAM       => "",             --string;

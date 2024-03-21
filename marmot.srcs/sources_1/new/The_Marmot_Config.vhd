@@ -46,6 +46,15 @@ package Marmot_Config is
     constant alu_src_fd2    : std_logic_vector := "010";
     constant alu_src_cl     : std_logic_vector := "011";
 
+    -- Wb source
+    constant wb_src_alu      : std_logic_vector := "000";
+    constant wb_src_mem      : std_logic_vector := "001";
+    constant wb_src_npc      : std_logic_vector := "010";
+    constant wb_src_imm_lower: std_logic_vector := "011";
+    constant wb_src_imm_upper: std_logic_vector := "100";
+    constant wb_src_rb       : std_logic_vector := "101";
+    constant wb_src_in       : std_logic_vector := "110";
+
     -- Instruction types
     constant a0_instr        : std_logic_vector := "000";
     constant a1_instr        : std_logic_vector := "001";
@@ -81,7 +90,6 @@ package Marmot_Config is
 
     -- L instructions
     subtype imm_width        is natural range 7 downto 0;
-    subtype r_rdest          is natural range 8 downto 6;
     subtype r_src            is natural range 5 downto 3;
     
     -- rd index mux
@@ -89,6 +97,9 @@ package Marmot_Config is
     
     -- alu src mux
     subtype alu_src_width    is natural range 2 downto 0;
+
+    -- wb src mux
+    subtype wb_src_width     is natural range 2 downto 0;
 
     
    -- Pipeline Latch Record Types
@@ -114,6 +125,8 @@ package Marmot_Config is
    type EX_MEM_rec is record
            instr   : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
+           ra_data : std_logic_vector(reg_width);
+           rb_data : std_logic_vector(reg_width);
            result  : std_logic_vector(reg_width);
            Z       : std_logic;
            N       : std_logic;

@@ -47,7 +47,6 @@ entity Controller is
     Conn_PCSrc_Port     : OUT std_logic;
     Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
 
-    DATA_SRC            : OUT std_logic;
     WB_EN               : OUT std_logic;
     
     MEM_WB_INDEX        : OUT std_logic_vector(reg_idx_width);
@@ -55,6 +54,10 @@ entity Controller is
     
     ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
     ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
+
+    MEM_DATA_ADDR_SRC   : OUT std_logic;
+
+    WB_SRC              : OUT std_logic_vector(wb_src_width);
     
     EX_MEM_RES_SRC      : OUT std_logic
 
@@ -146,7 +149,9 @@ begin
        
            
     RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
+                  IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr else
                   "111" when IF_ID_INS(op_width) = op_return else
+                  "111" when IF_ID_INS(op_width) = op_load_imm else
                   IF_ID_INS(ra_width);
               
 -----------------------------------   ID/EX   -------------------------------------------------   
@@ -178,7 +183,9 @@ begin
                  alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(rc_width) = MEM_WB_INS(ra_width)) else
                  alu_src_rd;
                  
-    EX_MEM_RES_SRC <= '1' when ID_EX_INS(op_width) = op_br_sub else '0';
+    EX_MEM_RES_SRC <= '1' when ID_EX_INS(op_width) = op_br_sub OR
+                               ID_EX_INS(op_width) = op_load_imm
+                               else '0';
       
     ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
       port map(
@@ -208,9 +215,16 @@ begin
 
       EX_MEM_INS <= EX_MEM_PORT;
       
-      DATA_SRC <= '1' when 
-        EX_MEM_INS(op_width) = op_in
-        else '0';
+      MEM_DATA_ADDR_SRC <= '1' when EX_MEM_INS(op_width) = op_load else '0';
+
+      WB_SRC <=
+         wb_src_mem when EX_MEM_INS(op_width) = op_load else
+         wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
+         wb_src_imm_lower when EX_MEM_INS(op_width) = op_load_imm and EX_MEM_INS(8) = '0' else
+         wb_src_imm_upper when EX_MEM_INS(op_width) = op_load_imm and EX_MEM_INS(8) = '1' else
+         wb_src_rb  when EX_MEM_INS(op_width) = op_mov else
+         wb_src_in  when EX_MEM_INS(op_width) = op_in else
+         wb_src_alu;
         
       EX_MEM_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
@@ -231,7 +245,10 @@ begin
         MEM_WB_PORT(op_width) = op_bshl OR
         MEM_WB_PORT(op_width) = op_bshr OR
         MEM_WB_PORT(op_width) = op_in OR
-        MEM_WB_PORT(op_width) = op_br_sub
+        MEM_WB_PORT(op_width) = op_br_sub OR
+        MEM_WB_PORT(op_width) = op_load OR
+        MEM_WB_PORT(op_width) = op_load_imm OR
+        MEM_WB_PORT(op_width) = op_mov
         else '0';
       
       MEM_WB_INDEX <= "111" when MEM_WB_PORT(op_width) = op_br_sub else
