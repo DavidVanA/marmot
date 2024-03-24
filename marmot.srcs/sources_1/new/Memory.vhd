@@ -19,7 +19,7 @@ end Memory;
     
 architecture Behavioral of Memory is
 
-    signal ROM_Not_RAM : std_logic;
+    signal RAM_Not_ROM : std_logic;
     signal RAM_clka    : std_logic;
     signal RAM_clkb    : std_logic;
     signal RAM_addrb   : std_logic_vector(instr_mem_width);
@@ -46,7 +46,7 @@ begin
     
 -----------------------------------    PC    -------------------------------------------------   
         -- RAM/ROM Selector for Fetch
-        ROM_Not_RAM <= Instr_Addr(15) OR
+        RAM_not_ROM <= Instr_Addr(15) OR
                        Instr_Addr(14) OR
                        Instr_Addr(13) OR
                        Instr_Addr(12) OR
@@ -57,14 +57,14 @@ begin
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
         RAM_addrb  <= Instr_Addr(instr_mem_width);  
-        Instr      <= RAM_doutb;
-        RAM_enb    <= not ROM_Not_RAM;
+        RAM_enb    <= RAM_not_ROM;
         RAM_rstb   <= Reset;
 
         ROM_clka   <= Clk;
-        ROM_ena    <= ROM_Not_RAM;
+        ROM_ena    <= not RAM_not_ROM;
         ROM_rsta   <= Reset;
-        Instr      <= ROM_douta;
+        ROM_addra  <= Instr_Addr(instr_mem_width);
+        Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
         
  
 -----------------------------------   IF/ID   -------------------------------------------------   
@@ -73,7 +73,7 @@ begin
         RAM_wea    <= Write_Not_Read;
         RAM_dina   <= Write_Data;
         Read_Data  <= RAM_douta;
-        RAM_ena    <= not ROM_Not_RAM;
+        RAM_ena    <= not RAM_Not_ROM;
         RAM_rsta   <= Reset;
 
 -----------------------------------   MEM/WB   -------------------------------------------------   
@@ -136,8 +136,8 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     -- Common module generics
     MEMORY_SIZE             => 8192,            --positive integer
     MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
-    MEMORY_INIT_FILE        => "none",          --string; "none" or "<filename>.mem" 
-    MEMORY_INIT_PARAM       => "0",              --string;
+    MEMORY_INIT_FILE        => "bootloader.mem",          --string; "none" or "<filename>.mem" 
+    MEMORY_INIT_PARAM       => "",              --string;
     USE_MEM_INIT            => 1,               --integer; 0,1
     WAKEUP_TIME             => "disable_sleep", --string; "disable_sleep" or "use_sleep_pin" 
     MESSAGE_CONTROL         => 0,               --integer; 0,1
