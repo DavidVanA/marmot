@@ -25,6 +25,9 @@ architecture Behavioral of The_Marmot is
     signal rd_index2      :   std_logic_vector(reg_idx_width); 
     signal r1_data        :   std_logic_vector(reg_width);
     signal r2_data        :   std_logic_vector(reg_width);
+
+    signal MEM_read_data  :   std_logic_vector(instr_width);
+    signal MEM_data_addr  :   std_logic_vector(instr_width);
     
     signal br_addr        :   std_logic_vector(instr_width);
 
@@ -51,6 +54,9 @@ architecture Behavioral of The_Marmot is
 
     -- MUX for memory data address
     signal o_CON_Data_Addr_Src: std_logic;
+
+    -- Signal for selecting write or read
+    signal o_CON_Mem_Wr_nRd: std_logic_vector(byte_addressable);
 
     -- MUX for writeback source
     signal o_CON_Wb_Src:     std_logic_vector(wb_src_width);
@@ -109,6 +115,7 @@ begin
        ALU_SRC_1          => o_CON_alu_src_1,
        ALU_SRC_2          => o_CON_alu_src_2,
        EX_MEM_RES_SRC     => o_CON_Ex_Mem_Res_Src,
+       MEM_WR_nRD         => o_CON_Mem_Wr_nRd,
        MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
        RD_INDEX_1         => o_CON_Rd_Index1,
        ALU_N              => o_ALU_N,
@@ -239,10 +246,27 @@ begin
         end if;
     end process EX_MEM;    
 
+    with o_CON_Data_Addr_Src select
+        Mem_data_addr <=
+            EX_MEM_latch.ra_data(15 downto 0) when '0',
+            EX_MEM_latch.rb_data(15 downto 0) when '1';
+        
+     Memory_instance : entity work.Memory
+        port map(                               
+            Reset => Reset_EX_MEM,
+            Clk => M_Clock,
+            Instr_Addr => PC.instr,
+            Instr => IF_ID_latch.instr,
+            Data_Addr => Mem_data_addr,
+            Read_Data => MEM_read_data,
+            Write_Data => EX_MEM_latch.rb_data(instr_width),
+            Write_Not_Read => o_CON_Mem_Wr_nRd
+        );
+
     with o_CON_Wb_Src select
         wb_data <=
            EX_MEM_latch.result       when wb_src_alu,
---           MEM_read_data             when wb_src_mem,
+           '0' & MEM_read_data             when wb_src_mem,
            '0' & EX_MEM_latch.npc    when wb_src_npc,
            '0' & EX_MEM_latch.instr(imm_width) & EX_MEM_latch.ra_data(7 downto 0) when wb_src_imm_upper,
            '0' & EX_MEM_latch.ra_data(15 downto 8) & EX_MEM_latch.instr(imm_width) when wb_src_imm_lower,

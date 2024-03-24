@@ -56,6 +56,8 @@ entity Controller is
     ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
 
     MEM_DATA_ADDR_SRC   : OUT std_logic;
+    
+    MEM_WR_nRD          : OUT std_logic_vector(byte_addressable);
 
     WB_SRC              : OUT std_logic_vector(wb_src_width);
     
@@ -216,6 +218,8 @@ begin
       EX_MEM_INS <= EX_MEM_PORT;
       
       MEM_DATA_ADDR_SRC <= '1' when EX_MEM_INS(op_width) = op_load else '0';
+
+      MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
 
       WB_SRC <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else

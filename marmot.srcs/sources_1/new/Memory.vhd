@@ -22,19 +22,19 @@ architecture Behavioral of Memory is
     signal ROM_Not_RAM : std_logic;
     signal RAM_clka    : std_logic;
     signal RAM_clkb    : std_logic;
-    signal RAM_addrb   : std_logic_vector(instr_width);
+    signal RAM_addrb   : std_logic_vector(instr_mem_width);
     signal RAM_doutb   : std_logic_vector(instr_width);
     signal RAM_enb     : std_logic;
     signal RAM_rstb    : std_logic;
          
     signal ROM_clka    : std_logic;
     signal ROM_ena     : std_logic;
-    signal ROM_addra   : std_logic;
+    signal ROM_addra   : std_logic_vector(instr_mem_width);
     signal ROM_douta   : std_logic_vector(instr_width); 
     signal ROM_rsta    : std_logic;
     signal ROM_sleep   : std_logic;
 
-    signal RAM_addra   : std_logic_vector(instr_width);
+    signal RAM_addra   : std_logic_vector(instr_mem_width);
     signal RAM_wea     : std_logic_vector(1 downto 0);
     signal RAM_dina    : std_logic_vector(instr_width);
     signal RAM_douta   : std_logic_vector(instr_width);
@@ -64,13 +64,12 @@ begin
         ROM_clka   <= Clk;
         ROM_ena    <= ROM_Not_RAM;
         ROM_rsta   <= Reset;
-        ROM_regcea <= Reset;
         Instr      <= ROM_douta;
         
  
 -----------------------------------   IF/ID   -------------------------------------------------   
 
-        RAM_addra  <= Data_Addr;
+        RAM_addra  <= Data_Addr(instr_mem_width);
         RAM_wea    <= Write_Not_Read;
         RAM_dina   <= Write_Data;
         Read_Data  <= RAM_douta;
@@ -88,7 +87,7 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     MEMORY_SIZE             => 8192,           --positive integer
     CLOCKING_MODE           => "common_clock", --string; "common_clock", "independent_clock" 
     MEMORY_INIT_FILE        => "none",         --string; "none" or "<filename>.mem" 
-    MEMORY_INIT_PARAM       => "none",         --string;
+    MEMORY_INIT_PARAM       => "0",         --string;
     USE_MEM_INIT            => 0,              --integer; 0,1
     MESSAGE_CONTROL         => 0,              --integer; 0,1
     USE_EMBEDDED_CONSTRAINT => 0,              --integer: 0,1
@@ -98,13 +97,13 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     WRITE_DATA_WIDTH_A      => 16,             --positive integer
     READ_DATA_WIDTH_A       => 16,             --positive integer
     BYTE_WRITE_WIDTH_A      => 8,              --integer; 8, 9, or WRITE_DATA_WIDTH_A value
-    ADDR_WIDTH_A            => 10,             --positive integer --> 2^10 = 1024
+    ADDR_WIDTH_A            => 9,             --positive integer --> 2^10 = 1024
     READ_RESET_VALUE_A      => "0",            --string
     READ_LATENCY_A          => 1,              --non-negative integer
 
     -- Port B module generics
     READ_DATA_WIDTH_B       => 16,             --positive integer
-    ADDR_WIDTH_B            => 10,             --positive integer
+    ADDR_WIDTH_B            => 9,             --positive integer
     READ_RESET_VALUE_B      => "0",            --string
     READ_LATENCY_B          => 1               --non-negative integer
   )
@@ -161,7 +160,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     clka                    => ROM_clka,
     rsta                    => ROM_rsta,
     ena                     => ROM_ena,
-    regcea                  => ROM_regcea,
+    regcea                  => '1',
     addra                   => ROM_addra,
     injectsbiterra          => '0',   --do not change
     injectdbiterra          => '0',   --do not change
