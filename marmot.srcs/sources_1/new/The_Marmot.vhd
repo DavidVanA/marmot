@@ -228,12 +228,7 @@ begin
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
             EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
-            
-            if o_CON_Ex_Mem_Res_Src = '0' then
-              EX_MEM_latch.result <= o_ALU_C;
-            else
-              EX_MEM_latch.result <= '0' & ID_EX_latch.npc;
-            end if;
+            EX_MEM_latch.npc <= ID_EX_latch.npc;
             
             if ID_EX_latch.instr (op_width) = op_test then
                 FLAG_N  <= o_ALU_N;
@@ -264,6 +259,7 @@ begin
             MEM_WB_latch.instr <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_latch.instr <= EX_MEM_latch.instr;
+            MEM_WB_latch.result <= wb_data;
         end if;
     end process MEM_WB;   
     
