@@ -118,6 +118,7 @@ begin
        ALU_SRC_2          => o_CON_alu_src_2,
        EX_MEM_RES_SRC     => o_CON_Ex_Mem_Res_Src,
        MEM_WR_nRD         => o_CON_Mem_Wr_nRd,
+       WB_SRC             => o_CON_Wb_Src,
        MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
        RD_INDEX_1         => o_CON_Rd_Index1,
        ALU_N              => o_ALU_N,
@@ -133,18 +134,18 @@ begin
     PC_process: process(M_clock, Reset_PC)
     begin
         if Reset_PC = '1' then
-            PC.instr <= (others => '0');
-        elsif falling_edge(M_clock) then
-            -- Instr_mem.in <= PC.instro
+            PC.pc <= (others => '0');
+        elsif rising_edge(M_clock) then
+            -- Instr_mem.in <= PC.pc
             if PCSrc = '0' then
-                PC.instr <= PC.npc;
+                PC.pc <= PC.npc;
             else
-                PC.instr <= PC.br;
+                PC.pc <= PC.br;
             end if;
         end if;
     end process PC_process;
 
-    PC.npc <= std_logic_vector(unsigned(PC.instr) + 2);
+    PC.npc <= std_logic_vector(unsigned(PC.pc) + 2);
     IF_ID_latch.npc <= PC.npc;
      
 -----------------------------------   IF/ID     -------------------------------------------------    
@@ -152,7 +153,10 @@ begin
     begin
         if Reset_IF_ID = '1' then
             IF_ID_latch.instr <= (others => '0');
+            IF_ID_latch.pc <= (others => '0');
+            IF_ID_latch.npc <= (others => '0');
         elsif rising_edge(M_clock) then
+            IF_ID_latch.pc <= PC.pc;
             IF_ID_latch.instr <= MEM_instr;
         end if;
     end process IF_ID;
@@ -162,7 +166,7 @@ begin
      with Branch_Relative select
           Branch_Base <=
                         r1_data(instr_width) when '1',
-                        IF_ID_latch.instr    when others;
+                        IF_ID_latch.pc       when others;
      
     Branch_Calculator_instance: entity work.Branch_Calculator
         port map (
@@ -270,7 +274,7 @@ begin
         port map(                               
             Reset => Reset_EX_MEM,
             Clk => M_Clock,
-            Instr_Addr => PC.instr,
+            Instr_Addr => PC.pc,
             Instr => MEM_instr,
             Data_Addr => MEM_data_addr,
             Read_Data => MEM_read_data,
