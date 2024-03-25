@@ -34,13 +34,7 @@ package Marmot_Config is
     constant op_load_imm     : std_logic_vector(op_code) := "0010010"; -- 18 -- L1 
     constant op_mov          : std_logic_vector(op_code) := "0010011"; -- 19
 
-    -- ALU Mode
-    -- Redundant?
-    constant alu_mode_a0     : std_logic_vector := "000";
-    constant alu_mode_a1     : std_logic_vector := "001";
-    constant alu_mode_a2     : std_logic_vector := "010";
-    constant alu_mode_a3     : std_logic_vector := "011";
-    
+    -- ALU input source
     constant alu_src_rd     : std_logic_vector := "000";
     constant alu_src_fd1    : std_logic_vector := "001";
     constant alu_src_fd2    : std_logic_vector := "010";
@@ -80,7 +74,6 @@ package Marmot_Config is
     subtype reg_idx_width    is natural range 2 downto 0;
     
     -- ALU specific ranges
-    subtype alu_mode_width   is natural range 2 downto 0;
     subtype instr_type_width is natural range 2 downto 0;
     
     -- Instruction specific ranges    
