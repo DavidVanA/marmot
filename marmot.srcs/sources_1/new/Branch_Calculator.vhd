@@ -50,7 +50,6 @@ entity Branch_Calculator is
     with Disp_Selector select
       br_addr <= br_addr_l when b1_instr,
                  br_addr_s when b2_instr,
-                 Ra when a0_instr,
                  
                  (others => '0') when others; 
 

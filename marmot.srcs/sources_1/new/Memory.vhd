@@ -149,7 +149,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     READ_DATA_WIDTH_A       => 16,              --positive integer
     ADDR_WIDTH_A            => 9,               --positive integer
     READ_RESET_VALUE_A      => "0",             --string
-    READ_LATENCY_A          => 2                --non-negative integer
+    READ_LATENCY_A          => 0                --non-negative integer
   )
   port map (
 

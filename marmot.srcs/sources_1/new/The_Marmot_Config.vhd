@@ -113,7 +113,7 @@ package Marmot_Config is
 
    -- Pipeline Latch Record Types
     type PC_rec is record
-           instr   : std_logic_vector(instr_width);
+           pc      : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
            br      : std_logic_vector(instr_width);
     end record PC_rec;
@@ -121,11 +121,13 @@ package Marmot_Config is
     type IF_ID_rec is record
            instr : std_logic_vector(instr_width);
            npc   : std_logic_vector(instr_width);        
+           pc    : std_logic_vector(instr_width);
    end record IF_ID_rec;
 
    type ID_EX_rec is record
            instr   : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
+           pc      : std_logic_vector(instr_width);
            br_addr : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);
@@ -134,6 +136,7 @@ package Marmot_Config is
    type EX_MEM_rec is record
            instr   : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
+           pc    : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);
            result  : std_logic_vector(reg_width);
