@@ -65,6 +65,11 @@ package Marmot_Config is
     constant write_low_byte  : std_logic_vector := "01";
     constant write_word      : std_logic_vector := "11";
 
+	-- Memory source enum
+	constant mem_src_ra		 : std_logic_vector := "00";
+	constant mem_src_rb		 : std_logic_vector := "01";
+	constant mem_src_f1		 : std_logic_vector := "10";
+
     -- Memory specific ranges
     subtype instr_mem_width  is natural range 8 downto 0;
     subtype byte_addressable is natural range 1 downto 0;
@@ -103,6 +108,9 @@ package Marmot_Config is
 
     -- wb src mux
     subtype wb_src_width     is natural range 2 downto 0;
+
+	-- memory data src mux
+	subtype mem_src_width	 is natural range 1 downto 0;
 
    -- Pipeline Latch Record Types
     type PC_rec is record

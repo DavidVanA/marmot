@@ -25,6 +25,7 @@ architecture Behavioral of The_Marmot is
 
     signal MEM_read_data  :   std_logic_vector(instr_width);
     signal MEM_data_addr  :   std_logic_vector(instr_width);
+    signal MEM_data_data  :   std_logic_vector(instr_width);
     signal MEM_instr      :   std_logic_vector(instr_width);
     
     signal br_addr        :   std_logic_vector(instr_width);
@@ -39,19 +40,21 @@ architecture Behavioral of The_Marmot is
     
     -- MUX for REG read index 1
     signal o_CON_Rd_Index1:   std_logic_vector(rd_index_width);
+    -- MUX for REG read index 2
+    signal o_CON_Rd_Index2:   std_logic_vector(rd_index_width);
 
     -- MUX for ALU A and B
     signal o_CON_alu_src_1:   std_logic_vector(alu_src_width);    
     signal o_CON_alu_src_2:   std_logic_vector(alu_src_width);
-    
-    -- MUX for EX_MEM result
-    signal o_CON_Ex_Mem_Res_Src: std_logic;
     
     -- MUX for MEM_WB write index
     signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
 
     -- MUX for memory data address
     signal o_CON_Data_Addr_Src: std_logic;
+
+    -- MUX for memory write data 
+    signal o_CON_Data_Data_Src: std_logic;
 
     -- Signal for selecting write or read
     signal o_CON_Mem_Wr_nRd: std_logic_vector(byte_addressable);
@@ -112,13 +115,14 @@ begin
        MEM_WB_PORT        => i_CON_MEM_WB,
        WB_EN              => o_CON_Wb_En,
        MEM_DATA_ADDR_SRC  => o_CON_Data_Addr_Src,
+       MEM_DATA_DATA_SRC  => o_CON_Data_Data_Src,
        ALU_SRC_1          => o_CON_alu_src_1,
        ALU_SRC_2          => o_CON_alu_src_2,
-       EX_MEM_RES_SRC     => o_CON_Ex_Mem_Res_Src,
        MEM_WR_nRD         => o_CON_Mem_Wr_nRd,
        WB_SRC             => o_CON_Wb_Src,
        MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
        RD_INDEX_1         => o_CON_Rd_Index1,
+       RD_INDEX_2         => o_CON_Rd_Index2,
        ALU_N              => o_ALU_N,
        ALU_Z              => o_ALU_Z,
        ALU_Ov             => o_ALU_Ov,
@@ -179,7 +183,7 @@ begin
 
          -- Select register read index
     rd_index1 <= o_CON_Rd_Index1;
-    rd_index2 <= IF_ID_latch.instr(rc_width);
+    rd_index2 <= o_CON_Rd_Index2;
      
     Registers_Latches_instance : entity work.register_file
     port map(
@@ -265,9 +269,17 @@ begin
     end process EX_MEM;    
 
     with o_CON_Data_Addr_Src select
-        Mem_data_addr <=
-            EX_MEM_latch.ra_data(15 downto 0) when '0',
-            EX_MEM_latch.rb_data(15 downto 0) when others;
+        MEM_data_addr <=
+            EX_MEM_latch.ra_data(15 downto 0) when mem_src_ra,
+            EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
+			MEM_WB_latch.result(15 downto 0) when mem_src_f1
+			(others => '0') when others;
+
+    with o_CON_Data_Data_Src select
+        MEM_data_data <=
+            EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
+			MEM_WB_latch.result(15 downto 0) when mem_src_f1
+			(others => '0') when others;
         
      Memory_instance : entity work.Memory
         port map(                               
