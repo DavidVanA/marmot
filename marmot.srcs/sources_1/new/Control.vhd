@@ -32,52 +32,44 @@ entity Controller is
     Reset_ID_EX         : OUT std_logic;
     Reset_EX_MEM        : OUT std_logic;
     Reset_MEM_WB        : OUT std_logic;
+
     -- Latch Ports
 --    PC_PORT             : in  std_logic_vector(instr_addr_width);
     IF_ID_PORT          : IN  std_logic_vector(instr_width);
     ID_EX_PORT          : IN  std_logic_vector(instr_width);
     EX_MEM_PORT         : IN  std_logic_vector(instr_width);
     MEM_WB_PORT         : IN  std_logic_vector(instr_width);
+
     -- ALU Ports
     ALU_N               : IN std_logic;
     ALU_Z               : IN std_logic;
     ALU_Ov              : IN std_logic;
+
     -- Control Signal Ports
     Conn_PCSrc_Port     : OUT std_logic;
     Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
 
-    WB_EN               : OUT std_logic;
-    
-    MEM_WB_INDEX        : OUT std_logic_vector(reg_idx_width);
+  	-- Read indices
     RD_INDEX_1          : OUT std_logic_vector(rd_index_width);
+    RD_INDEX_2          : OUT std_logic_vector(rd_index_width);
     
+  	-- Source for ALU inputs
     ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
     ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
 
-    MEM_DATA_ADDR_SRC   : OUT std_logic;
-    
+  	-- RAM control signals
     MEM_WR_nRD          : OUT std_logic_vector(byte_addressable);
+    MEM_DATA_ADDR_SRC   : OUT std_logic_vector(mem_src_width);
+    MEM_DATA_DATA_SRC   : OUT std_logic_vector(mem_src_width);
 
+  	-- WB control signals
+    WB_EN               : OUT std_logic;
     WB_SRC              : OUT std_logic_vector(wb_src_width);
-    
-    EX_MEM_RES_SRC      : OUT std_logic;
+    MEM_WB_INDEX        : OUT std_logic_vector(reg_idx_width);
 
+  	-- Branch control signals
     Branch_Relative     : OUT std_logic
 
---    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
---    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
-
-    -- Flush Lines
-    -- IF_ID_Flush_Port    : OUT std_logic;
-    -- ID_EX_Flush_Port    : OUT std_logic;
-    -- EX_MEM_Flush_Port   : OUT std_logic;
-    -- MEM_WB_Flush_Port   : OUT std_logic
-    
-   -- Control flag
-    --PCSCr_Port        : OUT std_logic_vector();
---    PC_PORT             : IN PC_rec;
---    PC_BR_PORT          : OUT std_logic_vector(instr_width)
-    
     );
 end Controller;
 
@@ -97,14 +89,9 @@ architecture Behavioral of Controller is
     signal EX_MEM_INS_type    : std_logic_vector(instr_type_width);
     signal MEM_WB_INS_type    : std_logic_vector(instr_type_width);
     
+	-- Writeback target for each latch
     signal ex_mem_dest        : std_logic_vector(reg_idx_width);
     signal mem_wb_dest        : std_logic_vector(reg_idx_width);
-
-    -- Flush lines - not clear if these need to be distinct from Reset lines
-    -- signal IF_ID_Flush        : std_logic;
-    -- signal ID_EX_Flush        : std_logic;
-    -- signal EX_MEM_Flush       : std_logic;
-    -- signal MEM_WB_Flush       : std_logic;
 
     -- Status Flag Signals
     signal Status_Flags      : Status_Flags_rec;
@@ -161,10 +148,13 @@ begin
                            '0' when others;
            
     RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
-                  IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr else
+                  IF_ID_INS(ra_width) when IF_ID_INS_type = l2_instr else
                   "111" when IF_ID_INS(op_width) = op_return else
                   "111" when IF_ID_INS(op_width) = op_load_imm else
                   IF_ID_INS(ra_width);
+
+	RD_INDEX_2 <= IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr else
+				  IF_ID_INS(rc_width);
 
 -----------------------------------   ID/EX   -------------------------------------------------   
       Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
@@ -193,10 +183,6 @@ begin
 
                  alu_src_rd;
                  
-    EX_MEM_RES_SRC <= '1' when ID_EX_INS(op_width) = op_br_sub OR
-                               ID_EX_INS(op_width) = op_load_imm
-                               else '0';
-      
     ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
       port map(
         Instr_Port      => ID_EX_INS(op_width),
@@ -225,7 +211,13 @@ begin
 
       EX_MEM_INS <= EX_MEM_PORT;
       
-      MEM_DATA_ADDR_SRC <= '1' when EX_MEM_INS(op_width) = op_load else '0';
+	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest else
+						   mem_src_f1 when EX_MEM_INS(op_width) = op_store and EX_MEM_INS(ra_width) = mem_wb_dest else
+						   mem_src_rb when EX_MEM_INS(op_width) = op_load else 
+						   mem_src_ra;
+
+	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest else
+						   mem_src_rb;
 
       MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
 
@@ -261,9 +253,9 @@ begin
         MEM_WB_PORT(op_width) = op_mov
         else '0';
       
-          MEM_WB_INDEX <= "111" when MEM_WB_PORT(op_width) = op_br_sub else
-                          "111" when MEM_WB_PORT(op_width) = op_load_imm else
-                          MEM_WB_PORT(ra_width);
+	  MEM_WB_INDEX <= "111" when MEM_WB_PORT(op_width) = op_br_sub else
+					  "111" when MEM_WB_PORT(op_width) = op_load_imm else
+					  MEM_WB_PORT(ra_width);
         
       MEM_WB_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
