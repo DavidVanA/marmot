@@ -148,7 +148,6 @@ begin
                            '0' when others;
            
     RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
-                  IF_ID_INS(ra_width) when IF_ID_INS_type = l2_instr else
                   "111" when IF_ID_INS(op_width) = op_return else
                   "111" when IF_ID_INS(op_width) = op_load_imm else
                   IF_ID_INS(ra_width);
