@@ -479,18 +479,18 @@ begin
     --
     -- Stage 1 Fetch
     --
-        s1_pc => x"0000",
-        s1_inst => x"0000",
+        s1_pc => IF_ID_latch.pc,
+        s1_inst => IF_ID_latch.instr,
     
     --
     -- Stage 2 Decode
     --
     
-        s2_pc => x"0000",
-        s2_inst => x"0000",
+        s2_pc => ID_EX_latch.pc,
+        s2_inst => ID_EX_latch.instr,
     
-        s2_reg_a => "000",
-        s2_reg_b => "000",
+        s2_reg_a => rd_index1,
+        s2_reg_b => rd_index2,
         s2_reg_c => "000",
     
         s2_reg_a_data => x"0000",
