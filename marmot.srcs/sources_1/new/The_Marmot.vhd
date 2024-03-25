@@ -80,9 +80,12 @@ architecture Behavioral of The_Marmot is
     signal o_ALU_Ov       :  std_logic;
     signal FLAG_Ov        :  std_logic;
 
-    signal wb_data        : std_logic_vector(reg_width);
-    signal PCSrc          : std_logic;
-    signal Disp_Select    : std_logic_vector(instr_type_width);
+    signal wb_data         : std_logic_vector(reg_width);
+    signal PCSrc           : std_logic;
+    signal Disp_Select     : std_logic_vector(instr_type_width);
+    signal Branch_Relative : std_logic;
+    signal Branch_Base     : std_logic_vector(instr_width);
+
     
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
@@ -121,8 +124,8 @@ begin
        ALU_Z              => o_ALU_Z,
        ALU_Ov             => o_ALU_Ov,
        Conn_PCSrc_Port    => PCSrc,
-       Disp_Select_Port   => Disp_Select
-       
+       Disp_Select_Port   => Disp_Select,
+       Branch_Relative    => Branch_Relative
        );
 
 ----------------------------------     PC       -------------------------------------------------
@@ -154,20 +157,28 @@ begin
         end if;
     end process IF_ID;
 
-    -- Select register read index
-    rd_index1 <= o_CON_Rd_Index1;
-    rd_index2 <= IF_ID_latch.instr(rc_width);
+     ------------ Branching -----------------
 
-
+     with Branch_Relative select
+          Branch_Base <=
+                        r1_data(instr_width) when '1',
+                        IF_ID_latch.instr    when '0';
+     
     Branch_Calculator_instance: entity work.Branch_Calculator
         port map (
             Instr_Port => IF_ID_latch.instr,
-            NPC => ID_Ex_latch.npc,
+            Branch_Base => Branch_Base,
             Ra  => r1_data(instr_width),
             Disp_Selector => Disp_Select,
             Br_Addr_Port => br_addr
         );
- 
+
+     --------------------------------------
+
+         -- Select register read index
+    rd_index1 <= o_CON_Rd_Index1;
+    rd_index2 <= IF_ID_latch.instr(rc_width);
+     
     Registers_Latches_instance : entity work.register_file
     port map(
         rst         => Reset_and_Execute,
@@ -191,13 +202,18 @@ begin
             ID_EX_latch.instr <= IF_ID_latch.instr;
             ID_EX_latch.ra_data <= r1_data;
             ID_EX_latch.rb_data <= r2_data;
+
             ID_EX_latch.npc <= IF_ID_latch.npc;
             ID_EX_latch.br_addr <= br_addr;
+
         end if;
     end process ID_EX;
-    
-    PC.br <= ID_EX_latch.br_addr;
-    
+
+     
+   PC.br <= ID_EX_latch.br_addr;
+
+     ---
+     
     with o_CON_alu_src_1 select
       i_ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,

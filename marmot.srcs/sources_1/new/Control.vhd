@@ -61,7 +61,9 @@ entity Controller is
 
     WB_SRC              : OUT std_logic_vector(wb_src_width);
     
-    EX_MEM_RES_SRC      : OUT std_logic
+    EX_MEM_RES_SRC      : OUT std_logic;
+
+    Branch_Relative     : OUT std_logic
 
 --    MEM_Op              : OUT std_logic_vector(MEM_Op_width-1 downto 0);
 --    WB_Op               : OUT std_logic_vector(WB_Op_width-1 downto 0)
@@ -111,6 +113,7 @@ architecture Behavioral of Controller is
     -- PC Counter Calculator
     signal PC          : PC_rec;
 
+--    signal Branch_Addr_Select  : std_logic;
     
 begin
     
@@ -148,14 +151,19 @@ begin
        Instr_Port      => IF_ID_INS(op_width),
        Instr_Type_Port => IF_ID_INS_type
     );
-       
+    
+    -- Branch Relative Selector --
+    with IF_ID_INS_type select
+         Branch_Relative <=
+                           '1' when b2_instr,
+                           '0' when others;
            
     RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
                   IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr else
                   "111" when IF_ID_INS(op_width) = op_return else
                   "111" when IF_ID_INS(op_width) = op_load_imm else
                   IF_ID_INS(ra_width);
-              
+
 -----------------------------------   ID/EX   -------------------------------------------------   
       Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
 

@@ -6,7 +6,7 @@ use work.Marmot_Config.ALL;
 entity Branch_Calculator is
   port (
     signal Instr_Port     : IN  std_logic_vector(instr_width);
-    signal NPC            : IN  std_logic_vector(instr_width);
+    signal Branch_Base    : IN  std_logic_vector(instr_width);
     signal Ra             : IN std_logic_vector(instr_width);
     signal Disp_Selector  : IN  std_logic_vector(instr_type_width);
     signal Br_Addr_Port   : OUT std_logic_vector(instr_width)
@@ -41,10 +41,10 @@ entity Branch_Calculator is
     shft_l      <= sign_ex_l(14 downto 0) & '0';
     shft_s      <= sign_ex_s(14 downto 0) & '0';
     
-    -- add NPC and shift left
+    -- add Branch_Base and shift left
     br_addr_s_int <= std_logic_vector(signed(Ra) + signed(shft_s));
     
-    br_addr_l <= std_logic_vector(signed(NPC) + signed(shft_l));
+    br_addr_l <= std_logic_vector(signed(Branch_Base) + signed(shft_l));
     br_addr_s <= br_addr_s_int(15 downto 1) & '0';
     
     with Disp_Selector select
