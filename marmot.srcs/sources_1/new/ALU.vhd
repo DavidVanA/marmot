@@ -65,8 +65,8 @@ begin
     i_bshl_B <= ALU_B(cl_width) when ALU_Ins(op_width) = op_bshl else x"0";
     i_bshr_B <= ALU_B(cl_width) when ALU_Ins(op_width) = op_bshr else x"0";
 
-    o_imm_C <= ALU_Ins(imm_width) & ALU_A(7 downto 0) when ALU_Ins(op_width) = op_load_imm and ALU_Ins(8) = '0' else
-               ALU_A(7 downto 0) & ALU_Ins(imm_width) when ALU_Ins(op_width) = op_load_imm and ALU_Ins(8) = '1' else
+    o_imm_C <= ALU_Ins(imm_width) & ALU_A(7 downto 0) when ALU_Ins(op_width) = op_load_imm and ALU_Ins(8) = '1' else
+               ALU_A(15 downto 8) & ALU_Ins(imm_width) when ALU_Ins(op_width) = op_load_imm and ALU_Ins(8) = '0' else
                (others => '0');
 
 -- Output Mux
