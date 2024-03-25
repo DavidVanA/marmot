@@ -29,6 +29,7 @@ begin
                    a1_instr when op_add,
                    a1_instr when op_sub,
                    a1_instr when op_mult,
+                   a1_instr when op_nand,
                    a2_instr when op_bshl,
                    a2_instr when op_bshr,
                    a3_instr when op_test,
@@ -44,7 +45,7 @@ begin
                    b2_instr when op_br_ov,
                    b2_instr when op_br_sub,
                    l1_instr when op_load_imm,
-                   l1_instr when op_mov,
+                   l2_instr when op_mov,
                    l2_instr when op_load,
                    l2_instr when op_store,
                    (others => '0') when others;

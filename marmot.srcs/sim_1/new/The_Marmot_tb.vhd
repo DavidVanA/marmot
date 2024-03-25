@@ -25,8 +25,6 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
    signal Reset_and_Execute : std_logic := '0';
    signal Reset_and_Load : std_logic := '0';
    
-   signal INS_port : std_logic_vector(15 downto 0);
-
    --Outputs
    signal out_port : std_logic_vector(15 downto 0);
 
@@ -56,14 +54,15 @@ BEGIN
     stim_proc: process
     begin        
         -- Initialize Inputs
-        in_port <= (others => '0');
-        Reset_and_Execute <= '1';
+        in_port <= x"0080";
         Reset_and_Load <= '1';
         wait for 20 ns;
         
         -- Clear resets
-        Reset_and_Execute <= '0';
         Reset_and_Load <= '0';
+        
+        wait for 210ns;
+        in_port <= x"AA00";
 
         wait for 600 ns;
     end process;
