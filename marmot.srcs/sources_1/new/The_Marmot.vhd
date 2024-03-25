@@ -162,7 +162,7 @@ begin
      with Branch_Relative select
           Branch_Base <=
                         r1_data(instr_width) when '1',
-                        IF_ID_latch.instr    when '0';
+                        IF_ID_latch.instr    when others;
      
     Branch_Calculator_instance: entity work.Branch_Calculator
         port map (
