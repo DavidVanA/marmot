@@ -29,6 +29,7 @@ entity Controller is
     Reset_Load_Port     : IN  std_logic;
     Reset_PC            : OUT std_logic;
     Reset_IF_ID         : OUT std_logic;
+    Reset_Reg           : OUT std_logic;
     Reset_ID_EX         : OUT std_logic;
     Reset_EX_MEM        : OUT std_logic;
     Reset_MEM_WB        : OUT std_logic;
@@ -57,6 +58,9 @@ entity Controller is
     ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
     ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
 
+    -- Source for EX stage result
+    EX_RES_SRC          : OUT std_logic_vector(ex_res_src_width);
+    
   	-- RAM control signals
     MEM_WR_nRD          : OUT std_logic_vector(byte_addressable);
     MEM_DATA_ADDR_SRC   : OUT std_logic_vector(mem_src_width);
@@ -157,20 +161,21 @@ begin
 
 -----------------------------------   ID/EX   -------------------------------------------------   
       Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
+      Reset_Reg <= Reset_Execute or Reset_Load;
 
       ID_EX_INS <= ID_EX_PORT;
       
-     ex_mem_dest <= "111" when (ID_EX_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
+     ex_mem_dest <= "111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
                      EX_MEM_INS(ra_width);
                      
      mem_wb_dest <= "111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
-                     EX_MEM_INS(ra_width);    
+                     MEM_WB_INS(ra_width);    
                      
      -- <TODO>: This is gnarly look at - make it a block?
-    ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = ex_mem_dest) else
+    ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = ex_mem_dest) else
                  alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "111") else
                  alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = ex_mem_dest) else
-                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = mem_wb_dest) else
+                 alu_src_fd2 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = mem_wb_dest) else
                  alu_src_fd2 when (ID_EX_INS_type = l1_instr and mem_wb_dest = "111") else
                  alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = mem_wb_dest) else
 
@@ -178,9 +183,12 @@ begin
                         
     ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
                  alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = ex_mem_dest) else
-                 alu_src_fd2 when (ID_EX_INS_type  /= a1_instr and ID_EX_INS(rc_width) = mem_wb_dest) else
+                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = mem_wb_dest) else
 
                  alu_src_rd;
+    
+    EX_RES_SRC <= ex_res_src_in when ID_EX_INS(op_width) = op_in else
+                  ex_res_src_alu;
                  
     ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
       port map(
@@ -223,7 +231,6 @@ begin
       WB_SRC <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
          wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
-         wb_src_rb  when EX_MEM_INS(op_width) = op_mov else
          wb_src_in  when EX_MEM_INS(op_width) = op_in else
          wb_src_alu;
         

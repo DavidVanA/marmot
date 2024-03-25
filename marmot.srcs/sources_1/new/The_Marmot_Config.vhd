@@ -39,6 +39,10 @@ package Marmot_Config is
     constant alu_src_fd1    : std_logic_vector := "001";
     constant alu_src_fd2    : std_logic_vector := "010";
     constant alu_src_cl     : std_logic_vector := "011";
+    
+    -- EX result source
+    constant ex_res_src_alu : std_logic_vector := "00";
+    constant ex_res_src_in  : std_logic_vector := "01";
 
     -- Wb source
     constant wb_src_alu      : std_logic_vector := "000";
@@ -105,6 +109,9 @@ package Marmot_Config is
     
     -- alu src mux
     subtype alu_src_width    is natural range 2 downto 0;
+    
+    -- result src mux
+    subtype ex_res_src_width is natural range 1 downto 0;
 
     -- wb src mux
     subtype wb_src_width     is natural range 2 downto 0;

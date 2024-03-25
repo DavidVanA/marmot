@@ -47,6 +47,9 @@ architecture Behavioral of The_Marmot is
     signal o_CON_alu_src_1:   std_logic_vector(alu_src_width);    
     signal o_CON_alu_src_2:   std_logic_vector(alu_src_width);
     
+    -- MUX for EX stage result source
+    signal o_CON_Ex_Res_Src:  std_logic_vector(ex_res_src_width);
+    
     -- MUX for MEM_WB write index
     signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
 
@@ -71,6 +74,7 @@ architecture Behavioral of The_Marmot is
 
     signal Reset_PC       :  std_logic;
     signal Reset_IF_ID    :  std_logic;
+    signal Reset_Reg      :  std_logic;
     signal Reset_ID_EX    :  std_logic;
     signal Reset_EX_MEM   :  std_logic;
     signal Reset_MEM_WB   :  std_logic;
@@ -106,6 +110,7 @@ begin
        Reset_Load_Port    => Reset_and_Load,
        Reset_PC           => Reset_PC,
        Reset_IF_ID        => Reset_IF_ID,
+       Reset_Reg          => Reset_Reg,
        Reset_ID_EX        => Reset_ID_EX,
        Reset_EX_MEM       => Reset_EX_MEM,
        Reset_MEM_WB       => Reset_MEM_WB,
@@ -118,14 +123,15 @@ begin
        MEM_DATA_DATA_SRC  => o_CON_Data_Data_Src,
        ALU_SRC_1          => o_CON_alu_src_1,
        ALU_SRC_2          => o_CON_alu_src_2,
+       EX_RES_SRC         => o_CON_Ex_Res_Src,
        MEM_WR_nRD         => o_CON_Mem_Wr_nRd,
        WB_SRC             => o_CON_Wb_Src,
        MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
        RD_INDEX_1         => o_CON_Rd_Index1,
        RD_INDEX_2         => o_CON_Rd_Index2,
-       ALU_N              => o_ALU_N,
-       ALU_Z              => o_ALU_Z,
-       ALU_Ov             => o_ALU_Ov,
+       ALU_N              => FLAG_N,
+       ALU_Z              => FLAG_Z,
+       ALU_Ov             => FLAG_Ov,
        Conn_PCSrc_Port    => PCSrc,
        Disp_Select_Port   => Disp_Select,
        Branch_Relative    => Branch_Relative
@@ -133,10 +139,12 @@ begin
 
 ----------------------------------     PC       -------------------------------------------------
 
-    PC_process: process(M_clock, Reset_PC)
+    PC_process: process(M_clock, Reset_And_Execute, Reset_And_Load)
     begin
-        if Reset_PC = '1' then
+        if Reset_And_Execute = '1' then
             PC.pc <= (others => '0');
+        elsif Reset_And_Load = '1' then
+            PC.pc <= x"0002";
         elsif rising_edge(M_clock) then
             -- Instr_mem.in <= PC.pc
             if PCSrc = '0' then
@@ -187,7 +195,7 @@ begin
      
     Registers_Latches_instance : entity work.register_file
     port map(
-        rst         => Reset_and_Execute,
+        rst         => Reset_Reg,
         clk         => M_clock,
         wr_index    => o_CON_Mem_Wb_Index,
         wr_data     => MEM_WB_latch.result,
@@ -253,7 +261,12 @@ begin
               EX_MEM_latch.instr <= (others => '0');
               EX_MEM_latch.result <= (others => '0');
         elsif rising_edge(M_clock) then
-            EX_MEM_latch.result <= o_ALU_C;
+            if o_CON_Ex_Res_Src = ex_res_src_in then
+                EX_MEM_latch.result <= '0' & in_port;
+            else
+                EX_MEM_latch.result <= o_ALU_C;
+            end if;
+            
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
             EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
