@@ -10,7 +10,18 @@ entity The_Marmot is
     M_clock               : IN std_logic;
     Reset_and_Execute     : IN std_logic;
     Reset_and_Load        : IN std_logic;
-    out_port              : OUT std_logic_vector(instr_width)
+    out_port              : OUT std_logic_vector(instr_width);
+    
+    ------- Debug Console Ports -----------------------------
+    debug_console   : in std_logic;
+    board_clock     : in std_logic;
+
+    vga_red         : out std_logic_vector( 3 downto 0 );
+    vga_green       : out std_logic_vector( 3 downto 0 );
+    vga_blue        : out std_logic_vector( 3 downto 0 );
+
+    h_sync_signal   : out std_logic;
+    v_sync_signal   : out std_logic
     );
 end The_Marmot;
 
@@ -83,6 +94,136 @@ architecture Behavioral of The_Marmot is
     signal wb_data        : std_logic_vector(reg_width);
     signal PCSrc          : std_logic;
     signal Disp_Select    : std_logic_vector(instr_type_width);
+    
+   
+component console is
+        port (
+    
+    --
+    -- Stage 1 Fetch
+    --
+            s1_pc : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            s1_inst : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    
+    
+    --
+    -- Stage 2 Decode
+    --
+            s2_pc : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            s2_inst : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    
+            s2_reg_a : in STD_LOGIC_VECTOR( 2 downto 0 );
+            s2_reg_b : in STD_LOGIC_VECTOR( 2 downto 0 );
+            s2_reg_c : in STD_LOGIC_VECTOR( 2 downto 0 );
+    
+            s2_reg_a_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s2_reg_b_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s2_reg_c_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+            s2_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+    
+    --
+    -- Stage 3 Execute
+    --
+            s3_pc : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            s3_inst : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    
+            s3_reg_a : in STD_LOGIC_VECTOR( 2 downto 0 );
+            s3_reg_b : in STD_LOGIC_VECTOR( 2 downto 0 );
+            s3_reg_c : in STD_LOGIC_VECTOR( 2 downto 0 );
+    
+            s3_reg_a_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s3_reg_b_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s3_reg_c_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+            s3_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+    --
+    -- Branch and memory operation
+    --
+            s3_r_wb : in STD_LOGIC;
+            s3_r_wb_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+            s3_br_wb : in STD_LOGIC;
+            s3_br_wb_address : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+            s3_mr_wr : in STD_LOGIC;
+            s3_mr_wr_address : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s3_mr_wr_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+            s3_mr_rd : in STD_LOGIC;
+            s3_mr_rd_address : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+    --
+    -- Stage 4 Memory
+    --
+            s4_pc : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s4_inst : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+            s4_reg_a : in STD_LOGIC_VECTOR( 2 downto 0 );
+    
+            s4_r_wb : in STD_LOGIC;
+            s4_r_wb_data : in STD_LOGIC_VECTOR( 15 downto 0 );
+    
+    --
+    -- CPU registers
+    --
+    
+            register_0 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_1 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_2 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_3 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_4 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_5 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_6 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            register_7 : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    
+    --
+    -- CPU registers overflow flags
+    --
+            register_0_of : in STD_LOGIC;
+            register_1_of : in STD_LOGIC;
+            register_2_of : in STD_LOGIC;
+            register_3_of : in STD_LOGIC;
+            register_4_of : in STD_LOGIC;
+            register_5_of : in STD_LOGIC;
+            register_6_of : in STD_LOGIC;
+            register_7_of : in STD_LOGIC;
+    
+    --
+    -- CPU Flags
+    --
+            zero_flag : in STD_LOGIC;
+            negative_flag : in STD_LOGIC;
+            overflow_flag : in STD_LOGIC;
+    
+    --
+    -- Debug screen enable
+    --
+            debug : in STD_LOGIC;
+    
+    --
+    -- Text console display memory access signals ( clk is the processor clock )
+    --
+            addr_write : in  STD_LOGIC_VECTOR (15 downto 0);
+            clk : in  STD_LOGIC;
+            data_in : in  STD_LOGIC_VECTOR (15 downto 0);
+            en_write : in  STD_LOGIC;
+    
+    --
+    -- Video related signals
+    --
+            board_clock : in STD_LOGIC;
+            v_sync_signal : out STD_LOGIC;
+            h_sync_signal : out STD_LOGIC;
+            vga_red : out STD_LOGIC_VECTOR( 3 downto 0 );
+            vga_green : out STD_LOGIC_VECTOR( 3 downto 0 );
+            vga_blue : out STD_LOGIC_VECTOR( 3 downto 0 )
+    
+        );
+    end component;    
+    
     
 begin
 -----------------------------------   IN Port   -------------------------------------------------   
@@ -289,4 +430,123 @@ begin
 -----------------------------------   OUT Port   -------------------------------------------------
     out_port <= MEM_WB_latch.result(instr_width) when MEM_WB_latch.instr(op_width) = op_out;  
     
+-----------------
+    console_display : console
+    port map
+    (
+    --
+    -- Stage 1 Fetch
+    --
+        s1_pc => x"0000",
+        s1_inst => x"0000",
+    
+    --
+    -- Stage 2 Decode
+    --
+    
+        s2_pc => x"0000",
+        s2_inst => x"0000",
+    
+        s2_reg_a => "000",
+        s2_reg_b => "000",
+        s2_reg_c => "000",
+    
+        s2_reg_a_data => x"0000",
+        s2_reg_b_data => x"0000",
+        s2_reg_c_data => x"0000",
+        s2_immediate => x"0000",
+    
+    --
+    -- Stage 3 Execute
+    --
+    
+        s3_pc => x"0000",
+        s3_inst => x"0000",
+    
+        s3_reg_a => "000",
+        s3_reg_b => "000",
+        s3_reg_c => "000",
+    
+        s3_reg_a_data => x"0000",
+        s3_reg_b_data => x"0000",
+        s3_reg_c_data => x"0000",
+        s3_immediate => x"0000",
+    
+        s3_r_wb => '0',
+        s3_r_wb_data => x"0000",
+    
+        s3_br_wb => '0',
+        s3_br_wb_address => x"0000",
+    
+        s3_mr_wr => '0',
+        s3_mr_wr_address => x"0000",
+        s3_mr_wr_data => x"0000",
+    
+        s3_mr_rd => '0',
+        s3_mr_rd_address => x"0000",
+    
+    --
+    -- Stage 4 Memory
+    --
+    
+        s4_pc => x"0000",
+        s4_inst => x"0000",
+        s4_reg_a => "000",
+        s4_r_wb => '0',
+        s4_r_wb_data => x"0000",
+    
+    --
+    -- CPU registers
+    --
+    
+        register_0 => x"0000",
+        register_1 => x"0000",
+        register_2 => x"0000",
+        register_3 => x"0000",
+        register_4 => x"0000",
+        register_5 => x"0000",
+        register_6 => x"0000",
+        register_7 => x"0000",
+    
+        register_0_of => '0',
+        register_1_of => '0',
+        register_2_of => '0',
+        register_3_of => '0',
+        register_4_of => '0',
+        register_5_of => '0',
+        register_6_of => '0',
+        register_7_of => '0',
+    
+    --
+    -- CPU Flags
+    --
+        zero_flag => '0',
+        negative_flag => '0',
+        overflow_flag => '0',
+    
+    --
+    -- Debug screen enable
+    --
+        debug => debug_console,
+    
+    --
+    -- Text console display memory access signals ( clk is the processor clock )
+    --
+    
+        clk => '0',
+        addr_write => x"0000",
+        data_in => x"0000",
+        en_write => '0',
+    
+    --
+    -- Video related signals
+    --
+    
+        board_clock => board_clock,
+        h_sync_signal => h_sync_signal,
+        v_sync_signal => v_sync_signal,
+        vga_red => vga_red,
+        vga_green => vga_green,
+        vga_blue => vga_blue
+    );
 end Behavioral;
