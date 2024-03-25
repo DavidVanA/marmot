@@ -62,10 +62,10 @@ architecture Behavioral of The_Marmot is
     signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
 
     -- MUX for memory data address
-    signal o_CON_Data_Addr_Src: std_logic;
+    signal o_CON_Data_Addr_Src: std_logic_vector(mem_src_width);
 
     -- MUX for memory write data 
-    signal o_CON_Data_Data_Src: std_logic;
+    signal o_CON_Data_Data_Src: std_logic_vector(mem_src_width);
 
     -- Signal for selecting write or read
     signal o_CON_Mem_Wr_nRd: std_logic_vector(byte_addressable);
@@ -413,13 +413,13 @@ begin
         MEM_data_addr <=
             EX_MEM_latch.ra_data(15 downto 0) when mem_src_ra,
             EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
-			MEM_WB_latch.result(15 downto 0) when mem_src_f1
+			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
 			(others => '0') when others;
 
     with o_CON_Data_Data_Src select
         MEM_data_data <=
             EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
-			MEM_WB_latch.result(15 downto 0) when mem_src_f1
+			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
 			(others => '0') when others;
         
      Memory_instance : entity work.Memory
