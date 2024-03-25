@@ -63,7 +63,7 @@ begin
         ROM_clka   <= Clk;
         ROM_ena    <= not RAM_not_ROM;
         ROM_rsta   <= Reset;
-        ROM_addra  <= Instr_Addr(instr_mem_width);
+        ROM_addra  <= '0' & Instr_Addr(8 downto 1);
         Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
         
  

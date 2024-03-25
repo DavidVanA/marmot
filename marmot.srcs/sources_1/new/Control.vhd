@@ -42,7 +42,6 @@ entity Controller is
     ALU_N               : IN std_logic;
     ALU_Z               : IN std_logic;
     ALU_Ov              : IN std_logic;
-    ALU_Mode            : OUT std_logic_vector(alu_mode_width);
     -- Control Signal Ports
     Conn_PCSrc_Port     : OUT std_logic;
     Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
@@ -97,6 +96,9 @@ architecture Behavioral of Controller is
     signal ID_EX_INS_type     : std_logic_vector(instr_type_width);
     signal EX_MEM_INS_type    : std_logic_vector(instr_type_width);
     signal MEM_WB_INS_type    : std_logic_vector(instr_type_width);
+    
+    signal ex_mem_dest        : std_logic_vector(reg_idx_width);
+    signal mem_wb_dest        : std_logic_vector(reg_idx_width);
 
     -- Flush lines - not clear if these need to be distinct from Reset lines
     -- signal IF_ID_Flush        : std_logic;
@@ -169,28 +171,26 @@ begin
 
       ID_EX_INS <= ID_EX_PORT;
       
-      with ID_EX_INS(op_width) select
-        ALU_Mode <= 
-        "000" when op_nop,
-        "001" when op_add,
-        "010" when op_sub,
-        "011" when op_mult,
-        "100" when op_nand,
-        "101" when op_bshl,
-        "110" when op_bshr,
-        "111" when op_test,
-        (others => '0') when others;
-        
-    -- <TODO>: This is gnarly look at - make it a block?
-    ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = EX_MEM_INS(ra_width)) else
-                 alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = EX_MEM_INS(ra_width)) else
-                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = MEM_WB_INS(ra_width)) else
-                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = MEM_WB_INS(ra_width)) else
+     ex_mem_dest <= "111" when (ID_EX_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
+                     EX_MEM_INS(ra_width);
+                     
+     mem_wb_dest <= "111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
+                     EX_MEM_INS(ra_width);    
+                     
+     -- <TODO>: This is gnarly look at - make it a block?
+    ALU_SRC_1 <= alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = ex_mem_dest) else
+                 alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "111") else
+                 alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = ex_mem_dest) else
+                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rb_width) = mem_wb_dest) else
+                 alu_src_fd2 when (ID_EX_INS_type = l1_instr and mem_wb_dest = "111") else
+                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = mem_wb_dest) else
+
                  alu_src_rd;
                         
     ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
-                 alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = EX_MEM_INS(ra_width)) else
-                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(rc_width) = MEM_WB_INS(ra_width)) else
+                 alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = ex_mem_dest) else
+                 alu_src_fd2 when (ID_EX_INS_type  /= a1_instr and ID_EX_INS(rc_width) = mem_wb_dest) else
+
                  alu_src_rd;
                  
     EX_MEM_RES_SRC <= '1' when ID_EX_INS(op_width) = op_br_sub OR
@@ -232,8 +232,6 @@ begin
       WB_SRC <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
          wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
-         wb_src_imm_lower when EX_MEM_INS(op_width) = op_load_imm and EX_MEM_INS(8) = '0' else
-         wb_src_imm_upper when EX_MEM_INS(op_width) = op_load_imm and EX_MEM_INS(8) = '1' else
          wb_src_rb  when EX_MEM_INS(op_width) = op_mov else
          wb_src_in  when EX_MEM_INS(op_width) = op_in else
          wb_src_alu;
@@ -263,8 +261,9 @@ begin
         MEM_WB_PORT(op_width) = op_mov
         else '0';
       
-      MEM_WB_INDEX <= "111" when MEM_WB_PORT(op_width) = op_br_sub else
-                      MEM_WB_PORT(ra_width);
+          MEM_WB_INDEX <= "111" when MEM_WB_PORT(op_width) = op_br_sub else
+                          "111" when MEM_WB_PORT(op_width) = op_load_imm else
+                          MEM_WB_PORT(ra_width);
         
       MEM_WB_Instr_Decode_instance: entity work.Instruction_Decoder
        port map(
