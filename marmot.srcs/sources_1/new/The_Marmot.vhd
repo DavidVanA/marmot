@@ -102,15 +102,16 @@ architecture Behavioral of The_Marmot is
     signal Disp_Select     : std_logic_vector(instr_type_width);
     signal Branch_Relative : std_logic;
     signal Branch_Base     : std_logic_vector(instr_width);
-	
-	signal reg_0		   : std_logic_vector(reg_width);
-	signal reg_1		   : std_logic_vector(reg_width);
-	signal reg_2		   : std_logic_vector(reg_width);
-	signal reg_3		   : std_logic_vector(reg_width);
-	signal reg_4		   : std_logic_vector(reg_width);
-	signal reg_5		   : std_logic_vector(reg_width);
-	signal reg_6		   : std_logic_vector(reg_width);
-	signal reg_7		   : std_logic_vector(reg_width);
+    
+    
+    signal debug_reg_0      : std_logic_vector(reg_width);
+    signal debug_reg_1      : std_logic_vector(reg_width);
+    signal debug_reg_2      : std_logic_vector(reg_width);
+    signal debug_reg_3      : std_logic_vector(reg_width);
+    signal debug_reg_4      : std_logic_vector(reg_width);
+    signal debug_reg_5      : std_logic_vector(reg_width);
+    signal debug_reg_6      : std_logic_vector(reg_width);
+    signal debug_reg_7      : std_logic_vector(reg_width);
     
    
 component console is
@@ -353,7 +354,17 @@ begin
         rd_index1   => rd_index1,
         rd_index2   => rd_index2,
         rd_data1    => r1_data,
-        rd_data2    => r2_data
+        rd_data2    => r2_data,
+        
+        reg_0   =>  debug_reg_0,
+        reg_1   =>  debug_reg_1,
+        reg_2   =>  debug_reg_2,
+        reg_3   =>  debug_reg_3,
+        reg_4   =>  debug_reg_4,
+        reg_5   =>  debug_reg_5,
+        reg_6   =>  debug_reg_6,
+        reg_7   =>  debug_reg_7
+        
     );
     
 -----------------------------------   ID/EX   -------------------------------------------------   
@@ -502,8 +513,8 @@ begin
         s2_reg_b => rd_index2,
         s2_reg_c => "000",
     
-        s2_reg_a_data => x"0000",
-        s2_reg_b_data => x"0000",
+        s2_reg_a_data => ID_EX_latch.ra_data(instr_width),
+        s2_reg_b_data => ID_EX_latch.rb_data(instr_width),
         s2_reg_c_data => x"0000",
         s2_immediate => x"0000",
     
@@ -511,17 +522,17 @@ begin
     -- Stage 3 Execute
     --
     
-        s3_pc => x"0000",
-        s3_inst => x"0000",
+        s3_pc => EX_MEM_latch.pc,
+        s3_inst => EX_MEM_latch.instr,
     
-        s3_reg_a => "000",
-        s3_reg_b => "000",
-        s3_reg_c => "000",
+        s3_reg_a => EX_MEM_latch.instr(8 downto 6),
+        s3_reg_b => EX_MEM_latch.instr(5 downto 3),
+        s3_reg_c => EX_MEM_latch.instr(2 downto 0),
     
-        s3_reg_a_data => x"0000",
-        s3_reg_b_data => x"0000",
-        s3_reg_c_data => x"0000",
-        s3_immediate => x"0000",
+        s3_reg_a_data => EX_MEM_latch.ra_data(instr_width),
+        s3_reg_b_data => EX_MEM_latch.rb_data(instr_width),
+        s3_reg_c_data => EX_MEM_latch.result(instr_width),
+        s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
     
         s3_r_wb => '0',
         s3_r_wb_data => x"0000",
@@ -541,8 +552,8 @@ begin
     --
     
         s4_pc => x"0000",
-        s4_inst => x"0000",
-        s4_reg_a => "000",
+        s4_inst => MEM_WB_latch.instr,
+        s4_reg_a => o_Con_MEM_WB_index,
         s4_r_wb => '0',
         s4_r_wb_data => x"0000",
     
@@ -550,30 +561,30 @@ begin
     -- CPU registers
     --
     
-        register_0 => reg_0(instr_width),
-        register_1 => reg_1(instr_width),
-        register_2 => reg_2(instr_width),
-        register_3 => reg_3(instr_width),
-        register_4 => reg_4(instr_width),
-        register_5 => reg_5(instr_width),
-        register_6 => reg_6(instr_width),
-        register_7 => reg_7(instr_width),
+        register_0 => debug_reg_0(instr_width),
+        register_1 => debug_reg_1(instr_width),
+        register_2 => debug_reg_2(instr_width),
+        register_3 => debug_reg_3(instr_width),
+        register_4 => debug_reg_4(instr_width),
+        register_5 => debug_reg_5(instr_width),
+        register_6 => debug_reg_6(instr_width),
+        register_7 => debug_reg_7(instr_width),
     
-        register_0_of => reg_0(16),
-        register_1_of => reg_1(16),
-        register_2_of => reg_2(16),
-        register_3_of => reg_3(16),
-        register_4_of => reg_4(16),
-        register_5_of => reg_5(16),
-        register_6_of => reg_6(16),
-        register_7_of => reg_7(16),
+        register_0_of => debug_reg_0(16),
+        register_1_of => debug_reg_0(16),
+        register_2_of => debug_reg_0(16),
+        register_3_of => debug_reg_0(16),
+        register_4_of => debug_reg_0(16),
+        register_5_of => debug_reg_0(16),
+        register_6_of => debug_reg_0(16),
+        register_7_of => debug_reg_0(16),
     
     --
     -- CPU Flags
     --
-        zero_flag => '0',
-        negative_flag => '0',
-        overflow_flag => '0',
+        zero_flag => flag_z,
+        negative_flag => flag_n,
+        overflow_flag => flag_OV,
     
     --
     -- Debug screen enable
