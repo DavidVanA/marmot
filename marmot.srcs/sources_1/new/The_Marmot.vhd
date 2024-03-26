@@ -331,7 +331,7 @@ begin
      
     Branch_Calculator_instance: entity work.Branch_Calculator
         port map (
-            Instr_Port => IF_ID_latch.instr,
+            Instr_Port => ID_EX_latch.instr,
             Branch_Base => Branch_Base,
             Ra  => r1_data(instr_width),
             Disp_Selector => Disp_Select,
@@ -373,8 +373,10 @@ begin
     begin
         if Reset_ID_EX = '1' then
             ID_EX_latch.instr <= (others => '0');
+            ID_EX_latch.pc <= (others => '0');
         elsif rising_edge(M_clock) then
             ID_EX_latch.instr <= IF_ID_latch.instr;
+            ID_EX_latch.pc <= IF_ID_latch.pc;
             ID_EX_latch.ra_data <= r1_data;
             ID_EX_latch.rb_data <= r2_data;
 
@@ -420,6 +422,7 @@ begin
     begin
         if Reset_EX_MEM = '1' then
               EX_MEM_latch.instr <= (others => '0');
+              EX_MEM_latch.pc <= (others => '0');
               EX_MEM_latch.result <= (others => '0');
         elsif rising_edge(M_clock) then
             if o_CON_Ex_Res_Src = ex_res_src_in then
@@ -429,6 +432,7 @@ begin
             end if;
             
             EX_MEM_latch.instr <= ID_EX_latch.instr;
+            EX_MEM_latch.pc <= ID_EX_latch.pc;
             EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
             EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
             EX_MEM_latch.npc <= ID_EX_latch.npc;
@@ -483,8 +487,10 @@ begin
         if Reset_MEM_WB = '1' then
             MEM_WB_latch.result <= (others => '0');
             MEM_WB_latch.instr <= (others => '0');
+            MEM_WB_latch.pc <= (others => '0');
         elsif rising_edge(M_clock) then
             MEM_WB_latch.instr <= EX_MEM_latch.instr;
+            MEM_WB_latch.pc <= EX_MEM_latch.pc;
             MEM_WB_latch.result <= wb_data;
         end if;
     end process MEM_WB;   
@@ -529,8 +535,8 @@ begin
         s3_reg_b => EX_MEM_latch.instr(5 downto 3),
         s3_reg_c => EX_MEM_latch.instr(2 downto 0),
     
-        s3_reg_a_data => EX_MEM_latch.ra_data(instr_width),
-        s3_reg_b_data => EX_MEM_latch.rb_data(instr_width),
+        s3_reg_a_data => i_ALU_A(instr_width),
+        s3_reg_b_data => i_ALU_B(instr_width),
         s3_reg_c_data => EX_MEM_latch.result(instr_width),
         s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
     
@@ -551,7 +557,7 @@ begin
     -- Stage 4 Memory
     --
     
-        s4_pc => x"0000",
+        s4_pc => MEM_WB_latch.pc,
         s4_inst => MEM_WB_latch.instr,
         s4_reg_a => o_Con_MEM_WB_index,
         s4_r_wb => '0',
@@ -582,9 +588,9 @@ begin
     --
     -- CPU Flags
     --
-        zero_flag => flag_z,
-        negative_flag => flag_n,
-        overflow_flag => flag_OV,
+        zero_flag       => flag_z,
+        negative_flag   => flag_n,
+        overflow_flag   => flag_OV,
     
     --
     -- Debug screen enable

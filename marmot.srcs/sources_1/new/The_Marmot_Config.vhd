@@ -156,6 +156,7 @@ package Marmot_Config is
 
    type MEM_WB_rec is record
           instr    : std_logic_vector(instr_width);
+          pc       : std_logic_vector(instr_width);
           result   : std_logic_vector(reg_width);
           mem_data : std_logic_vector(instr_width);
    end record MEM_WB_rec;

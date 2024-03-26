@@ -110,8 +110,8 @@ architecture Behavioral of Controller is
     
 begin
     
-    Reset_Execute <= Reset_Execute_Port;
-    Reset_Load <= Reset_Load_Port;
+    Reset_Execute   <= Reset_Execute_Port;
+    Reset_Load      <= Reset_Load_Port;
 
 -----------------------------------   Hazards    ------------------------------------------------
 
@@ -160,7 +160,7 @@ begin
 				  IF_ID_INS(rc_width);
 
 -----------------------------------   ID/EX   -------------------------------------------------   
-      Reset_ID_EX <= Reset_Execute or Reset_Load; -- OR whatever else
+      Reset_ID_EX <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
       Reset_Reg <= Reset_Execute or Reset_Load;
 
       ID_EX_INS <= ID_EX_PORT;
@@ -199,7 +199,7 @@ begin
     Branch_Resolver_instance: entity work.Branch_Resolver
       port map(
         Status => Status_Flags,
-        Opcode => ID_EX_INS(op_width),
+        Opcode => EX_MEM_INS(op_width),
         PCSrc_Port => PCSrc_conn
     );
                
