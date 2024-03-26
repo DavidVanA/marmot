@@ -6,11 +6,11 @@ use work.Marmot_Config.all;
 entity The_Marmot is
 
   port (
-    in_port               : IN std_logic_vector(instr_width);
+    in_port               : IN std_logic_vector(15 downto 6);
     M_clock               : IN std_logic;
     Reset_and_Execute     : IN std_logic;
     Reset_and_Load        : IN std_logic;
-    out_port              : OUT std_logic_vector(instr_width);
+    out_port              : OUT std_logic;
     
     ------- Debug Console Ports -----------------------------
     debug_console   : in std_logic;
@@ -243,6 +243,7 @@ component console is
     
     
 begin
+
 -----------------------------------   IN Port   -------------------------------------------------   
 
 
@@ -411,7 +412,7 @@ begin
               EX_MEM_latch.result <= (others => '0');
         elsif rising_edge(M_clock) then
             if o_CON_Ex_Res_Src = ex_res_src_in then
-                EX_MEM_latch.result <= '0' & in_port;
+                EX_MEM_latch.result <= '0' & in_port & "000000";
             else
                 EX_MEM_latch.result <= o_ALU_C;
             end if;
@@ -461,7 +462,7 @@ begin
            '0' & MEM_read_data       when wb_src_mem,
            '0' & EX_MEM_latch.npc    when wb_src_npc,
            EX_MEM_latch.rb_data      when wb_src_rb,
-           '0' & in_port             when wb_src_in,
+           '0' & in_port & "000000"  when wb_src_in,
            (others => '0')           when others;
            
            
@@ -478,7 +479,7 @@ begin
     end process MEM_WB;   
     
 -----------------------------------   OUT Port   -------------------------------------------------
-    out_port <= MEM_WB_latch.result(instr_width) when MEM_WB_latch.instr(op_width) = op_out;  
+    out_port <= MEM_WB_latch.result(0) when MEM_WB_latch.instr(op_width) = op_out;  
     
 -----------------
     console_display : console
