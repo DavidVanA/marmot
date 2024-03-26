@@ -102,7 +102,15 @@ architecture Behavioral of The_Marmot is
     signal Disp_Select     : std_logic_vector(instr_type_width);
     signal Branch_Relative : std_logic;
     signal Branch_Base     : std_logic_vector(instr_width);
-
+	
+	signal reg_0		   : std_logic_vector(reg_width);
+	signal reg_1		   : std_logic_vector(reg_width);
+	signal reg_2		   : std_logic_vector(reg_width);
+	signal reg_3		   : std_logic_vector(reg_width);
+	signal reg_4		   : std_logic_vector(reg_width);
+	signal reg_5		   : std_logic_vector(reg_width);
+	signal reg_6		   : std_logic_vector(reg_width);
+	signal reg_7		   : std_logic_vector(reg_width);
     
    
 component console is
@@ -541,23 +549,23 @@ begin
     -- CPU registers
     --
     
-        register_0 => x"0000",
-        register_1 => x"0000",
-        register_2 => x"0000",
-        register_3 => x"0000",
-        register_4 => x"0000",
-        register_5 => x"0000",
-        register_6 => x"0000",
-        register_7 => x"0000",
+        register_0 => reg_0(instr_width),
+        register_1 => reg_1(instr_width),
+        register_2 => reg_2(instr_width),
+        register_3 => reg_3(instr_width),
+        register_4 => reg_4(instr_width),
+        register_5 => reg_5(instr_width),
+        register_6 => reg_6(instr_width),
+        register_7 => reg_7(instr_width),
     
-        register_0_of => '0',
-        register_1_of => '0',
-        register_2_of => '0',
-        register_3_of => '0',
-        register_4_of => '0',
-        register_5_of => '0',
-        register_6_of => '0',
-        register_7_of => '0',
+        register_0_of => reg_0(16),
+        register_1_of => reg_1(16),
+        register_2_of => reg_2(16),
+        register_3_of => reg_3(16),
+        register_4_of => reg_4(16),
+        register_5_of => reg_5(16),
+        register_6_of => reg_6(16),
+        register_7_of => reg_7(16),
     
     --
     -- CPU Flags
