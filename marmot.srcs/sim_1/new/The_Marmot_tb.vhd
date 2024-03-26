@@ -15,7 +15,18 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
         M_clock             : IN  std_logic;
         Reset_and_Execute   : IN  std_logic;
         Reset_and_Load      : IN  std_logic;
-        out_port            : OUT std_logic_vector(15 downto 0)
+        out_port            : OUT std_logic_vector(15 downto 0);
+        
+        ------- Debug Console Ports -----------------------------
+        debug_console   : in std_logic;
+        board_clock     : in std_logic;
+    
+        vga_red         : out std_logic_vector( 3 downto 0 );
+        vga_green       : out std_logic_vector( 3 downto 0 );
+        vga_blue        : out std_logic_vector( 3 downto 0 );
+    
+        h_sync_signal   : out std_logic;
+        v_sync_signal   : out std_logic
     );
     END COMPONENT;
    
@@ -27,6 +38,9 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
    
    --Outputs
    signal out_port : std_logic_vector(15 downto 0);
+   
+   signal debug_console : std_logic;
+   signal board_clock : std_logic;
 
 BEGIN
 
@@ -37,8 +51,9 @@ BEGIN
           M_clock => M_clock,
           Reset_and_Execute => Reset_and_Execute,
           Reset_and_Load => Reset_and_Load,
-          
-          out_port => out_port
+          out_port => out_port,
+          debug_console => debug_console,
+          board_clock => board_clock
         );
 
     -- Clock process definitions
