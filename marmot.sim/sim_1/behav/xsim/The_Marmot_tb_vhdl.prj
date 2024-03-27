@@ -16,8 +16,10 @@ vhdl xil_defaultlib  \
 "../../../../marmot.srcs/sources_1/new/Control.vhd" \
 "../../../../marmot.srcs/sources_1/new/FullAdder.vhd" \
 "../../../../marmot.srcs/sources_1/new/HalfAdder.vhd" \
+"../../../../marmot.srcs/sources_1/new/Memory.vhd" \
 "../../../../marmot.srcs/sources_1/new/Register_Latches.vhd" \
 "../../../../marmot.srcs/sources_1/new/The_Marmot.vhd" \
+"../../../../marmot.srcs/sources_1/new/console.vhd" \
 "../../../../marmot.srcs/sim_1/new/The_Marmot_tb.vhd" \
 
 # Do not sort compile order

@@ -11,11 +11,11 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
     -- Component Declaration for the Unit Under Test (UUT)
     COMPONENT The_Marmot
     PORT(
-        in_port             : IN  std_logic_vector(15 downto 0);
+        in_port             : IN  std_logic_vector(15 downto 6);
         M_clock             : IN  std_logic;
         Reset_and_Execute   : IN  std_logic;
         Reset_and_Load      : IN  std_logic;
-        out_port            : OUT std_logic_vector(15 downto 0);
+        out_port            : OUT std_logic;
         
         ------- Debug Console Ports -----------------------------
         debug_console   : in std_logic;
@@ -31,29 +31,45 @@ ARCHITECTURE behavior OF The_Marmot_tb IS
     END COMPONENT;
    
    --Inputs
-   signal in_port : std_logic_vector(15 downto 0) := (others => '0');
-   signal M_clock : std_logic := '0';
-   signal Reset_and_Execute : std_logic := '0';
-   signal Reset_and_Load : std_logic := '0';
+   signal d_in_port               : std_logic_vector(15 downto 0) := (others => '0');
+   signal d_M_clock               : std_logic                     := '0';
+   signal d_Reset_and_Execute     : std_logic                     := '0';
+   signal d_Reset_and_Load        : std_logic                     := '0';
    
    --Outputs
-   signal out_port : std_logic_vector(15 downto 0);
+   signal d_out_port              : std_logic;
    
-   signal debug_console : std_logic;
-   signal board_clock : std_logic;
+   signal d_debug_console         : std_logic;
+   signal d_board_clock           : std_logic;
+   
+   signal d_vga_red               : std_logic_vector( 3 downto 0 );
+   signal d_vga_green             : std_logic_vector( 3 downto 0 );
+   signal d_vga_blue              : std_logic_vector( 3 downto 0 );
+
+   signal d_h_sync_signal         : std_logic;
+   signal d_v_sync_signal         : std_logic
 
 BEGIN
 
     -- Instantiate the Unit Under Test (UUT)
    uut: COMPONENT The_Marmot
         PORT MAP (
-          in_port => in_port,
-          M_clock => M_clock,
-          Reset_and_Execute => Reset_and_Execute,
-          Reset_and_Load => Reset_and_Load,
-          out_port => out_port,
-          debug_console => debug_console,
-          board_clock => board_clock
+          in_port           => d_in_port,
+          M_clock           => d_M_clock,
+          Reset_and_Execute => d_Reset_and_Execute,
+          Reset_and_Load    => d_Reset_and_Load,
+          out_port          => d_out_port,
+          debug_console     => d_debug_console,
+          board_clock       => d_board_clock,
+      
+          vga_red           => d_vga_red, 
+          vga_green         => d_vga_green,
+          vga_blue          => d_vga_blue,
+      
+          h_sync_signal     => d_h_sync_signal,
+          v_sync_signal     => d_v_sync_signal
+          
+          
         );
 
     -- Clock process definitions

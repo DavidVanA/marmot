@@ -103,6 +103,8 @@ architecture Behavioral of The_Marmot is
     signal Branch_Relative : std_logic;
     signal Branch_Base     : std_logic_vector(instr_width);
     
+    signal branch_WB       : std_logic;
+    
     
     signal debug_reg_0      : std_logic_vector(reg_width);
     signal debug_reg_1      : std_logic_vector(reg_width);
@@ -305,8 +307,11 @@ begin
             end if;
         end if;
     end process PC_process;
-
-    PC.npc <= std_logic_vector(unsigned(PC.pc) + 2);
+    
+    
+    PC.npc <= std_logic_vector(unsigned(PC.pc) + 2); 
+--    when branch_WB = '0' else
+--           <= PC.pc when branch_wb = '1';
      
 -----------------------------------   IF/ID     -------------------------------------------------    
     IF_ID: process(M_clock, Reset_IF_ID)
