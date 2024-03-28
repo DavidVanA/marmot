@@ -4,6 +4,7 @@ use work.Marmot_Config.all;
 
 entity Branch_Resolver is
   Port ( 
+  	Clk			  : IN  std_logic;
     Status        : IN  Status_Flags_rec;
     Opcode        : IN  std_logic_vector(op_code); 
     PCSrc_Port    : OUT std_logic  
@@ -12,23 +13,24 @@ end Branch_Resolver;
 
 architecture Behavioral of Branch_Resolver is
 
-    signal PCSrc_res : std_logic;
-    
 begin
 
-    with Opcode select
-         PCSrc_res   <=  '1' when op_brr,
-                     '1' when op_br,
-                     '1' when op_br_sub,
-                     '1' when op_return,
-                    Status.neg  when op_brr_n,
-                    Status.neg  when op_br_n,
-                    Status.zero when op_brr_z,
-                    Status.zero when op_br_z,
-                    Status.overflow when op_br_ov,
-                    Status.overflow when op_brr_ov,
-                   '0' when others; 
+	BR_RES: process(clk)
 
-    PCSrc_Port <= PCSrc_res;
+		case Opcode is
+			when op_brr 	=> PCSrc_Port <= '1';
+			when op_br  	=> PCSrc_Port <= '1';
+			when op_br_sub	=> PCSrc_Port <= '1';
+			when op_return	=> PCSrc_Port <= '1';
+			when op_brr_n	=> PCSrc_Port <= Status.neg;
+			when op_br_n	=> PCSrc_Port <= Status.neg;
+			when op_brr_z	=> PCSrc_Port <= Status.zero;
+			when op_br_z	=> PCSrc_Port <= Status.zero;
+			when op_brr_ov	=> PCSrc_Port <= Status.overflow;
+			when op_br_ov	=> PCSrc_Port <= Status.overflow;
+			when others		=> PCSrc_Port <= '0';
+		end case;
+
+	end process BR_RES;
     
 end Behavioral;

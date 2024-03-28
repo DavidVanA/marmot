@@ -97,6 +97,9 @@ architecture Behavioral of The_Marmot is
     signal o_ALU_Ov       :  std_logic;
     signal FLAG_Ov        :  std_logic;
 
+    -- Status Flag Signals
+    signal Status_Flags      : Status_Flags_rec;
+
     signal wb_data         : std_logic_vector(reg_width);
     signal PCSrc           : std_logic;
     signal Disp_Select     : std_logic_vector(instr_type_width);
@@ -421,6 +424,18 @@ begin
         ALU_Z    => o_ALU_Z, 
         ALU_Ov   => o_ALU_Ov
         );    
+
+    Branch_Resolver_instance: entity work.Branch_Resolver
+      port map(
+	  	Clk	=> M_Clock,
+        Status => Status_Flags,
+        Opcode => EX_MEM_latch.instr,
+        PCSrc_Port => PCSrc_conn
+    );
+
+    Status_Flags.zero     <= FLAG_Z;
+    Status_Flags.neg      <= FLAG_N;
+    Status_Flags.overflow <= FLAG_Ov;
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_EX_MEM)

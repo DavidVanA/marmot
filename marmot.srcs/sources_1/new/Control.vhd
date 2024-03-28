@@ -47,7 +47,6 @@ entity Controller is
     ALU_Ov              : IN std_logic;
 
     -- Control Signal Ports
-    Conn_PCSrc_Port     : OUT std_logic;
     Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
 
   	-- Read indices
@@ -97,11 +96,8 @@ architecture Behavioral of Controller is
     signal ex_mem_dest        : std_logic_vector(reg_idx_width);
     signal mem_wb_dest        : std_logic_vector(reg_idx_width);
 
-    -- Status Flag Signals
-    signal Status_Flags      : Status_Flags_rec;
     -- Control Signals
     signal Branch_Flag       : std_logic;
-    signal PCSrc_conn        : std_logic;
     
     -- PC Counter Calculator
     signal PC          : PC_rec;
@@ -134,7 +130,7 @@ begin
     Reset_PC <= Reset_Execute or Reset_Load;                      
     
 -----------------------------------   IF/ID     -------------------------------------------------        
-    Reset_IF_ID <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
+    Reset_IF_ID <= Reset_Execute or Reset_Load; -- OR whatever else
     IF_ID_INS   <= IF_ID_PORT;
 
     Disp_Select_Port <= IF_ID_INS_type;
@@ -160,7 +156,7 @@ begin
 				  IF_ID_INS(rc_width);
 
 -----------------------------------   ID/EX   -------------------------------------------------   
-      Reset_ID_EX   <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
+      Reset_ID_EX   <= Reset_Execute or Reset_Load; -- OR whatever else
       Reset_Reg     <= Reset_Execute or Reset_Load;
 
       ID_EX_INS <= ID_EX_PORT;
@@ -196,19 +192,6 @@ begin
         Instr_Type_Port => ID_EX_INS_type
       );
       
-    Branch_Resolver_instance: entity work.Branch_Resolver
-      port map(
-        Status => Status_Flags,
-        Opcode => EX_MEM_INS(op_width),
-        PCSrc_Port => PCSrc_conn
-    );
-               
-    Status_Flags.zero     <= ALU_Z;
-    Status_Flags.neg      <= ALU_N;
-    Status_Flags.overflow <= ALU_Ov;
-    
-    Conn_PCSrc_Port <= PCSrc_conn;
-    
     -- IF PCScr == 1 we chose wrong (we are Branching) need to Flush
     -- IF_ID_Flush <= PCScr;
     -- ID_EC_Flush <= PCScr;
