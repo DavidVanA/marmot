@@ -16,6 +16,7 @@ architecture Behavioral of Branch_Resolver is
 begin
 
 	BR_RES: process(clk)
+	begin
 
 		case Opcode is
 			when op_brr 	=> PCSrc_Port <= '1';

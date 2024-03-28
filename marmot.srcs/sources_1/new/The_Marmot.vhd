@@ -288,7 +288,6 @@ begin
        ALU_N              => FLAG_N,
        ALU_Z              => FLAG_Z,
        ALU_Ov             => FLAG_Ov,
-       Conn_PCSrc_Port    => PCSrc,
        Disp_Select_Port   => Disp_Select,
        Branch_Relative    => Branch_Relative
        );
@@ -429,8 +428,8 @@ begin
       port map(
 	  	Clk	=> M_Clock,
         Status => Status_Flags,
-        Opcode => EX_MEM_latch.instr,
-        PCSrc_Port => PCSrc_conn
+        Opcode => EX_MEM_latch.instr(op_width),
+        PCSrc_Port => PCSrc
     );
 
     Status_Flags.zero     <= FLAG_Z;
