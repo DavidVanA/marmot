@@ -17,20 +17,21 @@ begin
 
 	BR_RES: process(clk)
 	begin
-
-		case Opcode is
-			when op_brr 	=> PCSrc_Port <= '1';
-			when op_br  	=> PCSrc_Port <= '1';
-			when op_br_sub	=> PCSrc_Port <= '1';
-			when op_return	=> PCSrc_Port <= '1';
-			when op_brr_n	=> PCSrc_Port <= Status.neg;
-			when op_br_n	=> PCSrc_Port <= Status.neg;
-			when op_brr_z	=> PCSrc_Port <= Status.zero;
-			when op_br_z	=> PCSrc_Port <= Status.zero;
-			when op_brr_ov	=> PCSrc_Port <= Status.overflow;
-			when op_br_ov	=> PCSrc_Port <= Status.overflow;
-			when others		=> PCSrc_Port <= '0';
-		end case;
+        if rising_edge(clk) then
+            case Opcode is
+                when op_brr 	=> PCSrc_Port <= '1';
+                when op_br  	=> PCSrc_Port <= '1';
+                when op_br_sub	=> PCSrc_Port <= '1';
+                when op_return	=> PCSrc_Port <= '1';
+                when op_brr_n	=> PCSrc_Port <= Status.neg;
+                when op_br_n	=> PCSrc_Port <= Status.neg;
+                when op_brr_z	=> PCSrc_Port <= Status.zero;
+                when op_br_z	=> PCSrc_Port <= Status.zero;
+                when op_brr_ov	=> PCSrc_Port <= Status.overflow;
+                when op_br_ov	=> PCSrc_Port <= Status.overflow;
+                when others		=> PCSrc_Port <= '0';
+            end case;
+        end if;
 
 	end process BR_RES;
     

@@ -143,7 +143,7 @@ component console is
             s2_reg_b_data : in STD_LOGIC_VECTOR( 15 downto 0 );
             s2_reg_c_data : in STD_LOGIC_VECTOR( 15 downto 0 );
     
-            s2_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
+ --           s2_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
     
     
     --
@@ -160,7 +160,7 @@ component console is
             s3_reg_b_data : in STD_LOGIC_VECTOR( 15 downto 0 );
             s3_reg_c_data : in STD_LOGIC_VECTOR( 15 downto 0 );
     
-            s3_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
+--            s3_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
     
     --
     -- Branch and memory operation
@@ -316,13 +316,13 @@ begin
 --           <= PC.pc when branch_wb = '1';
      
 -----------------------------------   IF/ID     -------------------------------------------------    
-    IF_ID: process(M_clock, Reset_IF_ID)
+    IF_ID: process(M_clock, Reset_IF_ID, PCSrc)
     begin
-        if Reset_IF_ID = '1' then
+        if Reset_IF_ID = '1' or (PCSrc = '1') then
             IF_ID_latch.instr <= (others => '0');
             IF_ID_latch.pc <= (others => '0');
             IF_ID_latch.npc <= (others => '0');
-        elsif rising_edge(M_clock) then
+        elsif rising_edge(M_clock) or PCSrc = '0' then
             IF_ID_latch.pc <= PC.pc;
             IF_ID_latch.npc <= PC.npc;
             IF_ID_latch.instr <= MEM_instr;
@@ -376,12 +376,12 @@ begin
     
 -----------------------------------   ID/EX   -------------------------------------------------   
 -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
-    ID_EX: process(M_clock, Reset_ID_EX)
+    ID_EX: process(M_clock, Reset_ID_EX, PCSrc)
     begin
-        if Reset_ID_EX = '1' then
+        if Reset_ID_EX = '1' or (PCSrc = '1') then
             ID_EX_latch.instr <= (others => '0');
             ID_EX_latch.pc <= (others => '0');
-        elsif rising_edge(M_clock) then
+        elsif rising_edge(M_clock) or PCSrc = '0' then
             ID_EX_latch.instr <= IF_ID_latch.instr;
             ID_EX_latch.pc <= IF_ID_latch.pc;
             ID_EX_latch.ra_data <= r1_data;
@@ -428,7 +428,7 @@ begin
       port map(
 	  	Clk	=> M_Clock,
         Status => Status_Flags,
-        Opcode => EX_MEM_latch.instr(op_width),
+        Opcode => ID_EX_latch.instr(op_width),
         PCSrc_Port => PCSrc
     );
 
@@ -541,7 +541,7 @@ begin
         s2_reg_a_data => ID_EX_latch.ra_data(instr_width),
         s2_reg_b_data => ID_EX_latch.rb_data(instr_width),
         s2_reg_c_data => x"0000",
-        s2_immediate => x"0000",
+ --       s2_immediate => x"0000",
     
     --
     -- Stage 3 Execute
@@ -557,7 +557,7 @@ begin
         s3_reg_a_data => i_ALU_A(instr_width),
         s3_reg_b_data => i_ALU_B(instr_width),
         s3_reg_c_data => EX_MEM_latch.result(instr_width),
-        s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
+        --s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
     
         s3_r_wb => '0',
         s3_r_wb_data => x"0000",
