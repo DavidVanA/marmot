@@ -1512,7 +1512,7 @@ begin
 
             if ( v_sync = '0' ) then
                 address := ( others => '0' );
-                offset := to_unsigned( -20, offset'LENGTH ); -- "000000000";
+                offset := to_unsigned( 492, offset'LENGTH ); -- "000000000";
             end if;
 
             if (( Hdot < 640 ) and ( Hdot(4 downto 0 ) = "00000" )) then
@@ -1533,7 +1533,7 @@ begin
 
             if ( v_sync = '0' ) then
                 address := ( others => '0' );
-                offset := to_unsigned( -40, offset'LENGTH ); -- "000000000";
+                offset := to_unsigned( 472, offset'LENGTH ); -- "000000000";
             end if;
 
             if (( Hdot < 640 ) and ( Hdot(3 downto 0 ) = "00000" )) then
