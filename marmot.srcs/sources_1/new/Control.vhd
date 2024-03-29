@@ -24,55 +24,66 @@ use work.Marmot_Config.all;
 entity Controller is
 
   port (    
-    -- Reset Ports
+
+    -------------- Controller --------------
+
     Reset_Execute_Port  : IN  std_logic;
     Reset_Load_Port     : IN  std_logic;
-    Reset_PC            : OUT std_logic;
-    Reset_IF_ID         : OUT std_logic;
-    Reset_Reg           : OUT std_logic;
-    Reset_ID_EX         : OUT std_logic;
-    Reset_EX_MEM        : OUT std_logic;
-    Reset_MEM_WB        : OUT std_logic;
 
-    -- Latch Ports
---    PC_PORT             : in  std_logic_vector(instr_addr_width);
     IF_ID_PORT          : IN  std_logic_vector(instr_width);
     ID_EX_PORT          : IN  std_logic_vector(instr_width);
     EX_MEM_PORT         : IN  std_logic_vector(instr_width);
     MEM_WB_PORT         : IN  std_logic_vector(instr_width);
-
-    -- ALU Ports
-    ALU_N               : IN std_logic;
-    ALU_Z               : IN std_logic;
-    ALU_Ov              : IN std_logic;
-
-    -- Control Signal Ports
+    
+    -------------- PC          --------------
+    Reset_PC            : OUT std_logic;
     Conn_PCSrc_Port     : OUT std_logic;
-    Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
 
-  	-- Read indices
-    RD_INDEX_1          : OUT std_logic_vector(rd_index_width);
-    RD_INDEX_2          : OUT std_logic_vector(rd_index_width);
-    
-  	-- Source for ALU inputs
-    ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
-    ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
-
-    -- Source for EX stage result
-    EX_RES_SRC          : OUT std_logic_vector(ex_res_src_width);
-    
-  	-- RAM control signals
-    MEM_WR_nRD          : OUT std_logic_vector(byte_addressable);
+    -- RAM control signals
+    Mem_Write_Not_Read  : OUT std_logic_vector(byte_addressable);
     MEM_DATA_ADDR_SRC   : OUT std_logic_vector(mem_src_width);
     MEM_DATA_DATA_SRC   : OUT std_logic_vector(mem_src_width);
 
-  	-- WB control signals
+    -------------- IF/ID       --------------
+    Reset_IF_ID         : OUT std_logic;
+
+    -- Registers
+    Reset_Reg           : OUT std_logic;
+    RD_INDEX_1          : OUT std_logic_vector(rd_index_width);
+    RD_INDEX_2          : OUT std_logic_vector(rd_index_width);
+    -------------- ID/EX       --------------
+    Reset_ID_EX         : OUT std_logic;
+
+    -- ALU Ports
+  	-- Source for ALU inputs
+    ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
+    ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
+    
+    ALU_N               : IN std_logic;
+    ALU_Z               : IN std_logic;
+    ALU_Ov              : IN std_logic;
+    
+    -- Branch Calculator
+    Disp_Select_Port    : OUT std_logic_vector(instr_type_width);
+    Branch_Relative     : OUT std_logic;
+    
+    -------------- EX/MEM      --------------
+    Reset_EX_MEM        : OUT std_logic;
+    -------------- MEM/WB      --------------
+    Reset_MEM_WB        : OUT std_logic;      
+
+    	-- WB control signals
     WB_EN               : OUT std_logic;
     WB_SRC              : OUT std_logic_vector(wb_src_width);
     MEM_WB_INDEX        : OUT std_logic_vector(reg_idx_width);
+    
+    -- Latch Ports
+--    PC_PORT             : in  std_logic_vector(instr_addr_width);
 
-  	-- Branch control signals
-    Branch_Relative     : OUT std_logic
+    -- Source for EX stage result
+    EX_RES_SRC          : OUT std_logic_vector(ex_res_src_width)
+   
+  
 
     );
 end Controller;
@@ -224,7 +235,7 @@ begin
 	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest else
 						   mem_src_rb;
 
-      MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
+      Mem_Write_Not_Read <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
 
       WB_SRC <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else

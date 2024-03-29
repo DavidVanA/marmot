@@ -6,14 +6,14 @@ use work.Marmot_Config.all;
 
 entity Memory is
     port(
-        Reset           : IN  std_logic;
-        Clk             : IN  std_logic;
-        Instr_Addr      : IN  std_logic_vector(instr_width);
-        Instr           : OUT std_logic_vector(instr_width);
-        Data_Addr       : IN  std_logic_vector(instr_width);
-        Read_Data       : OUT std_logic_vector(instr_width);
-        Write_Data      : IN  std_logic_vector(instr_width); 
-        Write_Not_Read  : IN  std_logic_vector(1 downto 0) 
+        Reset               : IN  std_logic;
+        Clk                 : IN  std_logic;
+        Instr_Addr          : IN  std_logic_vector(instr_width);
+        Instr               : OUT std_logic_vector(instr_width);
+        Data_Addr           : IN  std_logic_vector(instr_width);
+        Read_Data           : OUT std_logic_vector(instr_width);
+        Write_Data          : IN  std_logic_vector(instr_width); 
+        Mem_Write_Not_Read  : IN  std_logic_vector(1 downto 0)  -- <TODO>: config
         );
 end Memory;
     
@@ -35,7 +35,7 @@ architecture Behavioral of Memory is
     signal ROM_sleep   : std_logic;
 
     signal RAM_addra   : std_logic_vector(instr_mem_width);
-    signal RAM_wea     : std_logic_vector(1 downto 0);
+    signal RAM_wea     : std_logic_vector(1 downto 0); -- <TODO>: config 
     signal RAM_dina    : std_logic_vector(instr_width);
     signal RAM_douta   : std_logic_vector(instr_width);
     signal RAM_ena     : std_logic;
@@ -70,7 +70,7 @@ begin
 -----------------------------------   IF/ID   -------------------------------------------------   
 
         RAM_addra  <= Data_Addr(instr_mem_width);
-        RAM_wea    <= Write_Not_Read;
+        RAM_wea    <= Mem_Write_Not_Read;
         RAM_dina   <= Write_Data;
         Read_Data  <= RAM_douta;
         RAM_ena    <= not RAM_Not_ROM;
