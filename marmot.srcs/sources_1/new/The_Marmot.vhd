@@ -316,8 +316,7 @@ begin
     begin
         if rising_edge(M_clock) then
             if Reset_IF_ID = '1' then
-                IF_ID_latch.instr    <= x"FFFF";
-                --IF_ID_latch.instr   <= (others => '0');
+                IF_ID_latch.instr   <= (others => '0');
                 IF_ID_latch.pc      <= (others => '0');
                 IF_ID_latch.npc     <= (others => '0'); --(others => '0');         
             else
