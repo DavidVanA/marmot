@@ -137,8 +137,6 @@ begin
     Reset_IF_ID <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
     IF_ID_INS   <= IF_ID_PORT;
 
-    Disp_Select_Port <= IF_ID_INS_type;
-
     IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
       port map(
        Instr_Port      => IF_ID_INS(op_width),
@@ -146,7 +144,7 @@ begin
     );
     
     -- Branch Relative Selector --
-    with IF_ID_INS_type select
+    with ID_EX_INS_type select
          Branch_Relative <=
                            '1' when b2_instr,
                            '0' when others;
@@ -160,11 +158,11 @@ begin
 				  IF_ID_INS(rc_width);
 
 -----------------------------------   ID/EX   -------------------------------------------------   
-      Reset_ID_EX   <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
-      Reset_Reg     <= Reset_Execute or Reset_Load;
+     Reset_ID_EX   <= Reset_Execute or Reset_Load; -- or PCsrc_conn; -- OR whatever else
+     Reset_Reg     <= Reset_Execute or Reset_Load;
 
-      ID_EX_INS <= ID_EX_PORT;
-      
+     ID_EX_INS <= ID_EX_PORT;
+     Disp_Select_Port <= ID_EX_INS_type;      
      ex_mem_dest <= "111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
                      EX_MEM_INS(ra_width);
                      
@@ -199,7 +197,7 @@ begin
     Branch_Resolver_instance: entity work.Branch_Resolver
       port map(
         Status => Status_Flags,
-        Opcode => EX_MEM_INS(op_width),
+        Opcode => ID_EX_INS(op_width),
         PCSrc_Port => PCSrc_conn
     );
                

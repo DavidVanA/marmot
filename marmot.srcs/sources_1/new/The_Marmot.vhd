@@ -310,8 +310,6 @@ begin
     
     
     PC.npc <= std_logic_vector(unsigned(PC.pc) + 2); 
---    when branch_WB = '0' else
---           <= PC.pc when branch_wb = '1';
      
 -----------------------------------   IF/ID     -------------------------------------------------    
     IF_ID: process(M_clock, Reset_IF_ID)
@@ -326,24 +324,6 @@ begin
             IF_ID_latch.instr <= MEM_instr;
         end if;
     end process IF_ID;
-
-     ------------ Branching -----------------
-
-     with Branch_Relative select
-          Branch_Base <=
-                        r1_data(instr_width) when '1',
-                        IF_ID_latch.pc       when others;
-     
-    Branch_Calculator_instance: entity work.Branch_Calculator
-        port map (
-            Instr_Port => ID_EX_latch.instr,
-            Branch_Base => Branch_Base,
-            Ra  => r1_data(instr_width),
-            Disp_Selector => Disp_Select,
-            Br_Addr_Port => br_addr
-        );
-
-     --------------------------------------
 
          -- Select register read index
     rd_index1 <= o_CON_Rd_Index1;
@@ -390,9 +370,26 @@ begin
 
         end if;
     end process ID_EX;
+    
+     ------------ Branching -----------------
 
+    with Branch_Relative select
+         Branch_Base <=
+                       ID_EX_latch.ra_data(instr_width) when '1',
+                       ID_EX_latch.pc                   when others;
+    
+   Branch_Calculator_instance: entity work.Branch_Calculator
+       port map (
+           Instr_Port      => ID_EX_latch.instr,
+           Branch_Base     => Branch_Base,
+           Ra              => ID_EX_latch.ra_data(instr_width),
+           Disp_Selector   => Disp_Select,
+           Br_Addr_Port    => PC.br
+       );
+
+    --------------------------------------
      
-   PC.br <= ID_EX_latch.br_addr;
+--   PC.br <= ID_EX_latch.br_addr;
 
      ---
      
@@ -564,7 +561,7 @@ begin
     
         s4_pc => MEM_WB_latch.pc,
         s4_inst => MEM_WB_latch.instr,
-        s4_reg_a => o_Con_MEM_WB_index,
+        s4_reg_a => "000",
         s4_r_wb => '0',
         s4_r_wb_data => x"0000",
     
