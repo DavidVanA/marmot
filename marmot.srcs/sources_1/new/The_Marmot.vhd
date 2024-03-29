@@ -51,7 +51,7 @@ architecture Behavioral of The_Marmot is
     signal Reset_Reg      :  std_logic;
     -- MUX for REG read index 1
     signal o_CON_Rd_Index1:  std_logic_vector(rd_index_width);
-    signal rd_index1      :  std_logic_vector(reg_idx_width); 
+    signal Reg_Idx_1_Select      :  std_logic_vector(reg_idx_width); 
     -- MUX for REG read index 2
     signal o_CON_Rd_Index2:  std_logic_vector(rd_index_width);
     signal rd_index2      :  std_logic_vector(reg_idx_width);
@@ -70,8 +70,8 @@ architecture Behavioral of The_Marmot is
     signal i_ALU_A       : std_logic_vector(reg_width);
     signal i_ALU_B       : std_logic_vector(reg_width);
 
-    signal o_CON_alu_src_1:   std_logic_vector(alu_src_width);    
-    signal o_CON_alu_src_2:   std_logic_vector(alu_src_width);
+    signal ALU_A_Select:   std_logic_vector(alu_src_width);    
+    signal ALU_B_Select:   std_logic_vector(alu_src_width);
     signal o_ALU_C        : std_logic_vector(reg_width);
 
     signal o_ALU_Z        :  std_logic;
@@ -100,7 +100,18 @@ architecture Behavioral of The_Marmot is
     signal MEM_data_data  :   std_logic_vector(instr_width);
     signal MEM_instr      :   std_logic_vector(instr_width);
 
+    -- Signal for selecting write or read
+    signal Mem_Write_Not_Read    : std_logic_vector(byte_addressable);
+    
+    -- MUX for memory write data 
+    signal Mem_Data_Write_Select : std_logic_vector(mem_src_width);
 
+    -- MUX for memory data address
+    signal Mem_Data_Addr_Select  : std_logic_vector(mem_src_width);
+
+    -- MUX for writeback source
+    signal o_CON_Wb_Src:     std_logic_vector(wb_src_width);
+    
 -----------------------------------   MEM/WB   -------------------------------------------------
 
     signal MEM_WB_latch   :   MEM_WB_rec;    
@@ -114,18 +125,6 @@ architecture Behavioral of The_Marmot is
     
     -- MUX for MEM_WB write index
     signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
-
-    -- MUX for memory data address
-    signal o_CON_Data_Addr_Src: std_logic_vector(mem_src_width);
-
-    -- MUX for memory write data 
-    signal o_CON_Data_Data_Src: std_logic_vector(mem_src_width);
-
-    -- Signal for selecting write or read
-    signal Mem_Write_Not_Read: std_logic_vector(byte_addressable);
-
-    -- MUX for writeback source
-    signal o_CON_Wb_Src:     std_logic_vector(wb_src_width);
     
 -----------------------------------   Console   -------------------------------------------------
 
@@ -299,8 +298,8 @@ begin
        RD_INDEX_2         => o_CON_Rd_Index2,
        -------------- ID/EX     -------------
        Reset_ID_EX        => Reset_ID_EX,       
-       ALU_SRC_1          => o_CON_alu_src_1,
-       ALU_SRC_2          => o_CON_alu_src_2,
+       ALU_A_Select       => ALU_A_Select,
+       ALU_B_Select       => ALU_B_Select,
        ALU_N              => FLAG_N,
        ALU_Z              => FLAG_Z,
        ALU_Ov             => FLAG_Ov,
@@ -311,12 +310,14 @@ begin
        Disp_Select_Port   => Disp_Select,
        
        ------------- EX/MEM    -------------
-       Reset_EX_MEM       => Reset_EX_MEM,       
-       MEM_DATA_ADDR_SRC  => o_CON_Data_Addr_Src,
-       MEM_DATA_DATA_SRC  => o_CON_Data_Data_Src,
-       Mem_Write_Not_Read => Mem_Write_Not_Read,
-       MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
-       EX_RES_SRC         => o_CON_Ex_Res_Src,
+       Reset_EX_MEM           => Reset_EX_MEM,
+       
+       Mem_Write_Not_Read     => Mem_Write_Not_Read,
+       Mem_Data_Addr_Select   => Mem_Data_Addr_Select,
+       Mem_Data_Write_Select  => Mem_Data_Write_Select,
+       
+       MEM_WB_INDEX           => o_CON_Mem_Wb_Index,
+       EX_RES_SRC             => o_CON_Ex_Res_Src,
 
        ------------- MEM/WB    -------------
        Reset_MEM_WB       => Reset_MEM_WB,       
@@ -361,8 +362,9 @@ begin
         end if;
     end process IF_ID;
 
-         -- Select register read index
-    rd_index1 <= o_CON_Rd_Index1;
+     -- Select register indexs
+     -- Direct port
+    Reg_Idx_1_Select <= o_CON_Rd_Index1;
     rd_index2 <= o_CON_Rd_Index2;
      
     Registers_Latches_instance : entity work.register_file
@@ -372,7 +374,7 @@ begin
         wr_index    => o_CON_Mem_Wb_Index,
         wr_data     => MEM_WB_latch.result,
         wr_enable   => o_CON_Wb_En,
-        rd_index1   => rd_index1,
+        rd_index1   => Reg_Idx_1_Select,
         rd_index2   => rd_index2,
         rd_data1    => r1_data,
         rd_data2    => r2_data,
@@ -393,7 +395,8 @@ begin
     ID_EX: process(M_clock, Reset_ID_EX)
     begin
         if rising_edge(M_clock) then
-            if Reset_ID_EX = '1' then
+            if Reset_ID_EX = '1' then -- Reset_ID_EX is asynchronous, CRUCIAL
+                                      -- that it is only checked on an edge!
                 ID_EX_latch.instr <= (others => '0');
                 ID_EX_latch.pc <= (others => '0');
             else
@@ -430,14 +433,14 @@ begin
 
      ---
      
-    with o_CON_alu_src_1 select
+    with ALU_A_Select select
       i_ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,
         EX_MEM_latch.result when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
         (others => '0') when others;
         
-    with o_CON_alu_src_2 select
+    with ALU_B_Select select
       i_ALU_B <= 
         ID_EX_latch.rb_data when alu_src_rd,
         EX_MEM_latch.result when alu_src_fd1,
@@ -485,18 +488,18 @@ begin
         end if;
     end process EX_MEM;    
 
-    with o_CON_Data_Addr_Src select
-        MEM_data_addr <=
-            EX_MEM_latch.ra_data(15 downto 0) when mem_src_ra,
-            EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
-			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
-			(others => '0') when others;
+    with Mem_Data_Addr_Select select
+         MEM_data_addr <=
+            EX_MEM_latch.ra_data(instr_width) when mem_src_ra,
+            EX_MEM_latch.rb_data(instr_width) when mem_src_rb,
+			MEM_WB_latch.result(instr_width)  when mem_src_f1, -- forward?
+			(others => '0')                   when others;
 
-    with o_CON_Data_Data_Src select
-        MEM_data_data <=
-            EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
-			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
-			(others => '0') when others;
+    with Mem_Data_Write_Select select
+         MEM_data_data <=
+            EX_MEM_latch.rb_data(instr_width) when mem_src_rb,
+			MEM_WB_latch.result(instr_width)  when mem_src_f1,
+			(others => '0')                   when others;
         
      Memory_instance : entity work.Memory
         port map(                               
@@ -554,7 +557,7 @@ begin
         s2_pc => ID_EX_latch.pc,
         s2_inst => ID_EX_latch.instr,
     
-        s2_reg_a => rd_index1,
+        s2_reg_a => Reg_Idx_1_Select,
         s2_reg_b => rd_index2,
         s2_reg_c => "000",
     

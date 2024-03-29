@@ -39,11 +39,6 @@ entity Controller is
     Reset_PC            : OUT std_logic;
     Conn_PCSrc_Port     : OUT std_logic;
 
-    -- RAM control signals
-    Mem_Write_Not_Read  : OUT std_logic_vector(byte_addressable);
-    MEM_DATA_ADDR_SRC   : OUT std_logic_vector(mem_src_width);
-    MEM_DATA_DATA_SRC   : OUT std_logic_vector(mem_src_width);
-
     -------------- IF/ID       --------------
     Reset_IF_ID         : OUT std_logic;
 
@@ -55,9 +50,8 @@ entity Controller is
     Reset_ID_EX         : OUT std_logic;
 
     -- ALU Ports
-  	-- Source for ALU inputs
-    ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
-    ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
+    ALU_A_Select        : OUT std_logic_vector(alu_src_width);
+    ALU_B_Select        : OUT std_logic_vector(alu_src_width);
     
     ALU_N               : IN std_logic;
     ALU_Z               : IN std_logic;
@@ -69,6 +63,12 @@ entity Controller is
     
     -------------- EX/MEM      --------------
     Reset_EX_MEM        : OUT std_logic;
+
+     -- Memory control signals
+    Mem_Write_Not_Read     : OUT std_logic_vector(byte_addressable);
+    Mem_Data_Addr_Select   : OUT std_logic_vector(mem_src_width);
+    Mem_Data_Write_Select  : OUT std_logic_vector(mem_src_width);
+    
     -------------- MEM/WB      --------------
     Reset_MEM_WB        : OUT std_logic;      
 
@@ -161,7 +161,7 @@ begin
                            '0' when others;
            
     RD_INDEX_1 <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
-                  "111" when IF_ID_INS(op_width) = op_return else
+                  "111" when IF_ID_INS(op_width) = op_return else -- selecting
                   "111" when IF_ID_INS(op_width) = op_load_imm else
                   IF_ID_INS(ra_width);
 
@@ -181,7 +181,7 @@ begin
                      MEM_WB_INS(ra_width);    
                      
      -- <TODO>: This is gnarly look at - make it a block?
-    ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = ex_mem_dest) else
+    ALU_A_Select <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = ex_mem_dest) else
                  alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "111") else
                  alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = ex_mem_dest) else
                  alu_src_fd2 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = mem_wb_dest) else
@@ -190,7 +190,7 @@ begin
 
                  alu_src_rd;
                         
-    ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
+    ALU_B_Select <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
                  alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = ex_mem_dest) else
                  alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = mem_wb_dest) else
 
@@ -227,12 +227,12 @@ begin
 
       EX_MEM_INS <= EX_MEM_PORT;
       
-	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest else
+	  Mem_Data_Addr_Select <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest else
 						   mem_src_f1 when EX_MEM_INS(op_width) = op_store and EX_MEM_INS(ra_width) = mem_wb_dest else
 						   mem_src_rb when EX_MEM_INS(op_width) = op_load else 
 						   mem_src_ra;
 
-	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest else
+	  Mem_Data_Write_Select <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest else
 						   mem_src_rb;
 
       Mem_Write_Not_Read <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 

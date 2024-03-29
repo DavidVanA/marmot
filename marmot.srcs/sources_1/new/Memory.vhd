@@ -13,12 +13,13 @@ entity Memory is
         Data_Addr           : IN  std_logic_vector(instr_width);
         Read_Data           : OUT std_logic_vector(instr_width);
         Write_Data          : IN  std_logic_vector(instr_width); 
-        Mem_Write_Not_Read  : IN  std_logic_vector(1 downto 0)  -- <TODO>: config
+        Mem_Write_Not_Read  : IN  std_logic_vector(byte_addressable) 
         );
 end Memory;
     
 architecture Behavioral of Memory is
 
+    -- Instruction Memory
     signal RAM_Not_ROM : std_logic;
     signal RAM_clka    : std_logic;
     signal RAM_clkb    : std_logic;
@@ -26,7 +27,8 @@ architecture Behavioral of Memory is
     signal RAM_doutb   : std_logic_vector(instr_width);
     signal RAM_enb     : std_logic;
     signal RAM_rstb    : std_logic;
-         
+
+    -- Bootloader
     signal ROM_clka    : std_logic;
     signal ROM_ena     : std_logic;
     signal ROM_addra   : std_logic_vector(instr_mem_width);
@@ -34,8 +36,9 @@ architecture Behavioral of Memory is
     signal ROM_rsta    : std_logic;
     signal ROM_sleep   : std_logic;
 
+    -- Data Memory
     signal RAM_addra   : std_logic_vector(instr_mem_width);
-    signal RAM_wea     : std_logic_vector(1 downto 0); -- <TODO>: config 
+    signal RAM_wea     : std_logic_vector(byte_addressable); 
     signal RAM_dina    : std_logic_vector(instr_width);
     signal RAM_douta   : std_logic_vector(instr_width);
     signal RAM_ena     : std_logic;
@@ -63,7 +66,7 @@ begin
         ROM_clka   <= Clk;
         ROM_ena    <= not RAM_not_ROM;
         ROM_rsta   <= Reset;
-        ROM_addra  <= '0' & Instr_Addr(8 downto 1);
+        ROM_addra  <= '0' & Instr_Addr(8 downto 1); -- What are we doing here?
         Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
         
  
