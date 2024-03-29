@@ -314,14 +314,17 @@ begin
 -----------------------------------   IF/ID     -------------------------------------------------    
     IF_ID: process(M_clock, Reset_IF_ID)
     begin
-        if Reset_IF_ID = '1' then
-            IF_ID_latch.instr <= (others => '0');
-            IF_ID_latch.pc <= (others => '0');
-            IF_ID_latch.npc <= (others => '0');
-        elsif rising_edge(M_clock) then
-            IF_ID_latch.pc <= PC.pc;
-            IF_ID_latch.npc <= PC.npc;
-            IF_ID_latch.instr <= MEM_instr;
+        if rising_edge(M_clock) then
+            if Reset_IF_ID = '1' then
+                IF_ID_latch.instr    <= x"FFFF";
+                --IF_ID_latch.instr   <= (others => '0');
+                IF_ID_latch.pc      <= (others => '0');
+                IF_ID_latch.npc     <= (others => '0'); --(others => '0');         
+            else
+                IF_ID_latch.pc      <= PC.pc;
+                IF_ID_latch.npc     <= PC.npc;
+                IF_ID_latch.instr   <= MEM_instr;
+            end if;
         end if;
     end process IF_ID;
 
@@ -356,18 +359,19 @@ begin
 -- [16 - instruction][16 - NPC][17 - ra_data][17 - rb_data][17 - rc_data]
     ID_EX: process(M_clock, Reset_ID_EX)
     begin
-        if Reset_ID_EX = '1' then
-            ID_EX_latch.instr <= (others => '0');
-            ID_EX_latch.pc <= (others => '0');
-        elsif rising_edge(M_clock) then
-            ID_EX_latch.instr <= IF_ID_latch.instr;
-            ID_EX_latch.pc <= IF_ID_latch.pc;
-            ID_EX_latch.ra_data <= r1_data;
-            ID_EX_latch.rb_data <= r2_data;
-
-            ID_EX_latch.npc <= IF_ID_latch.npc;
-            ID_EX_latch.br_addr <= br_addr;
-
+        if rising_edge(M_clock) then
+            if Reset_ID_EX = '1' then
+                ID_EX_latch.instr <= (others => '0');
+                ID_EX_latch.pc <= (others => '0');
+            else
+                ID_EX_latch.instr <= IF_ID_latch.instr;
+                ID_EX_latch.pc <= IF_ID_latch.pc;
+                ID_EX_latch.ra_data <= r1_data;
+                ID_EX_latch.rb_data <= r2_data;
+    
+                ID_EX_latch.npc <= IF_ID_latch.npc;
+                ID_EX_latch.br_addr <= br_addr;
+            end if;
         end if;
     end process ID_EX;
     
@@ -545,11 +549,11 @@ begin
         s3_r_wb => '0',
         s3_r_wb_data => x"0000",
     
-        s3_br_wb => '0',
+        s3_br_wb => PCSrc,
         s3_br_wb_address => x"0000",
     
         s3_mr_wr => '0',
-        s3_mr_wr_address => x"0000",
+        s3_mr_wr_address => x"000" & "00" & Reset_IF_ID & Reset_ID_EX,
         s3_mr_wr_data => x"0000",
     
         s3_mr_rd => '0',

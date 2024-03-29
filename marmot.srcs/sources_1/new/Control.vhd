@@ -158,7 +158,7 @@ begin
 				  IF_ID_INS(rc_width);
 
 -----------------------------------   ID/EX   -------------------------------------------------   
-     Reset_ID_EX   <= Reset_Execute or Reset_Load; -- or PCsrc_conn; -- OR whatever else
+     Reset_ID_EX   <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
      Reset_Reg     <= Reset_Execute or Reset_Load;
 
      ID_EX_INS <= ID_EX_PORT;
