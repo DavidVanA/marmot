@@ -9,8 +9,8 @@ port(
     rst         : in    std_logic; 
     clk         : in    std_logic;
 --read signals
-    rd_index1   : in    std_logic_vector(reg_idx_width); 
-    rd_index2   : in    std_logic_vector(reg_idx_width); 
+    Reg_Idx_1_Select   : in    std_logic_vector(reg_idx_width); 
+    Reg_Idx_2_Select   : in    std_logic_vector(reg_idx_width); 
     rd_data1    : out   std_logic_vector(reg_width); 
     rd_data2    : out   std_logic_vector(reg_width);
     --write signals
@@ -62,23 +62,23 @@ end process;
 
 --read operation
     rd_data1 <=	
-        reg_file(0) when(rd_index1="000") else
-        reg_file(1) when(rd_index1="001") else
-        reg_file(2) when(rd_index1="010") else
-        reg_file(3) when(rd_index1="011") else
-        reg_file(4) when(rd_index1="100") else
-        reg_file(5) when(rd_index1="101") else
-        reg_file(6) when(rd_index1="110") else 
+        reg_file(0) when(Reg_Idx_1_Select="000") else
+        reg_file(1) when(Reg_Idx_1_Select="001") else
+        reg_file(2) when(Reg_Idx_1_Select="010") else
+        reg_file(3) when(Reg_Idx_1_Select="011") else
+        reg_file(4) when(Reg_Idx_1_Select="100") else
+        reg_file(5) when(Reg_Idx_1_Select="101") else
+        reg_file(6) when(Reg_Idx_1_Select="110") else 
         reg_file(7);
     
     rd_data2 <=
-        reg_file(0) when(rd_index2="000") else
-        reg_file(1) when(rd_index2="001") else
-        reg_file(2) when(rd_index2="010") else
-        reg_file(3) when(rd_index2="011") else
-        reg_file(4) when(rd_index2="100") else
-        reg_file(5) when(rd_index2="101") else
-        reg_file(6) when(rd_index2="110") else 
+        reg_file(0) when(Reg_Idx_2_Select="000") else
+        reg_file(1) when(Reg_Idx_2_Select="001") else
+        reg_file(2) when(Reg_Idx_2_Select="010") else
+        reg_file(3) when(Reg_Idx_2_Select="011") else
+        reg_file(4) when(Reg_Idx_2_Select="100") else
+        reg_file(5) when(Reg_Idx_2_Select="101") else
+        reg_file(6) when(Reg_Idx_2_Select="110") else 
         reg_file(7);
 
 	reg_0 <= reg_file(0);

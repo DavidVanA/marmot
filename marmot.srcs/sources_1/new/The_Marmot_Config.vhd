@@ -89,11 +89,12 @@ package Marmot_Config is
            instr : std_logic_vector(instr_width);
            npc   : std_logic_vector(instr_width);        
            pc    : std_logic_vector(instr_width);
-   end record IF_ID_rec;
+    end record IF_ID_rec;
 
     -- Registers specific config
-    subtype reg_width        is natural range 16 downto 0; -- 17 bit register
-    subtype reg_idx_width    is natural range 2 downto 0;  -- 2^3 = 8 registers
+    subtype  reg_width        is natural range 16 downto 0; -- 17 bit register
+    subtype  reg_idx_width    is natural range 2 downto 0;  -- 2^3 = 8 registers
+    constant reg_7_idx         : std_logic_vector := "111"; -- Link register
     
 -------------------------------------------- ID/EX --------------------------------------------------
 
@@ -114,10 +115,7 @@ package Marmot_Config is
 
     -- ALU specific ranges
     subtype instr_type_width is natural range 2 downto 0;
-        
-    -- rd index mux
-    subtype rd_index_width   is natural range 2 downto 0;
-    
+
     -- alu src mux
     subtype alu_src_width    is natural range 2 downto 0;
     
