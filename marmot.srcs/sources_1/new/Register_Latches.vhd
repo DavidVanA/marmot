@@ -6,26 +6,26 @@ use work.Marmot_Config.all;
 
 entity register_file is
 port(
-    rst         : in    std_logic; 
-    clk         : in    std_logic;
---read signals
+    rst                : in    std_logic; 
+    clk                : in    std_logic;
+    --read signals
     Reg_Idx_1_Select   : in    std_logic_vector(reg_idx_width); 
     Reg_Idx_2_Select   : in    std_logic_vector(reg_idx_width); 
-    rd_data1    : out   std_logic_vector(reg_width); 
-    rd_data2    : out   std_logic_vector(reg_width);
+    rd_data1           : out   std_logic_vector(reg_width); 
+    rd_data2           : out   std_logic_vector(reg_width);
     --write signals
-    wr_index    : in    std_logic_vector(reg_idx_width); 
-    wr_data     : in    std_logic_vector(reg_width); 
-    wr_enable   : in    std_logic;
-
-	reg_0		: out	std_logic_vector(reg_width);
-	reg_1		: out	std_logic_vector(reg_width);
-	reg_2		: out	std_logic_vector(reg_width);
-	reg_3		: out	std_logic_vector(reg_width);
-	reg_4		: out	std_logic_vector(reg_width);
-	reg_5		: out	std_logic_vector(reg_width);
-	reg_6		: out	std_logic_vector(reg_width);
-	reg_7		: out	std_logic_vector(reg_width)
+    wr_index           : in    std_logic_vector(reg_idx_width); 
+    wr_data            : in    std_logic_vector(reg_width); 
+    wr_enable          : in    std_logic;
+    -- regs                   
+	reg_0		       : out	std_logic_vector(reg_width);
+	reg_1		       : out	std_logic_vector(reg_width);
+	reg_2		       : out	std_logic_vector(reg_width);
+	reg_3		       : out	std_logic_vector(reg_width);
+	reg_4		       : out	std_logic_vector(reg_width);
+	reg_5		       : out	std_logic_vector(reg_width);
+	reg_6		       : out	std_logic_vector(reg_width);
+	reg_7		       : out	std_logic_vector(reg_width)
 );
 
 end register_file;

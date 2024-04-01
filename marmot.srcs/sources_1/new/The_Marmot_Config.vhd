@@ -8,7 +8,7 @@ package Marmot_Config is
 -------------------------------------------- ISR ----------------------------------------------------
 
     -- Instruction specific ranges    
-    subtype instr_addr_width is natural range 16 downto 0; -- Address of an Instr
+    subtype instr_addr_width is natural range 16 downto 0; -- Where is this used?
     subtype instr_width      is natural range 15 downto 0; -- The Instr
     subtype op_width         is natural range 15 downto 9;
     

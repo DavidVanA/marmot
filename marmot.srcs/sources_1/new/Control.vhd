@@ -73,15 +73,15 @@ entity Controller is
     Reset_MEM_WB        : OUT std_logic;      
 
     	-- WB control signals
-    WB_EN               : OUT std_logic;
-    WB_SRC              : OUT std_logic_vector(wb_src_width);
+    Reg_Wb               : OUT std_logic;
+    Reg_Wb_Data_Select              : OUT std_logic_vector(wb_src_width);
     Reg_Wb_Idx        : OUT std_logic_vector(reg_idx_width);
     
     -- Latch Ports
 --    PC_PORT             : in  std_logic_vector(instr_addr_width);
 
     -- Source for EX stage result
-    EX_RES_SRC          : OUT std_logic_vector(ex_res_src_width)
+    Result_Select          : OUT std_logic_vector(ex_res_src_width)
    
   
 
@@ -219,7 +219,7 @@ begin
 
                  alu_src_rd;
     
-    EX_RES_SRC <= ex_res_src_in when ID_EX_INS(op_width) = op_in else
+    Result_Select <= ex_res_src_in when ID_EX_INS(op_width) = op_in else
                   ex_res_src_alu;
                  
     ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
@@ -261,7 +261,7 @@ begin
 
       Mem_Write_Not_Read    <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
 
-      WB_SRC <=
+      Reg_Wb_Data_Select <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
          wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
          wb_src_in  when EX_MEM_INS(op_width) = op_in else
@@ -279,7 +279,7 @@ begin
       MEM_WB_INS <= MEM_WB_instr;
 
       -- Is this writing back to Mem or the registers??
-      WB_EN <= '1' when 
+      Reg_Wb <= '1' when 
         MEM_WB_instr(op_width) = op_add OR
         MEM_WB_instr(op_width) = op_sub OR
         MEM_WB_instr(op_width) = op_mult OR

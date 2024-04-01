@@ -6,19 +6,20 @@ use work.Marmot_Config.all;
 entity The_Marmot is
 
   port (
-    in_port               : IN std_logic_vector(15 downto 6);
-    M_clock               : IN std_logic;
-    Reset_and_Execute     : IN std_logic;
-    Reset_and_Load        : IN std_logic;
-    out_port              : OUT std_logic;    
-    ------- Debug Console Ports -----------------------------
-    debug_console   	  : in std_logic;
-    board_clock     	  : in std_logic;
-    vga_red         	  : out std_logic_vector( 3 downto 0 );
-    vga_green       	  : out std_logic_vector( 3 downto 0 );
-    vga_blue        	  : out std_logic_vector( 3 downto 0 );
-    h_sync_signal   	  : out std_logic;
-    v_sync_signal   	  : out std_logic
+    in_port                      : IN std_logic_vector( 15 downto 6 ); -- 15
+                                                                       -- downto 6??
+    M_clock                      : IN std_logic;
+    Reset_and_Execute            : IN std_logic;
+    Reset_and_Load               : IN std_logic;
+    out_port                     : OUT std_logic;    
+    ---------------- Debug Console Ports -----------------------------
+    debug_console   	         : IN std_logic;
+    board_clock     	         : IN std_logic;
+    vga_red         	         : OUT std_logic_vector( 3 downto 0 );
+    vga_green       	         : OUT std_logic_vector( 3 downto 0 );
+    vga_blue        	         : OUT std_logic_vector( 3 downto 0 );
+    h_sync_signal   	         : OUT std_logic;
+    v_sync_signal   	         : OUT std_logic
     );
 end The_Marmot;
 
@@ -29,7 +30,7 @@ architecture Behavioral of The_Marmot is
     
 -----------------------------------   PC       -------------------------------------------------
 
-        -- Pipeline Latch Signals
+    -- Pipeline Latch Signals
     signal PC                    : PC_rec;
     signal Reset_PC              : std_logic;
                                  
@@ -47,11 +48,22 @@ architecture Behavioral of The_Marmot is
     signal Reg_Idx_2_Select      : std_logic_vector(reg_idx_width);
     signal r1_data               : std_logic_vector(reg_width);
     signal r2_data               : std_logic_vector(reg_width);
-        
+
+    -- Writeback enable from controller
+    signal Reg_Wb                : std_logic;
+    
+    -- MUX for MEM_WB write index
+    signal Reg_Wb_Idx            : std_logic_vector(reg_idx_width);
+            
 -----------------------------------   ID/EX    -------------------------------------------------
 
     signal ID_EX_latch           : ID_EX_rec;
     signal Reset_ID_EX           : std_logic;
+
+    -- Branch Calculator Signals --
+    signal Disp_Select           : std_logic_vector(instr_type_width);
+    signal Branch_Relative       : std_logic;
+    signal Branch_Base_Addr      : std_logic_vector(instr_width);
     
     -- ALU Signals --
     signal ALU_A_Select          : std_logic_vector(alu_src_width);    
@@ -66,14 +78,8 @@ architecture Behavioral of The_Marmot is
     signal FLAG_N         	     : std_logic;
     signal ALU_Ov         	     : std_logic;
     signal FLAG_Ov        	     : std_logic;
-
-    -- Branch Calculator Signals --
-    signal Disp_Select           : std_logic_vector(instr_type_width);
-    signal Branch_Relative       : std_logic;
-    signal Branch_Base           : std_logic_vector(instr_width);
-
     -- MUX for EX stage result source
-    signal CON_Ex_Res_Src        : std_logic_vector(ex_res_src_width);
+    signal Result_Select         : std_logic_vector(ex_res_src_width);
     
 -----------------------------------   EX/MEM   ------------------------------------------------
     
@@ -81,17 +87,15 @@ architecture Behavioral of The_Marmot is
     signal Reset_EX_MEM          : std_logic;    
 
     -- Data Memory Signals --
+    signal Mem_Write_Not_Read    : std_logic_vector(byte_addressable);
+    -- MUX for data read into memory?
     signal MEM_read_data         : std_logic_vector(instr_width);
+    -- MUX for memory write data 
+    signal Mem_Data_Write_Select : std_logic_vector(mem_src_width);
     signal MEM_data_addr         : std_logic_vector(instr_width);
     signal MEM_data_data         : std_logic_vector(instr_width);
     signal MEM_instr             : std_logic_vector(instr_width);
-
-    -- Signal for selecting write or read
-    signal Mem_Write_Not_Read    : std_logic_vector(byte_addressable);
     
-    -- MUX for memory write data 
-    signal Mem_Data_Write_Select : std_logic_vector(mem_src_width);
-
     -- MUX for memory data address
     signal Mem_Data_Addr_Select  : std_logic_vector(mem_src_width);
 
@@ -105,12 +109,6 @@ architecture Behavioral of The_Marmot is
 
     signal wb_data               : std_logic_vector(reg_width);        
     signal branch_WB             : std_logic;
-
-    -- Writeback enable from controller
-    signal Reg_Wb                : std_logic;
-    
-    -- MUX for MEM_WB write index
-    signal Reg_Wb_Idx            : std_logic_vector(reg_idx_width);
     
 -----------------------------------   Console   -------------------------------------------------
 
@@ -122,136 +120,86 @@ architecture Behavioral of The_Marmot is
     signal debug_reg_5           : std_logic_vector(reg_width);
     signal debug_reg_6           : std_logic_vector(reg_width);
     signal debug_reg_7           : std_logic_vector(reg_width);
-
     
 component console is
         port (
-    
-    --
     -- Stage 1 Fetch
-    --
-            s1_pc         : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            s1_inst       : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    
-    
-    --
-    -- Stage 2 Decode
-    --
-            s2_pc         : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            s2_inst       : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    
-            s2_reg_a      : in STD_LOGIC_VECTOR( 2 downto 0 );
-            s2_reg_b      : in STD_LOGIC_VECTOR( 2 downto 0 );
-            s2_reg_c      : in STD_LOGIC_VECTOR( 2 downto 0 );
-    
-            s2_reg_a_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s2_reg_b_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s2_reg_c_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s2_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-    
-    --
-    -- Stage 3 Execute
-    --
-            s3_pc : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            s3_inst : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    
-            s3_reg_a : in STD_LOGIC_VECTOR( 2 downto 0 );
-            s3_reg_b : in STD_LOGIC_VECTOR( 2 downto 0 );
-            s3_reg_c : in STD_LOGIC_VECTOR( 2 downto 0 );
-    
-            s3_reg_a_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s3_reg_b_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s3_reg_c_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s3_immediate : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-    --
+            s1_pc               : IN STD_LOGIC_VECTOR( instr_width );
+            s1_inst             : in STD_LOGIC_VECTOR( instr_width );                
+    -- Stage 2 Decode                                 
+            s2_pc               : in STD_LOGIC_VECTOR( instr_width );
+            s2_inst             : in STD_LOGIC_VECTOR( instr_width );
+            s2_reg_a            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s2_reg_b            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s2_reg_c            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s2_reg_a_data       : in STD_LOGIC_VECTOR( instr_width );
+            s2_reg_b_data       : in STD_LOGIC_VECTOR( instr_width );
+            s2_reg_c_data       : in STD_LOGIC_VECTOR( instr_width );
+            s2_immediate        : in STD_LOGIC_VECTOR( instr_width );
+    -- Stage 3 Execute          
+            s3_pc               : in STD_LOGIC_VECTOR( instr_width );
+            s3_inst             : in STD_LOGIC_VECTOR( instr_width );
+            s3_reg_a            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s3_reg_b            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s3_reg_c            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s3_reg_a_data       : in STD_LOGIC_VECTOR( instr_width );
+            s3_reg_b_data       : in STD_LOGIC_VECTOR( instr_width );
+            s3_reg_c_data       : in STD_LOGIC_VECTOR( instr_width );
+            s3_immediate        : in STD_LOGIC_VECTOR( instr_width );
     -- Branch and memory operation
-    --
-            s3_r_wb : in STD_LOGIC;
-            s3_r_wb_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s3_br_wb : in STD_LOGIC;
-            s3_br_wb_address : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s3_mr_wr : in STD_LOGIC;
-            s3_mr_wr_address : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s3_mr_wr_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s3_mr_rd : in STD_LOGIC;
-            s3_mr_rd_address : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-    --
-    -- Stage 4 Memory
-    --
-            s4_pc : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s4_inst : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s4_reg_a : in STD_LOGIC_VECTOR( 2 downto 0 );
-    
-            s4_r_wb : in STD_LOGIC;
-            s4_r_wb_data : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-    --
-    -- CPU registers
-    --
-    
-            register_0 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_1 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_2 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_3 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_4 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_5 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_6 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            register_7 : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    
-    --
-    -- CPU registers overflow flags
-    --
-            register_0_of : in STD_LOGIC;
-            register_1_of : in STD_LOGIC;
-            register_2_of : in STD_LOGIC;
-            register_3_of : in STD_LOGIC;
-            register_4_of : in STD_LOGIC;
-            register_5_of : in STD_LOGIC;
-            register_6_of : in STD_LOGIC;
-            register_7_of : in STD_LOGIC;
-    
-    --
-    -- CPU Flags
-    --
-            zero_flag : in STD_LOGIC;
-            negative_flag : in STD_LOGIC;
-            overflow_flag : in STD_LOGIC;
-    
-    --
-    -- Debug screen enable
-    --
-            debug : in STD_LOGIC;
-    
-    --
+            s3_r_wb             : in STD_LOGIC;
+            s3_r_wb_data        : in STD_LOGIC_VECTOR( instr_width );
+            s3_br_wb            : in STD_LOGIC;
+            s3_br_wb_address    : in STD_LOGIC_VECTOR( instr_width );
+            s3_mr_wr            : in STD_LOGIC;
+            s3_mr_wr_address    : in STD_LOGIC_VECTOR( instr_width );
+            s3_mr_wr_data       : in STD_LOGIC_VECTOR( instr_width );
+            s3_mr_rd            : in STD_LOGIC;
+            s3_mr_rd_address    : in STD_LOGIC_VECTOR( instr_width );
+    -- Stage 4 Memory           
+            s4_pc               : in STD_LOGIC_VECTOR( instr_width );
+            s4_inst             : in STD_LOGIC_VECTOR( instr_width );
+            s4_reg_a            : in STD_LOGIC_VECTOR( reg_idx_width );
+            s4_r_wb             : in STD_LOGIC;
+            s4_r_wb_data        : in STD_LOGIC_VECTOR( instr_width );
+    -- CPU registers            
+            register_0          : in STD_LOGIC_VECTOR ( instr_width );
+            register_1          : in STD_LOGIC_VECTOR ( instr_width );
+            register_2          : in STD_LOGIC_VECTOR ( instr_width );
+            register_3          : in STD_LOGIC_VECTOR ( instr_width );
+            register_4          : in STD_LOGIC_VECTOR ( instr_width );
+            register_5          : in STD_LOGIC_VECTOR ( instr_width );
+            register_6          : in STD_LOGIC_VECTOR ( instr_width );
+            register_7          : in STD_LOGIC_VECTOR ( instr_width );
+    -- CPU registers overflow  flags
+            register_0_of       : in STD_LOGIC;
+            register_1_of       : in STD_LOGIC;
+            register_2_of       : in STD_LOGIC;
+            register_3_of       : in STD_LOGIC;
+            register_4_of       : in STD_LOGIC;
+            register_5_of       : in STD_LOGIC;
+            register_6_of       : in STD_LOGIC;
+            register_7_of       : in STD_LOGIC;
+    -- CPU Flags                
+            zero_flag           : in STD_LOGIC;
+            negative_flag       : in STD_LOGIC;
+            overflow_flag       : in STD_LOGIC;
+    -- Debug screen enable      
+            debug               : in STD_LOGIC;
     -- Text console display memory access signals ( clk is the processor clock )
-    --
-            addr_write : in  STD_LOGIC_VECTOR (15 downto 0);
-            clk : in  STD_LOGIC;
-            data_in : in  STD_LOGIC_VECTOR (15 downto 0);
-            en_write : in  STD_LOGIC;
-    
-    --
-    -- Video related signals
-    --
-            board_clock : in STD_LOGIC;
-            v_sync_signal : out STD_LOGIC;
-            h_sync_signal : out STD_LOGIC;
-            vga_red : out STD_LOGIC_VECTOR( 3 downto 0 );
-            vga_green : out STD_LOGIC_VECTOR( 3 downto 0 );
-            vga_blue : out STD_LOGIC_VECTOR( 3 downto 0 )
-    
+            addr_write          : in  STD_LOGIC_VECTOR (instr_width);
+            clk                 : in  STD_LOGIC;
+            data_in             : in  STD_LOGIC_VECTOR (instr_width);
+            en_write            : in  STD_LOGIC;
+    -- Video related signals    
+            board_clock         : in STD_LOGIC;
+            v_sync_signal       : OUT STD_LOGIC;
+            h_sync_signal       : OUT STD_LOGIC;
+            vga_red             : OUT STD_LOGIC_VECTOR( 3 downto 0 );
+            vga_green           : OUT STD_LOGIC_VECTOR( 3 downto 0 );
+            vga_blue            : OUT STD_LOGIC_VECTOR( 3 downto 0 )
         );
-    end component;    
-    
+    end component;        
     
 begin
 
@@ -263,33 +211,30 @@ begin
      Controller_instance: entity work.Controller
      port map(
        ------------- Controller  ------------- 
-       Reset_Execute_Port  => Reset_and_Execute,
-       Reset_Load_Port     => Reset_and_Load,
-       IF_ID_instr         => IF_ID_latch.instr,
-       ID_EX_instr         => ID_EX_latch.instr,
-       EX_MEM_instr        => EX_MEM_latch.instr,
-       MEM_WB_instr        => MEM_WB_latch.instr,
-       -------------- PC        --------------
-       Reset_PC            => Reset_PC,
-       PCSrc_Select        => PCSrc_Select,
-       -------------- IF/ID     --------------
-       Reset_IF_ID         => Reset_IF_ID,
-       Reset_Reg           => Reset_Reg,
-       Reg_Idx_1_Select    => Reg_Idx_1_Select, 
-       Reg_Idx_2_Select    => Reg_Idx_2_Select,
-       -------------- ID/EX     -------------
-       Reset_ID_EX         => Reset_ID_EX,       
-       ALU_A_Select        => ALU_A_Select,
-       ALU_B_Select        => ALU_B_Select,
-       ALU_N               => FLAG_N,
-       ALU_Z               => FLAG_Z,
-       ALU_Ov              => FLAG_Ov,
-                           
-       Branch_Relative     => Branch_Relative,
-                           
-       -- Branch Calculator
+       Reset_Execute_Port     => Reset_and_Execute,
+       Reset_Load_Port        => Reset_and_Load,
+       IF_ID_instr            => IF_ID_latch.instr,
+       ID_EX_instr            => ID_EX_latch.instr,
+       EX_MEM_instr           => EX_MEM_latch.instr,
+       MEM_WB_instr           => MEM_WB_latch.instr,
+       -------------- PC           --------------
+       Reset_PC               => Reset_PC,
+       PCSrc_Select           => PCSrc_Select,
+       -------------- IF/ID        --------------
+       Reset_IF_ID            => Reset_IF_ID,
+       Reset_Reg              => Reset_Reg,
+       Reg_Idx_1_Select       => Reg_Idx_1_Select, 
+       Reg_Idx_2_Select       => Reg_Idx_2_Select,
+       -------------- ID/EX        -------------
+       Reset_ID_EX            => Reset_ID_EX,       
+       ALU_A_Select           => ALU_A_Select,
+       ALU_B_Select           => ALU_B_Select,
+       ALU_N                  => FLAG_N,
+       ALU_Z                  => FLAG_Z,
+       ALU_Ov                 => FLAG_Ov,                     
+       -- Branch Calculator   
+       Branch_Relative        => Branch_Relative,
        Disp_Select_Port       => Disp_Select,
-       
        ------------- EX/MEM    -------------
        Reset_EX_MEM           => Reset_EX_MEM,
        
@@ -298,12 +243,11 @@ begin
        Mem_Data_Write_Select  => Mem_Data_Write_Select,
 
        Reg_Wb_Idx             => Reg_Wb_Idx,
-       EX_RES_SRC             => CON_Ex_Res_Src,
-
+       Result_Select          => Result_Select,
        ------------- MEM/WB    -------------
-       Reset_MEM_WB       => Reset_MEM_WB,       
-       WB_EN              => Reg_Wb,
-       WB_SRC             => Reg_Wb_Data_Select
+       Reset_MEM_WB           => Reset_MEM_WB,       
+       Reg_Wb                 => Reg_Wb,
+       Reg_Wb_Data_Select     => Reg_Wb_Data_Select
        );
 
 ----------------------------------     PC       -------------------------------------------------
@@ -324,7 +268,7 @@ begin
         end if;
     end process PC_process;
     
-    
+    -- Program Counter Auto-increment    
     PC.npc <= std_logic_vector(unsigned(PC.pc) + 2); 
      
 -----------------------------------   IF/ID     -------------------------------------------------    
@@ -397,17 +341,17 @@ begin
     -- Determines base address to be used to calculate branch address.
     -- Choose: R[ra] or PC
     with Branch_Relative select
-         Branch_Base <=
+         Branch_Base_Addr <=
                        ID_EX_latch.ra_data(instr_width) when '1',
                        ID_EX_latch.pc                   when others;
     
     Branch_Calculator_instance: entity work.Branch_Calculator
        port map (
-           Instr_Port      => ID_EX_latch.instr,
-           Branch_Base     => Branch_Base,
-           Ra              => ID_EX_latch.ra_data(instr_width),
-           Disp_Selector   => Disp_Select,
-           Br_Addr_Port    => PC.br
+           Instr_Port           => ID_EX_latch.instr,
+           Branch_Base_Addr     => Branch_Base_Addr,
+           Ra                   => ID_EX_latch.ra_data(instr_width),
+           Disp_Selector        => Disp_Select,
+           Br_Addr_Port         => PC.br
        );
 
     --------------------------------------
@@ -446,21 +390,21 @@ begin
     EX_MEM: process(M_clock, Reset_EX_MEM)
     begin
         if Reset_EX_MEM = '1' then
-              EX_MEM_latch.instr <= (others => '0');
-              EX_MEM_latch.pc <= (others => '0');
-              EX_MEM_latch.result <= (others => '0');
+              EX_MEM_latch.instr    <= (others => '0');
+              EX_MEM_latch.pc       <= (others => '0');
+              EX_MEM_latch.result   <= (others => '0');
         elsif rising_edge(M_clock) then
-            if CON_Ex_Res_Src = ex_res_src_in then
+            if Result_Select = ex_res_src_in then
                 EX_MEM_latch.result <= '0' & in_port & "000000";
             else
                 EX_MEM_latch.result <= ALU_C;
             end if;
             
-            EX_MEM_latch.instr   <= ID_EX_latch.instr;
-            EX_MEM_latch.pc      <= ID_EX_latch.pc;
-            EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
-            EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
-            EX_MEM_latch.npc     <= ID_EX_latch.npc;
+            EX_MEM_latch.instr      <= ID_EX_latch.instr;
+            EX_MEM_latch.pc         <= ID_EX_latch.pc;
+            EX_MEM_latch.ra_data    <= ID_EX_latch.ra_data;
+            EX_MEM_latch.rb_data    <= ID_EX_latch.ra_data;
+            EX_MEM_latch.npc        <= ID_EX_latch.npc;
             
             if ID_EX_latch.instr (op_width) = op_test then
                 FLAG_N  <= ALU_N;
@@ -480,7 +424,8 @@ begin
 			MEM_WB_latch.result(instr_width)  when mem_src_f1, -- forward?
 			(others => '0')                   when others;
 
-    with Mem_Data_Write_Select select
+     -- Not being used?
+     with Mem_Data_Write_Select select
          MEM_data_data <=
             EX_MEM_latch.rb_data(instr_width) when mem_src_rb,
 			MEM_WB_latch.result(instr_width)  when mem_src_f1,
@@ -490,11 +435,15 @@ begin
         port map(                               
             Reset              => Reset_EX_MEM,
             Clk                => M_Clock,
+            -- Instruction Memory
             Instr_Addr         => PC.pc,
             Instr              => MEM_instr,
+            -- Data Memory
             Data_Addr          => MEM_data_addr,
-            Read_Data          => MEM_read_data,
+            -- Should this be MEM_data_data???
             Write_Data         => EX_MEM_latch.rb_data(instr_width),
+            Read_Data          => MEM_read_data,
+            -- Read/Write Select
             Mem_Write_Not_Read => Mem_Write_Not_Read
         );
      
@@ -533,119 +482,79 @@ begin
     console_display : console
     port map
     (
-    --
     -- Stage 1 Fetch
-    --
-        s1_pc => IF_ID_latch.pc,
-        s1_inst => IF_ID_latch.instr,
-    
-    --
+        s1_pc            => IF_ID_latch.pc,
+        s1_inst          => IF_ID_latch.instr,
     -- Stage 2 Decode
-    --
-    
-        s2_pc => ID_EX_latch.pc,
-        s2_inst => ID_EX_latch.instr,
-    
-        s2_reg_a => Reg_Idx_1_Select,
-        s2_reg_b => Reg_Idx_2_Select,
-        s2_reg_c => "000",
-    
-        s2_reg_a_data => ID_EX_latch.ra_data(instr_width),
-        s2_reg_b_data => ID_EX_latch.rb_data(instr_width),
-        s2_reg_c_data => x"0000",
-        s2_immediate => x"0000",
-    
-    --
-    -- Stage 3 Execute
-    --
-    
-        s3_pc => EX_MEM_latch.pc,
-        s3_inst => EX_MEM_latch.instr,
-    
-        s3_reg_a => EX_MEM_latch.instr(8 downto 6),
-        s3_reg_b => EX_MEM_latch.instr(5 downto 3),
-        s3_reg_c => EX_MEM_latch.instr(2 downto 0),
-    
-        s3_reg_a_data => ALU_A(instr_width),
-        s3_reg_b_data => ALU_B(instr_width),
-        s3_reg_c_data => EX_MEM_latch.result(instr_width),
-        s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
-    
-        s3_r_wb => '0',
-        s3_r_wb_data => x"0000",
-    
-        s3_br_wb => PCSrc_Select,
+        s2_pc            => ID_EX_latch.pc,
+        s2_inst          => ID_EX_latch.instr,
+        s2_reg_a         => Reg_Idx_1_Select,
+        s2_reg_b         => Reg_Idx_2_Select,
+        s2_reg_c         => "000",
+        s2_reg_a_data    => ID_EX_latch.ra_data(instr_width),
+        s2_reg_b_data    => ID_EX_latch.rb_data(instr_width),
+        s2_reg_c_data    => x"0000",
+        s2_immediate     => x"0000",
+    -- Stage 3 Execute   
+        s3_pc            => EX_MEM_latch.pc,
+        s3_inst          => EX_MEM_latch.instr,
+        s3_reg_a         => EX_MEM_latch.instr( ra_width ),
+        s3_reg_b         => EX_MEM_latch.instr( rb_width ),
+        s3_reg_c         => EX_MEM_latch.instr( rc_width ),
+        s3_reg_a_data    => ALU_A(instr_width),
+        s3_reg_b_data    => ALU_B(instr_width),
+        s3_reg_c_data    => EX_MEM_latch.result(instr_width),
+        s3_immediate     => x"00" & EX_MEM_latch.instr(imm_width),
+        s3_r_wb          => '0',
+        s3_r_wb_data     => x"0000",
+        s3_br_wb         => PCSrc_Select,
         s3_br_wb_address => x"0000",
-    
-        s3_mr_wr => '0',
+        s3_mr_wr         => '0',
         s3_mr_wr_address => x"000" & "00" & Reset_IF_ID & Reset_ID_EX,
-        s3_mr_wr_data => x"0000",
-    
-        s3_mr_rd => '0',
+        s3_mr_wr_data    => x"0000",
+        s3_mr_rd         => '0',
         s3_mr_rd_address => x"0000",
-    
-    --
     -- Stage 4 Memory
-    --
-    
-        s4_pc => MEM_WB_latch.pc,
-        s4_inst => MEM_WB_latch.instr,
-        s4_reg_a => "000",
-        s4_r_wb => '0',
-        s4_r_wb_data => x"0000",
-    
-    --
+        s4_pc            => MEM_WB_latch.pc,
+        s4_inst          => MEM_WB_latch.instr,
+        s4_reg_a         => "000",
+        s4_r_wb          => '0',
+        s4_r_wb_data     => x"0000",
     -- CPU registers
-    --
+        register_0       => debug_reg_0(instr_width),
+        register_1       => debug_reg_1(instr_width),
+        register_2       => debug_reg_2(instr_width),
+        register_3       => debug_reg_3(instr_width),
+        register_4       => debug_reg_4(instr_width),
+        register_5       => debug_reg_5(instr_width),
+        register_6       => debug_reg_6(instr_width),
+        register_7       => debug_reg_7(instr_width),
     
-        register_0 => debug_reg_0(instr_width),
-        register_1 => debug_reg_1(instr_width),
-        register_2 => debug_reg_2(instr_width),
-        register_3 => debug_reg_3(instr_width),
-        register_4 => debug_reg_4(instr_width),
-        register_5 => debug_reg_5(instr_width),
-        register_6 => debug_reg_6(instr_width),
-        register_7 => debug_reg_7(instr_width),
-    
-        register_0_of => debug_reg_0(16),
-        register_1_of => debug_reg_0(16),
-        register_2_of => debug_reg_0(16),
-        register_3_of => debug_reg_0(16),
-        register_4_of => debug_reg_0(16),
-        register_5_of => debug_reg_0(16),
-        register_6_of => debug_reg_0(16),
-        register_7_of => debug_reg_0(16),
-    
-    --
+        register_0_of    => debug_reg_0(16),
+        register_1_of    => debug_reg_0(16),
+        register_2_of    => debug_reg_0(16),
+        register_3_of    => debug_reg_0(16),
+        register_4_of    => debug_reg_0(16),
+        register_5_of    => debug_reg_0(16),
+        register_6_of    => debug_reg_0(16),
+        register_7_of    => debug_reg_0(16),
     -- CPU Flags
-    --
-        zero_flag       => flag_z,
-        negative_flag   => flag_n,
-        overflow_flag   => flag_OV,
-    
-    --
+        zero_flag        => flag_z,
+        negative_flag    => flag_n,
+        overflow_flag    => flag_OV,
     -- Debug screen enable
-    --
-        debug => debug_console,
-    
-    --
+        debug            => debug_console,
     -- Text console display memory access signals ( clk is the processor clock )
-    --
-    
-        clk => '0',
-        addr_write => x"0000",
-        data_in => x"0000",
-        en_write => '0',
-    
-    --
+        clk              => '0',
+        addr_write       => x"0000",
+        data_in          => x"0000",
+        en_write         => '0',
     -- Video related signals
-    --
-    
-        board_clock => board_clock,
-        h_sync_signal => h_sync_signal,
-        v_sync_signal => v_sync_signal,
-        vga_red => vga_red,
-        vga_green => vga_green,
-        vga_blue => vga_blue
+        board_clock      => board_clock,
+        h_sync_signal    => h_sync_signal,
+        v_sync_signal    => v_sync_signal,
+        vga_red          => vga_red,
+        vga_green        => vga_green,
+        vga_blue         => vga_blue
     );
 end Behavioral;

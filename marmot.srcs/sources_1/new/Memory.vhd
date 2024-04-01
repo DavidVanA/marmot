@@ -56,13 +56,15 @@ begin
                        Instr_Addr(11) OR
                        Instr_Addr(10) OR
                        Instr_Addr(9);
-    
+
+        -- Instruction Memory
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
         RAM_addrb  <= Instr_Addr(instr_mem_width);  
         RAM_enb    <= RAM_not_ROM;
         RAM_rstb   <= Reset;
 
+        -- Bootloader Memory
         ROM_clka   <= Clk;
         ROM_ena    <= not RAM_not_ROM;
         ROM_rsta   <= Reset;
@@ -70,8 +72,9 @@ begin
         Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
         
  
------------------------------------   IF/ID   -------------------------------------------------   
+-----------------------------------   EX/MEM   -------------------------------------------------   
 
+        -- Data Memory
         RAM_addra  <= Data_Addr(instr_mem_width);
         RAM_wea    <= Mem_Write_Not_Read;
         RAM_dina   <= Write_Data;
