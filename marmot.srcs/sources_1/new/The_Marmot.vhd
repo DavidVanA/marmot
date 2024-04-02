@@ -1,4 +1,4 @@
-library IEEE;                           --
+,library IEEE;                           --
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use work.Marmot_Config.all;
@@ -304,14 +304,14 @@ begin
         wr_index           => Reg_Wb_Idx,
         wr_data            => MEM_WB_latch.result,
         -- Debug ports for monitor
-        reg_0   		   =>  debug_reg_0,
-        reg_1   		   =>  debug_reg_1,
-        reg_2   		   =>  debug_reg_2,
-        reg_3   		   =>  debug_reg_3,
-        reg_4   		   =>  debug_reg_4,
-        reg_5   		   =>  debug_reg_5,
-        reg_6   		   =>  debug_reg_6,
-        reg_7   		   =>  debug_reg_7
+        reg_0   		   => debug_reg_0,
+        reg_1   		   => debug_reg_1,
+        reg_2   		   => debug_reg_2,
+        reg_3   		   => debug_reg_3,
+        reg_4   		   => debug_reg_4,
+        reg_5   		   => debug_reg_5,
+        reg_6   		   => debug_reg_6,
+        reg_7   		   => debug_reg_7
     );
     
 -----------------------------------   ID/EX   -------------------------------------------------   
@@ -344,7 +344,8 @@ begin
          Branch_Base_Addr <=
                        ID_EX_latch.ra_data(instr_width) when '1',
                        ID_EX_latch.pc                   when others;
-    
+
+    -- 
     Branch_Calculator_instance: entity work.Branch_Calculator
        port map (
            Instr_Port           => ID_EX_latch.instr,
@@ -440,7 +441,7 @@ begin
             Instr              => MEM_instr,
             -- Data Memory
             Data_Addr          => MEM_data_addr,
-            -- Should this be MEM_data_data???
+            -- <TODO> Should this be MEM_data_data?
             Write_Data         => EX_MEM_latch.rb_data(instr_width),
             Read_Data          => MEM_read_data,
             -- Read/Write Select
