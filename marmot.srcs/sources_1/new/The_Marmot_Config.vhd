@@ -52,6 +52,7 @@ package Marmot_Config is
     constant wb_src_imm_upper: std_logic_vector := "100";
     constant wb_src_rb       : std_logic_vector := "101";
     constant wb_src_in       : std_logic_vector := "110";
+    constant wb_src_out      : std_logic_vector := "111";
 
     -- Instruction types
     constant a0_instr        : std_logic_vector := "000";

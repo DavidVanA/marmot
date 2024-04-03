@@ -472,7 +472,7 @@ begin
             Instr => MEM_instr,
             Data_Addr => MEM_data_addr,
             Read_Data => MEM_read_data,
-            Write_Data => EX_MEM_latch.rb_data(instr_width),
+            Write_Data => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
             Write_Not_Read => o_CON_Mem_Wr_nRd
         );
 
@@ -483,6 +483,7 @@ begin
            '0' & EX_MEM_latch.npc    when wb_src_npc,
            EX_MEM_latch.rb_data      when wb_src_rb,
            '0' & in_port & "000000"  when wb_src_in,
+           EX_MEM_latch.ra_data      when wb_src_out,
            (others => '0')           when others;
            
            
@@ -564,9 +565,9 @@ begin
     
         s4_pc => MEM_WB_latch.pc,
         s4_inst => MEM_WB_latch.instr,
-        s4_reg_a => "000",
+        s4_reg_a => '0' & o_Con_data_data_src,
         s4_r_wb => '0',
-        s4_r_wb_data => x"0000",
+        s4_r_wb_data => MEM_data_data,
     
     --
     -- CPU registers

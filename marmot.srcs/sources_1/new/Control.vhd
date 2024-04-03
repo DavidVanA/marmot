@@ -230,6 +230,7 @@ begin
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
          wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
          wb_src_in  when EX_MEM_INS(op_width) = op_in else
+         wb_src_out when EX_MEM_INS(op_width) = op_out else
          wb_src_alu;
         
       EX_MEM_Instr_Decode_instance: entity work.Instruction_Decoder
