@@ -94,8 +94,8 @@ architecture Behavioral of Controller is
     signal MEM_WB_INS_type    : std_logic_vector(instr_type_width);
     
 	-- Writeback target for each latch
-    signal ex_mem_dest        : std_logic_vector(reg_idx_width);
-    signal mem_wb_dest        : std_logic_vector(reg_idx_width);
+    signal ex_mem_dest        : std_logic_vector(3 downto 0);
+    signal mem_wb_dest        : std_logic_vector(3 downto 0);
 
     -- Status Flag Signals
     signal Status_Flags      : Status_Flags_rec;
@@ -163,25 +163,48 @@ begin
 
      ID_EX_INS <= ID_EX_PORT;
      Disp_Select_Port <= ID_EX_INS_type;      
-     ex_mem_dest <= "111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
+
+     ex_mem_dest <= "0111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
+					"1000" when (EX_MEM_INS(op_width) /= op_add AND
+								 EX_MEM_INS(op_width) /= op_sub AND
+								 EX_MEM_INS(op_width) /= op_mult AND
+								 EX_MEM_INS(op_width) /= op_nand AND
+								 EX_MEM_INS(op_width) /= op_bshl AND
+								 EX_MEM_INS(op_width) /= op_bshr AND
+								 EX_MEM_INS(op_width) /= op_in AND
+								 EX_MEM_INS(op_width) /= op_br_sub AND
+								 EX_MEM_INS(op_width) /= op_load AND
+								 EX_MEM_INS(op_width) /= op_load_imm AND
+								 EX_MEM_INS(op_width) /= op_mov)
                      EX_MEM_INS(ra_width);
                      
-     mem_wb_dest <= "111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
+     mem_wb_dest <= "0111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
+					"1000" when (MEM_WB_INS(op_width) /= op_add AND
+								 MEM_WB_INS(op_width) /= op_sub AND
+								 MEM_WB_INS(op_width) /= op_mult AND
+								 MEM_WB_INS(op_width) /= op_nand AND
+								 MEM_WB_INS(op_width) /= op_bshl AND
+								 MEM_WB_INS(op_width) /= op_bshr AND
+								 MEM_WB_INS(op_width) /= op_in AND
+								 MEM_WB_INS(op_width) /= op_br_sub AND
+								 MEM_WB_INS(op_width) /= op_load AND
+								 MEM_WB_INS(op_width) /= op_load_imm AND
+								 MEM_WB_INS(op_width) /= op_mov)
                      MEM_WB_INS(ra_width);    
                      
      -- <TODO>: This is gnarly look at - make it a block?
-    ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = ex_mem_dest) else
-                 alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "111") else
+	ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = ex_mem_dest) else
+                 alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "0111") else
                  alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = ex_mem_dest) else
-                 alu_src_fd2 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and ID_EX_INS(rb_width) = mem_wb_dest) else
-                 alu_src_fd2 when (ID_EX_INS_type = l1_instr and mem_wb_dest = "111") else
-                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = mem_wb_dest) else
+                 alu_src_fd2 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = mem_wb_dest) else
+                 alu_src_fd2 when (ID_EX_INS_type = l1_instr and mem_wb_dest = "0111") else
+                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and '0' & ID_EX_INS(ra_width) = mem_wb_dest) else
 
                  alu_src_rd;
                         
     ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
-                 alu_src_fd1 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = ex_mem_dest) else
-                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and ID_EX_INS(rc_width) = mem_wb_dest) else
+                 alu_src_fd1 when (ID_EX_INS_type = a1_instr and '0' & ID_EX_INS(rc_width) = ex_mem_dest) else
+                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and '0' & ID_EX_INS(rc_width) = mem_wb_dest) else
 
                  alu_src_rd;
     
