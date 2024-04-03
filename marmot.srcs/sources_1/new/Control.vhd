@@ -175,8 +175,8 @@ begin
 								 EX_MEM_INS(op_width) /= op_br_sub AND
 								 EX_MEM_INS(op_width) /= op_load AND
 								 EX_MEM_INS(op_width) /= op_load_imm AND
-								 EX_MEM_INS(op_width) /= op_mov)
-                     EX_MEM_INS(ra_width);
+								 EX_MEM_INS(op_width) /= op_mov) else
+                     '0' & EX_MEM_INS(ra_width);
                      
      mem_wb_dest <= "0111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
 					"1000" when (MEM_WB_INS(op_width) /= op_add AND
@@ -189,8 +189,8 @@ begin
 								 MEM_WB_INS(op_width) /= op_br_sub AND
 								 MEM_WB_INS(op_width) /= op_load AND
 								 MEM_WB_INS(op_width) /= op_load_imm AND
-								 MEM_WB_INS(op_width) /= op_mov)
-                     MEM_WB_INS(ra_width);    
+								 MEM_WB_INS(op_width) /= op_mov) else
+                     '0' & MEM_WB_INS(ra_width);    
                      
      -- <TODO>: This is gnarly look at - make it a block?
 	ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = ex_mem_dest) else
