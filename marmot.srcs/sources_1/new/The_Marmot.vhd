@@ -96,6 +96,7 @@ architecture Behavioral of The_Marmot is
     signal FLAG_N         :  std_logic;
     signal o_ALU_Ov       :  std_logic;
     signal FLAG_Ov        :  std_logic;
+    signal EX_result       : std_logic_vector(reg_width);
 
     signal wb_data         : std_logic_vector(reg_width);
     signal PCSrc           : std_logic;
@@ -105,6 +106,7 @@ architecture Behavioral of The_Marmot is
     
     signal branch_WB       : std_logic;
     
+
     
     signal debug_reg_0      : std_logic_vector(reg_width);
     signal debug_reg_1      : std_logic_vector(reg_width);
@@ -422,19 +424,27 @@ begin
         ALU_Ov   => o_ALU_Ov
         );    
     
+
+        EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in else
+                     o_ALU_C;
+    
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_EX_MEM)
     begin
         if Reset_EX_MEM = '1' then
-              EX_MEM_latch.instr <= (others => '0');
-              EX_MEM_latch.pc <= (others => '0');
-              EX_MEM_latch.result <= (others => '0');
+              EX_MEM_latch.instr    <= (others => '0');
+              EX_MEM_latch.pc       <= (others => '0');
+              EX_MEM_latch.result   <= (others => '0');
+              FLAG_N    <= '0';
+              FLAG_Z    <= '0';
+              FLAG_Ov   <= '0';
         elsif rising_edge(M_clock) then
-            if o_CON_Ex_Res_Src = ex_res_src_in then
-                EX_MEM_latch.result <= '0' & in_port & "000000";
-            else
-                EX_MEM_latch.result <= o_ALU_C;
-            end if;
+              EX_MEM_latch.result <= EX_result;
+--            if o_CON_Ex_Res_Src = ex_res_src_in then
+--                EX_MEM_latch.result <= '0' & in_port & "000000";
+--            else
+--                EX_MEM_latch.result <= o_ALU_C;
+--            end if;
             
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.pc <= ID_EX_latch.pc;
@@ -482,7 +492,6 @@ begin
            '0' & MEM_read_data       when wb_src_mem,
            '0' & EX_MEM_latch.npc    when wb_src_npc,
            EX_MEM_latch.rb_data      when wb_src_rb,
-           '0' & in_port & "000000"  when wb_src_in,
            EX_MEM_latch.ra_data      when wb_src_out,
            (others => '0')           when others;
            
@@ -521,13 +530,13 @@ begin
         s2_pc => ID_EX_latch.pc,
         s2_inst => ID_EX_latch.instr,
     
-        s2_reg_a => rd_index1,
-        s2_reg_b => rd_index2,
-        s2_reg_c => "000",
+        s2_reg_a => ID_EX_latch.instr(ra_width),
+        s2_reg_b => ID_EX_latch.instr(rb_width),
+        s2_reg_c => ID_EX_latch.instr(rc_width),
     
-        s2_reg_a_data => ID_EX_latch.ra_data(instr_width),
-        s2_reg_b_data => ID_EX_latch.rb_data(instr_width),
-        s2_reg_c_data => x"0000",
+        s2_reg_a_data => i_ALU_A(instr_width),
+        s2_reg_b_data => i_ALU_B(instr_width),
+        s2_reg_c_data => EX_Result(instr_width),
         s2_immediate => x"0000",
     
     --
@@ -541,9 +550,9 @@ begin
         s3_reg_b => EX_MEM_latch.instr(5 downto 3),
         s3_reg_c => EX_MEM_latch.instr(2 downto 0),
     
-        s3_reg_a_data => i_ALU_A(instr_width),
-        s3_reg_b_data => i_ALU_B(instr_width),
-        s3_reg_c_data => EX_MEM_latch.result(instr_width),
+        s3_reg_a_data => EX_MEM_latch.ra_data(instr_width),
+        s3_reg_b_data => EX_MEM_latch.rb_data(instr_width),
+        s3_reg_c_data => wb_data(instr_width),
         s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
     
         s3_r_wb => '0',
@@ -565,9 +574,9 @@ begin
     
         s4_pc => MEM_WB_latch.pc,
         s4_inst => MEM_WB_latch.instr,
-        s4_reg_a => '0' & o_Con_data_data_src,
-        s4_r_wb => '0',
-        s4_r_wb_data => MEM_data_data,
+        s4_reg_a => o_CON_mem_wb_index,
+        s4_r_wb => o_CON_wb_en,
+        s4_r_wb_data => MEM_WB_latch.result(instr_width),
     
     --
     -- CPU registers
