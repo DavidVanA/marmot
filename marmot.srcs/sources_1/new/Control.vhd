@@ -96,6 +96,9 @@ architecture Behavioral of Controller is
 	-- Writeback target for each latch
     signal ex_mem_dest        : std_logic_vector(3 downto 0);
     signal mem_wb_dest        : std_logic_vector(3 downto 0);
+    
+    signal alu_1_read_src     : std_logic_vector(3 downto 0);
+    signal alu_2_read_src     : std_logic_vector(3 downto 0);
 
     -- Status Flag Signals
     signal Status_Flags      : Status_Flags_rec;
@@ -164,6 +167,7 @@ begin
      ID_EX_INS <= ID_EX_PORT;
      Disp_Select_Port <= ID_EX_INS_type;      
 
+	 -- TODO This is ugly af
      ex_mem_dest <= "0111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
 					"1000" when (EX_MEM_INS(op_width) /= op_add AND
 								 EX_MEM_INS(op_width) /= op_sub AND
@@ -191,21 +195,22 @@ begin
 								 MEM_WB_INS(op_width) /= op_load_imm AND
 								 MEM_WB_INS(op_width) /= op_mov) else
                      '0' & MEM_WB_INS(ra_width);    
-                     
-     -- <TODO>: This is gnarly look at - make it a block?
-	ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = ex_mem_dest) else
-                 alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "0111") else
-                 alu_src_fd1 when (ID_EX_INS_type /= a1_instr and '0' & ID_EX_INS(ra_width) = ex_mem_dest) else
-                 alu_src_fd2 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = mem_wb_dest) else
-                 alu_src_fd2 when (ID_EX_INS_type = l1_instr and mem_wb_dest = "0111") else
-                 alu_src_fd2 when (ID_EX_INS_type /= a1_instr and '0' & ID_EX_INS(ra_width) = mem_wb_dest) else
 
+
+	alu_1_read_src <= '0' & ID_EX_INS(rb_width) when (ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) else
+				   "0111" 					 	when (ID_EX_INS_type = l1_instr or ID_EX_INS(op_width) = op_out) else
+				   '0' & ID_EX_INS(ra_width);
+
+	alu_2_read_src <= '0' & ID_EX_INS(rc_width) when (ID_EX_INS_type = a1_instr) else
+				   "1111";
+                     
+	ALU_SRC_1 <= alu_src_fd1 when alu_1_read_src = ex_mem_dest else
+				 alu_src_fd2 when alu_1_read_src = mem_wb_dest else
                  alu_src_rd;
                         
-    ALU_SRC_2 <= alu_src_cl  when (ID_EX_INS_type = a2_instr) else
-                 alu_src_fd1 when (ID_EX_INS_type = a1_instr and '0' & ID_EX_INS(rc_width) = ex_mem_dest) else
-                 alu_src_fd2 when (ID_EX_INS_type = a1_instr and '0' & ID_EX_INS(rc_width) = mem_wb_dest) else
-
+    ALU_SRC_2 <= alu_src_cl  when ID_EX_INS_type = a2_instr else
+                 alu_src_fd1 when alu_2_read_src = ex_mem_dest else
+                 alu_src_fd2 when alu_2_read_src = mem_wb_dest else
                  alu_src_rd;
     
     EX_RES_SRC <= ex_res_src_in when ID_EX_INS(op_width) = op_in else

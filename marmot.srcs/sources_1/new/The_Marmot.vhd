@@ -89,6 +89,7 @@ architecture Behavioral of The_Marmot is
     signal Reset_ID_EX    :  std_logic;
     signal Reset_EX_MEM   :  std_logic;
     signal Reset_MEM_WB   :  std_logic;
+    signal Reset_Out      :  std_logic;
     
     signal o_ALU_Z        :  std_logic;
     signal FLAG_Z         :  std_logic;
@@ -362,10 +363,11 @@ begin
     begin
         if rising_edge(M_clock) then
             if Reset_ID_EX = '1' then
-                ID_EX_latch.instr   <= (others => '0');
-                ID_EX_latch.pc      <= (others => '0');
-                out_port            <= '0';
+                ID_EX_latch.instr 	<= (others => '0');
+                ID_EX_latch.pc 		<= (others => '0');
+                Reset_Out           <= '1';
             else
+                Reset_Out           <= '0';
                 ID_EX_latch.instr <= IF_ID_latch.instr;
                 ID_EX_latch.pc <= IF_ID_latch.pc;
                 ID_EX_latch.ra_data <= r1_data;
@@ -373,10 +375,6 @@ begin
     
                 ID_EX_latch.npc <= IF_ID_latch.npc;
                 ID_EX_latch.br_addr <= br_addr;
-                
-                if ID_EX_latch.instr(op_width) = op_out then
-                    out_port <= ID_EX_latch.ra_data(0);
-                end if;
             end if;
         end if;
     end process ID_EX;
@@ -429,7 +427,9 @@ begin
         ALU_Ov   => o_ALU_Ov
         );    
     
-
+        out_port <= '0'         when Reset_Out = '1' else
+                    i_ALU_A(0)  when ID_EX_latch.instr(op_width) = op_out;
+    
         EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in else
                      o_ALU_C;
     
@@ -514,9 +514,6 @@ begin
             MEM_WB_latch.result <= wb_data;
         end if;
     end process MEM_WB;   
-    
------------------------------------   OUT Port   -------------------------------------------------
-
     
 -----------------
     console_display : console
