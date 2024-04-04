@@ -566,9 +566,9 @@ begin
         s3_br_wb => PCSrc,
         s3_br_wb_address => x"0000",
     
-        s3_mr_wr => '0',
-        s3_mr_wr_address => x"000" & "00" & Reset_IF_ID & Reset_ID_EX,
-        s3_mr_wr_data => x"0000",
+        s3_mr_wr            => o_CON_MEM_wr_nrd(0),
+        s3_mr_wr_address    => MEM_data_addr,
+        s3_mr_wr_data       => MEM_data_data,
     
         s3_mr_rd => '0',
         s3_mr_rd_address => x"0000",
