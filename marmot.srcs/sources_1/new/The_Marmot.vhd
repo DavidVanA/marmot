@@ -362,8 +362,9 @@ begin
     begin
         if rising_edge(M_clock) then
             if Reset_ID_EX = '1' then
-                ID_EX_latch.instr <= (others => '0');
-                ID_EX_latch.pc <= (others => '0');
+                ID_EX_latch.instr   <= (others => '0');
+                ID_EX_latch.pc      <= (others => '0');
+                out_port            <= '0';
             else
                 ID_EX_latch.instr <= IF_ID_latch.instr;
                 ID_EX_latch.pc <= IF_ID_latch.pc;
@@ -372,6 +373,10 @@ begin
     
                 ID_EX_latch.npc <= IF_ID_latch.npc;
                 ID_EX_latch.br_addr <= br_addr;
+                
+                if ID_EX_latch.instr(op_width) = op_out then
+                    out_port <= ID_EX_latch.ra_data(0);
+                end if;
             end if;
         end if;
     end process ID_EX;
@@ -511,7 +516,7 @@ begin
     end process MEM_WB;   
     
 -----------------------------------   OUT Port   -------------------------------------------------
-    out_port <= MEM_WB_latch.result(0) when MEM_WB_latch.instr(op_width) = op_out;  
+
     
 -----------------
     console_display : console

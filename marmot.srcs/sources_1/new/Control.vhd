@@ -195,7 +195,7 @@ begin
      -- <TODO>: This is gnarly look at - make it a block?
 	ALU_SRC_1 <= alu_src_fd1 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = ex_mem_dest) else
                  alu_src_fd1 when (ID_EX_INS_type = l1_instr and ex_mem_dest = "0111") else
-                 alu_src_fd1 when (ID_EX_INS_type /= a1_instr and ID_EX_INS(ra_width) = ex_mem_dest) else
+                 alu_src_fd1 when (ID_EX_INS_type /= a1_instr and '0' & ID_EX_INS(ra_width) = ex_mem_dest) else
                  alu_src_fd2 when ((ID_EX_INS_type = a1_instr or ID_EX_INS_type = l2_instr) and '0' & ID_EX_INS(rb_width) = mem_wb_dest) else
                  alu_src_fd2 when (ID_EX_INS_type = l1_instr and mem_wb_dest = "0111") else
                  alu_src_fd2 when (ID_EX_INS_type /= a1_instr and '0' & ID_EX_INS(ra_width) = mem_wb_dest) else
