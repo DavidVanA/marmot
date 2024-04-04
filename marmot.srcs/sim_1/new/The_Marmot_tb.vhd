@@ -78,6 +78,9 @@ BEGIN
         
         wait for 210ns;
         in_port <= x"AA" & "00";
+        
+        wait for 200ns;
+        in_port <= x"55" & "00";
 
         wait for 600 ns;
     end process;
