@@ -299,9 +299,12 @@ begin
     begin
         if Reset_And_Execute = '1' then
             PC.pc <= (others => '0');
+            Reset_Out           <= '1';
         elsif Reset_And_Load = '1' then
             PC.pc <= x"0002";
+            Reset_Out           <= '1';
         elsif rising_edge(M_clock) then
+            Reset_Out           <= '0';
             -- Instr_mem.in <= PC.pc
             if PCSrc = '0' then
                 PC.pc <= PC.npc;
@@ -365,9 +368,7 @@ begin
             if Reset_ID_EX = '1' then
                 ID_EX_latch.instr 	<= (others => '0');
                 ID_EX_latch.pc 		<= (others => '0');
-                Reset_Out           <= '1';
             else
-                Reset_Out           <= '0';
                 ID_EX_latch.instr <= IF_ID_latch.instr;
                 ID_EX_latch.pc <= IF_ID_latch.pc;
                 ID_EX_latch.ra_data <= r1_data;

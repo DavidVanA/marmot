@@ -81,8 +81,14 @@ BEGIN
         
         wait for 200ns;
         in_port <= x"55" & "00";
+        
+        wait for 470ns;
+        in_port <= x"55" & "10";
+        
+        wait for 380ns;
+        in_port <= x"00" & "00";
 
-        wait for 600 ns;
+        wait for 2000 ns;
     end process;
 
 END;
