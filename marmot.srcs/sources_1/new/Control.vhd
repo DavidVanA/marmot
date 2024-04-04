@@ -239,12 +239,12 @@ begin
 
       EX_MEM_INS <= EX_MEM_PORT;
       
-	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest else
-						   mem_src_f1 when EX_MEM_INS(op_width) = op_store and EX_MEM_INS(ra_width) = mem_wb_dest else
+	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
+						   mem_src_f1 when EX_MEM_INS(op_width) = op_store and EX_MEM_INS(ra_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_rb when EX_MEM_INS(op_width) = op_load else 
 						   mem_src_ra;
 
-	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest else
+	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_rb;
 
       MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
