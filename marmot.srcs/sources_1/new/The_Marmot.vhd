@@ -13,6 +13,7 @@ entity The_Marmot is
     out_port              : OUT std_logic;
     
     ------- Debug Console Ports -----------------------------
+
     debug_console   : in std_logic;
     board_clock     : in std_logic;
 
@@ -21,7 +22,12 @@ entity The_Marmot is
     vga_blue        : out std_logic_vector( 3 downto 0 );
 
     h_sync_signal   : out std_logic;
-    v_sync_signal   : out std_logic
+    v_sync_signal   : out std_logic;
+    
+    ------- LED Display Ports -------------------------------
+    led_segments    : out STD_LOGIC_VECTOR( 6 downto 0 );
+    led_digits      : out STD_LOGIC_VECTOR( 3 downto 0 )
+
     );
 end The_Marmot;
 
@@ -117,7 +123,24 @@ architecture Behavioral of The_Marmot is
     signal debug_reg_5      : std_logic_vector(reg_width);
     signal debug_reg_6      : std_logic_vector(reg_width);
     signal debug_reg_7      : std_logic_vector(reg_width);
-    
+
+    -- signal led_segments     : STD_LOGIC_VECTOR( 6 downto 0 );
+    -- signal led_digits       : STD_LOGIC_VECTOR( 3 downto 0 );
+    -- signal en_write         : std_logic;
+        
+component led_display is
+   Port (
+       -- Mem mapped to xFFF2
+       addr_write           : in  STD_LOGIC_VECTOR (15 downto 0);  -- wb_address
+       clk                  : in  STD_LOGIC;
+       data_in              : in  STD_LOGIC_VECTOR (15 downto 0);
+       en_write             : in  STD_LOGIC;
+
+       board_clock          : in  STD_LOGIC;
+       led_segments         : out STD_LOGIC_VECTOR( 6 downto 0 );
+       led_digits           : out STD_LOGIC_VECTOR( 3 downto 0 )
+   );
+end component;
    
 component console is
         port (
@@ -522,7 +545,24 @@ begin
         end if;
     end process MEM_WB;   
     
------------------
+
+-----------------------------------   LED Display     -------------------------------------------------   
+
+-- Mem mapped to xFFF2
+led_display_memory : led_display
+port map (
+
+       addr_write   => EX_MEM_latch.ra_data(15 downto 0), -- store address  
+       clk          => M_clock,
+       data_in      => EX_MEM_latch.rb_data(15 downto 0), -- data written to LEDs  
+       en_write     => '1', 
+       board_clock  => board_clock,
+       led_segments => led_segments,
+       led_digits   => led_digits
+   );
+     
+-----------------------------------   Debug Console   -------------------------------------------------   
+
     console_display : console
     port map
     (
@@ -536,7 +576,7 @@ begin
     -- Stage 2 Decode
     --
     
-        s2_pc => ID_EX_latch.pc,
+        s2_pc   => ID_EX_latch.pc,
         s2_inst => ID_EX_latch.instr,
     
         s2_reg_a => ID_EX_latch.instr(ra_width),
