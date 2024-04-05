@@ -429,7 +429,6 @@ begin
             if rising_edge(M_Clock) and Reset_Out = '1' then
                 out_port <= '0';
             end if;
-            
             if falling_edge(M_Clock) and Reset_Out = '0' then
                 if ID_EX_latch.instr(op_width) = op_out then
                     out_port <= i_ALU_A(0);
@@ -488,7 +487,7 @@ begin
         
      Memory_instance : entity work.Memory
         port map(                               
-            Reset => Reset_EX_MEM,
+            Reset => Reset_and_Load,
             Clk => M_Clock,
             Instr_Addr => PC.pc,
             Instr => MEM_instr,
