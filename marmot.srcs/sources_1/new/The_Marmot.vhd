@@ -397,11 +397,7 @@ begin
        );
 
     --------------------------------------
-     
---   PC.br <= ID_EX_latch.br_addr;
-
-     ---
-     
+          
     with o_CON_alu_src_1 select
       i_ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,
@@ -428,11 +424,21 @@ begin
         ALU_Ov   => o_ALU_Ov
         );    
     
-        out_port <= '0'         when Reset_Out = '1' else
-                    i_ALU_A(0)  when ID_EX_latch.instr(op_width) = op_out;
+    OUT_process: process(Reset_Out, M_Clock)
+        begin
+            if rising_edge(M_Clock) and Reset_Out = '1' then
+                out_port <= '0';
+            end if;
+            
+            if falling_edge(M_Clock) and Reset_Out = '0' then
+                if ID_EX_latch.instr(op_width) = op_out then
+                    out_port <= i_ALU_A(0);
+                end if;
+            end if;
+    end process OUT_process;        
     
-        EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in else
-                     o_ALU_C;
+    EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in else
+                 o_ALU_C;
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_EX_MEM)
