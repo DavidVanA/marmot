@@ -79,7 +79,7 @@ begin
              '0' & o_bshr_A  when op_bshr,
                    o_mult_C  when op_mult,
              '0' & o_imm_C   when op_load_imm,
-                   ALU_A     when op_mov,
+                   ALU_B     when op_mov,
              (others => '0') when others;
     
     Adder_instance : entity work.Adder

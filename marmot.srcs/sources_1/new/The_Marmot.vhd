@@ -17,6 +17,7 @@ entity The_Marmot is
     sw_sel  : IN std_logic;
     
     ------- Debug Console Ports -----------------------------
+
     debug_console   : in std_logic;
     board_clock     : in std_logic;
 
@@ -25,7 +26,12 @@ entity The_Marmot is
     vga_blue        : out std_logic_vector( 3 downto 0 );
 
     h_sync_signal   : out std_logic;
-    v_sync_signal   : out std_logic
+    v_sync_signal   : out std_logic;
+    
+    ------- LED Display Ports -------------------------------
+    led_segments    : out STD_LOGIC_VECTOR( 6 downto 0 );
+    led_digits      : out STD_LOGIC_VECTOR( 3 downto 0 )
+
     );
 end The_Marmot;
 
@@ -121,7 +127,24 @@ architecture Behavioral of The_Marmot is
     signal debug_reg_5      : std_logic_vector(reg_width);
     signal debug_reg_6      : std_logic_vector(reg_width);
     signal debug_reg_7      : std_logic_vector(reg_width);
-    
+
+    -- signal led_segments     : STD_LOGIC_VECTOR( 6 downto 0 );
+    -- signal led_digits       : STD_LOGIC_VECTOR( 3 downto 0 );
+    -- signal en_write         : std_logic;
+        
+component led_display is
+   Port (
+       -- Mem mapped to xFFF2
+       addr_write           : in  STD_LOGIC_VECTOR (15 downto 0);  -- wb_address
+       clk                  : in  STD_LOGIC;
+       data_in              : in  STD_LOGIC_VECTOR (15 downto 0);
+       en_write             : in  STD_LOGIC;
+
+       board_clock          : in  STD_LOGIC;
+       led_segments         : out STD_LOGIC_VECTOR( 6 downto 0 );
+       led_digits           : out STD_LOGIC_VECTOR( 3 downto 0 )
+   );
+end component;
    
 component console is
         port (
@@ -405,14 +428,14 @@ begin
     with o_CON_alu_src_1 select
       i_ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,
-        EX_MEM_latch.result when alu_src_fd1,
+        wb_data when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
         (others => '0') when others;
         
     with o_CON_alu_src_2 select
       i_ALU_B <= 
         ID_EX_latch.rb_data when alu_src_rd,
-        EX_MEM_latch.result when alu_src_fd1,
+        wb_data when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
         '0' & x"000" & ID_EX_latch.instr(cl_width) when alu_src_cl,
         (others => '0') when others;
@@ -433,7 +456,6 @@ begin
             if rising_edge(M_Clock) and Reset_Out = '1' then
                 out_port <= '0';
             end if;
-            
             if falling_edge(M_Clock) and Reset_Out = '0' then
                 if ID_EX_latch.instr(op_width) = op_out then
                     out_port <= i_ALU_A(0);
@@ -488,16 +510,17 @@ begin
         
      Memory_instance : entity work.Memory
         port map(                               
-            Reset           => Reset_EX_MEM,
-            Clk             => M_Clock,
-            Instr_Addr      => PC.pc,
-            Instr           => MEM_instr,
-            Data_Addr       => MEM_data_addr,
-            Read_Data       => MEM_read_data,
-            Write_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
-            Write_Not_Read  => o_CON_Mem_Wr_nRd
+            Reset => Reset_and_Load,
+            Clk => M_Clock,
+            Instr_Addr => PC.pc,
+            Instr => MEM_instr,
+            Data_Addr => MEM_data_addr,
+            Read_Data => MEM_read_data,
+            Write_Data => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
+            Write_Not_Read => o_CON_Mem_Wr_nRd
         );
-
+        
+    
     with o_CON_Wb_Src select
         wb_data <=
            EX_MEM_latch.result       when wb_src_alu,
@@ -522,7 +545,24 @@ begin
         end if;
     end process MEM_WB;   
     
------------------
+
+-----------------------------------   LED Display     -------------------------------------------------   
+
+-- Mem mapped to xFFF2
+led_display_memory : led_display
+port map (
+
+       addr_write   => EX_MEM_latch.ra_data(15 downto 0), -- store address  
+       clk          => M_clock,
+       data_in      => EX_MEM_latch.rb_data(15 downto 0), -- data written to LEDs  
+       en_write     => '1', 
+       board_clock  => board_clock,
+       led_segments => led_segments,
+       led_digits   => led_digits
+   );
+     
+-----------------------------------   Debug Console   -------------------------------------------------   
+
     console_display : console
     port map
     (
@@ -536,7 +576,7 @@ begin
     -- Stage 2 Decode
     --
     
-        s2_pc => ID_EX_latch.pc,
+        s2_pc   => ID_EX_latch.pc,
         s2_inst => ID_EX_latch.instr,
     
         s2_reg_a => ID_EX_latch.instr(ra_width),
@@ -564,8 +604,8 @@ begin
         s3_reg_c_data => wb_data(instr_width),
         s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
     
-        s3_r_wb => '0',
-        s3_r_wb_data => x"0000",
+        s3_r_wb => not(o_CON_MEM_wr_nRd(0)),
+        s3_r_wb_data => MEM_read_data,
     
         s3_br_wb => PCSrc,
         s3_br_wb_address => x"0000",

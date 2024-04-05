@@ -50,9 +50,7 @@ begin
                        Instr_Addr(14) OR
                        Instr_Addr(13) OR
                        Instr_Addr(12) OR
-                       Instr_Addr(11) OR
-                       Instr_Addr(10) OR
-                       Instr_Addr(9);
+                       Instr_Addr(11);
     
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
@@ -136,7 +134,11 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     -- Common module generics
     MEMORY_SIZE             => 8192,            --positive integer
     MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
+<<<<<<< HEAD
     MEMORY_INIT_FILE        => "boots.mem",          --string; "none" or "<filename>.mem" 
+=======
+    MEMORY_INIT_FILE        => "boots.mem",     --string; "none" or "<filename>.mem" 
+>>>>>>> master
     MEMORY_INIT_PARAM       => "",              --string;
     USE_MEM_INIT            => 1,               --integer; 0,1
     WAKEUP_TIME             => "disable_sleep", --string; "disable_sleep" or "use_sleep_pin" 
