@@ -201,7 +201,8 @@ begin
 				   "0111" 					 	when (ID_EX_INS_type = l1_instr or ID_EX_INS(op_width) = op_out) else
 				   '0' & ID_EX_INS(ra_width);
 
-	alu_2_read_src <= '0' & ID_EX_INS(rc_width) when (ID_EX_INS_type = a1_instr) else
+	alu_2_read_src <= '0' & ID_EX_INS(rb_width) when (ID_EX_INS_type = l2_instr) else
+	               '0' & ID_EX_INS(rc_width) when (ID_EX_INS_type = a1_instr) else
 				   "1111";
 
 	ALU_SRC_1 <= alu_src_fd1 when alu_1_read_src = ex_mem_dest else
