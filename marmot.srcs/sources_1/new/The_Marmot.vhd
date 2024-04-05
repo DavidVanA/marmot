@@ -424,14 +424,14 @@ begin
     with o_CON_alu_src_1 select
       i_ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,
-        EX_MEM_latch.result when alu_src_fd1,
+        wb_data when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
         (others => '0') when others;
         
     with o_CON_alu_src_2 select
       i_ALU_B <= 
         ID_EX_latch.rb_data when alu_src_rd,
-        EX_MEM_latch.result when alu_src_fd1,
+        wb_data when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
         '0' & x"000" & ID_EX_latch.instr(cl_width) when alu_src_cl,
         (others => '0') when others;
@@ -452,7 +452,6 @@ begin
             if rising_edge(M_Clock) and Reset_Out = '1' then
                 out_port <= '0';
             end if;
-            
             if falling_edge(M_Clock) and Reset_Out = '0' then
                 if ID_EX_latch.instr(op_width) = op_out then
                     out_port <= i_ALU_A(0);
@@ -511,7 +510,7 @@ begin
         
      Memory_instance : entity work.Memory
         port map(                               
-            Reset => Reset_EX_MEM,
+            Reset => Reset_and_Load,
             Clk => M_Clock,
             Instr_Addr => PC.pc,
             Instr => MEM_instr,
@@ -520,7 +519,8 @@ begin
             Write_Data => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
             Write_Not_Read => o_CON_Mem_Wr_nRd
         );
-
+        
+    
     with o_CON_Wb_Src select
         wb_data <=
            EX_MEM_latch.result       when wb_src_alu,
@@ -604,8 +604,8 @@ port map (
         s3_reg_c_data => wb_data(instr_width),
         s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
     
-        s3_r_wb => '0',
-        s3_r_wb_data => x"0000",
+        s3_r_wb => not(o_CON_MEM_wr_nRd(0)),
+        s3_r_wb_data => MEM_read_data,
     
         s3_br_wb => PCSrc,
         s3_br_wb_address => x"0000",
