@@ -50,9 +50,7 @@ begin
                        Instr_Addr(14) OR
                        Instr_Addr(13) OR
                        Instr_Addr(12) OR
-                       Instr_Addr(11) OR
-                       Instr_Addr(10) OR
-                       Instr_Addr(9);
+                       Instr_Addr(11);
     
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
