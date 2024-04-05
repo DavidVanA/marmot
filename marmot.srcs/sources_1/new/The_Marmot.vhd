@@ -12,6 +12,10 @@ entity The_Marmot is
     Reset_and_Load        : IN std_logic;
     out_port              : OUT std_logic;
     
+    ------- Input Switch Ports ------------------------------
+    sw      : IN std_logic_vector(9 downto 0);
+    sw_sel  : IN std_logic;
+    
     ------- Debug Console Ports -----------------------------
     debug_console   : in std_logic;
     board_clock     : in std_logic;
@@ -437,7 +441,8 @@ begin
             end if;
     end process OUT_process;        
     
-    EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in else
+    EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in and sw_sel = '0' else
+                 '0' & "000000"& sw       when o_CON_EX_Res_Src = ex_res_src_in and sw_sel = '1' else
                  o_ALU_C;
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
@@ -452,11 +457,6 @@ begin
               FLAG_Ov   <= '0';
         elsif rising_edge(M_clock) then
               EX_MEM_latch.result <= EX_result;
---            if o_CON_Ex_Res_Src = ex_res_src_in then
---                EX_MEM_latch.result <= '0' & in_port & "000000";
---            else
---                EX_MEM_latch.result <= o_ALU_C;
---            end if;
             
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.pc <= ID_EX_latch.pc;
@@ -488,14 +488,14 @@ begin
         
      Memory_instance : entity work.Memory
         port map(                               
-            Reset => Reset_EX_MEM,
-            Clk => M_Clock,
-            Instr_Addr => PC.pc,
-            Instr => MEM_instr,
-            Data_Addr => MEM_data_addr,
-            Read_Data => MEM_read_data,
-            Write_Data => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
-            Write_Not_Read => o_CON_Mem_Wr_nRd
+            Reset           => Reset_EX_MEM,
+            Clk             => M_Clock,
+            Instr_Addr      => PC.pc,
+            Instr           => MEM_instr,
+            Data_Addr       => MEM_data_addr,
+            Read_Data       => MEM_read_data,
+            Write_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
+            Write_Not_Read  => o_CON_Mem_Wr_nRd
         );
 
     with o_CON_Wb_Src select
@@ -512,13 +512,13 @@ begin
     MEM_WB: process(M_clock, Reset_MEM_WB)
     begin
         if Reset_MEM_WB = '1' then
-            MEM_WB_latch.result <= (others => '0');
-            MEM_WB_latch.instr <= (others => '0');
-            MEM_WB_latch.pc <= (others => '0');
+            MEM_WB_latch.result     <= (others => '0');
+            MEM_WB_latch.instr      <= (others => '0');
+            MEM_WB_latch.pc         <= (others => '0');
         elsif rising_edge(M_clock) then
-            MEM_WB_latch.instr <= EX_MEM_latch.instr;
-            MEM_WB_latch.pc <= EX_MEM_latch.pc;
-            MEM_WB_latch.result <= wb_data;
+            MEM_WB_latch.instr      <= EX_MEM_latch.instr;
+            MEM_WB_latch.pc         <= EX_MEM_latch.pc;
+            MEM_WB_latch.result     <= wb_data;
         end if;
     end process MEM_WB;   
     
