@@ -113,7 +113,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
 
     MEMORY_SIZE             => 8192,            --positive integer
     MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
-    MEMORY_INIT_FILE        => "storeTest.mem",     --string; "none" or "<filename>.mem" 
+    MEMORY_INIT_FILE        => "boots.mem",     --string; "none" or "<filename>.mem" 
     MEMORY_INIT_PARAM       => "",              --string;
     USE_MEM_INIT            => 1,               --integer; 0,1
     WAKEUP_TIME             => "disable_sleep", --string; "disable_sleep" or "use_sleep_pin" 

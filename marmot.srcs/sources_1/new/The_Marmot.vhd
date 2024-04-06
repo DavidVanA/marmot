@@ -415,14 +415,14 @@ begin
 
     with Branch_Relative select
          Branch_Base <=
-                       ID_EX_latch.ra_data(instr_width) when '1',
+                       i_ALU_A(instr_width) when '1',
                        ID_EX_latch.pc                   when others;
     
    Branch_Calculator_instance: entity work.Branch_Calculator
        port map (
            Instr_Port      => ID_EX_latch.instr,
            Branch_Base     => Branch_Base,
-           Ra              => ID_EX_latch.ra_data(instr_width),
+           Ra              => i_ALU_A(instr_width),
            Disp_Selector   => Disp_Select,
            Br_Addr_Port    => PC.br
        );
@@ -489,8 +489,8 @@ begin
             
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.pc <= ID_EX_latch.pc;
-            EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
-            EX_MEM_latch.rb_data <= ID_EX_latch.rb_data;
+            EX_MEM_latch.ra_data <= i_ALU_A;
+            EX_MEM_latch.rb_data <= i_ALU_B;
             EX_MEM_latch.npc <= ID_EX_latch.npc;
             
             if ID_EX_latch.instr (op_width) = op_test then
