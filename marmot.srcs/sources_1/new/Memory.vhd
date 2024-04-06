@@ -54,7 +54,7 @@ begin
     
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
-        RAM_addrb  <= Instr_Addr(instr_mem_width);  
+        RAM_addrb  <= Instr_Addr(9 downto 1);  
         RAM_enb    <= RAM_not_ROM;
         RAM_rstb   <= Reset;
 
@@ -67,7 +67,7 @@ begin
  
 -----------------------------------   IF/ID   -------------------------------------------------   
 
-        RAM_addra  <= Data_Addr(instr_mem_width);
+        RAM_addra  <= Data_Addr(9 downto 1);
         RAM_wea    <= Write_Not_Read;
         RAM_dina   <= Write_Data;
         Read_Data  <= RAM_douta;
@@ -134,7 +134,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     -- Common module generics
     MEMORY_SIZE             => 8192,            --positive integer
     MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
-    MEMORY_INIT_FILE        => "boots.mem",     --string; "none" or "<filename>.mem" 
+    MEMORY_INIT_FILE        => "storeTest.mem",     --string; "none" or "<filename>.mem" 
     MEMORY_INIT_PARAM       => "",              --string;
     USE_MEM_INIT            => 1,               --integer; 0,1
     WAKEUP_TIME             => "disable_sleep", --string; "disable_sleep" or "use_sleep_pin" 

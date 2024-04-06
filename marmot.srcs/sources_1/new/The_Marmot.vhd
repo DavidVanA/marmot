@@ -510,14 +510,14 @@ begin
         
      Memory_instance : entity work.Memory
         port map(                               
-            Reset => Reset_and_Load,
-            Clk => M_Clock,
-            Instr_Addr => PC.pc,
-            Instr => MEM_instr,
-            Data_Addr => MEM_data_addr,
-            Read_Data => MEM_read_data,
-            Write_Data => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
-            Write_Not_Read => o_CON_Mem_Wr_nRd
+            Reset           => Reset_and_Load,
+            Clk             => M_Clock,
+            Instr_Addr      => PC.pc,
+            Instr           => MEM_instr,
+            Data_Addr       => MEM_data_addr,
+            Read_Data       => MEM_read_data,
+            Write_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
+            Write_Not_Read  => o_CON_Mem_Wr_nRd
         );
         
     
@@ -569,53 +569,53 @@ port map (
     --
     -- Stage 1 Fetch
     --
-        s1_pc => IF_ID_latch.pc,
+        s1_pc   => IF_ID_latch.pc,
         s1_inst => IF_ID_latch.instr,
     
     --
     -- Stage 2 Decode
     --
     
-        s2_pc   => ID_EX_latch.pc,
-        s2_inst => ID_EX_latch.instr,
+        s2_pc           => ID_EX_latch.pc,
+        s2_inst         => ID_EX_latch.instr,
     
-        s2_reg_a => ID_EX_latch.instr(ra_width),
-        s2_reg_b => ID_EX_latch.instr(rb_width),
-        s2_reg_c => ID_EX_latch.instr(rc_width),
+        s2_reg_a        => ID_EX_latch.instr(ra_width),
+        s2_reg_b        => ID_EX_latch.instr(rb_width),
+        s2_reg_c        => ID_EX_latch.instr(rc_width),
     
-        s2_reg_a_data => i_ALU_A(instr_width),
-        s2_reg_b_data => i_ALU_B(instr_width),
-        s2_reg_c_data => EX_Result(instr_width),
-        s2_immediate => x"0000",
+        s2_reg_a_data   => i_ALU_A(instr_width),
+        s2_reg_b_data   => i_ALU_B(instr_width),
+        s2_reg_c_data   => EX_Result(instr_width),
+        s2_immediate    => x"0000",
     
     --
     -- Stage 3 Execute
     --
     
-        s3_pc => EX_MEM_latch.pc,
-        s3_inst => EX_MEM_latch.instr,
+        s3_pc           => EX_MEM_latch.pc,
+        s3_inst         => EX_MEM_latch.instr,
     
-        s3_reg_a => EX_MEM_latch.instr(8 downto 6),
-        s3_reg_b => EX_MEM_latch.instr(5 downto 3),
-        s3_reg_c => EX_MEM_latch.instr(2 downto 0),
+        s3_reg_a        => EX_MEM_latch.instr(8 downto 6),
+        s3_reg_b        => EX_MEM_latch.instr(5 downto 3),
+        s3_reg_c        => EX_MEM_latch.instr(2 downto 0),
     
-        s3_reg_a_data => EX_MEM_latch.ra_data(instr_width),
-        s3_reg_b_data => EX_MEM_latch.rb_data(instr_width),
-        s3_reg_c_data => wb_data(instr_width),
-        s3_immediate => x"00" & EX_MEM_latch.instr(imm_width),
+        s3_reg_a_data   => EX_MEM_latch.ra_data(instr_width),
+        s3_reg_b_data   => EX_MEM_latch.rb_data(instr_width),
+        s3_reg_c_data   => wb_data(instr_width),
+        s3_immediate    => x"00" & EX_MEM_latch.instr(imm_width),
     
-        s3_r_wb => not(o_CON_MEM_wr_nRd(0)),
-        s3_r_wb_data => MEM_read_data,
+        s3_r_wb         => not(o_CON_MEM_wr_nRd(0)),
+        s3_r_wb_data    => MEM_read_data,
     
-        s3_br_wb => PCSrc,
-        s3_br_wb_address => x"0000",
+        s3_br_wb            => '0',
+        s3_br_wb_address    => x"0000",
     
         s3_mr_wr            => o_CON_MEM_wr_nrd(0),
         s3_mr_wr_address    => MEM_data_addr,
         s3_mr_wr_data       => MEM_data_data,
     
-        s3_mr_rd => '0',
-        s3_mr_rd_address => x"0000",
+        s3_mr_rd            => '0',
+        s3_mr_rd_address    => x"0000",
     
     --
     -- Stage 4 Memory
