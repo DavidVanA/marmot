@@ -1,7 +1,7 @@
 Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 ---------------------------------------------------------------------------------------------------------------
 | Tool Version : Vivado v.2017.4 (win64) Build 2086221 Fri Dec 15 20:55:39 MST 2017
-| Date         : Sat Apr  6 13:31:46 2024
+| Date         : Sat Apr  6 13:56:25 2024
 | Host         : DESKTOP-26QU564 running 64-bit major release  (build 9200)
 | Command      : report_utilization -file The_Marmot_utilization_synth.rpt -pb The_Marmot_utilization_synth.pb
 | Design       : The_Marmot
@@ -157,9 +157,9 @@ Table of Contents
 | LUT5     |  431 |                 LUT |
 | LUT4     |  334 |                 LUT |
 | MUXF7    |  328 |               MuxFx |
-| LUT3     |  319 |                 LUT |
+| LUT3     |  320 |                 LUT |
 | RAMD64E  |  256 |  Distributed Memory |
-| LUT2     |  185 |                 LUT |
+| LUT2     |  184 |                 LUT |
 | FDCE     |  117 |        Flop & Latch |
 | CARRY4   |   34 |          CarryLogic |
 | OBUF     |   26 |                  IO |

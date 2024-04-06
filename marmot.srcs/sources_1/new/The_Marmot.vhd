@@ -522,7 +522,7 @@ begin
     Memory_instance : entity work.Memory_V2
     port map(                               
         Reset           => Reset_and_Load,
-        M_clock             => M_Clock,
+        M_clock         => M_Clock,
         Fetch_Addr      => PC.pc,
         Fetch_Instr     => Fetch_instr,
         Mem_Addr        => Mem_addr,

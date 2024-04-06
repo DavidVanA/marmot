@@ -92,7 +92,7 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     rsta                    => Reset,
     ena                     => RAM_ena,
     wea                     => RAM_wea,
-    addra                   => Mem_Addr(instr_mem_width),
+    addra                   => Mem_Addr(9 downto 1),
     dina                    => Store_Data,
     douta                   => RAM_douta,
 
@@ -101,7 +101,7 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     clkb                    => M_clock,
     rstb                    => Reset,
     enb                     => RAM_not_ROM,
-    addrb                   => Fetch_Addr(instr_mem_width),
+    addrb                   => Fetch_Addr(9 downto 1),
     doutb                   => RAM_doutb
     
   );
@@ -139,7 +139,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     clka                    => M_clock,
     rsta                    => Reset,
     ena                     => ROM_en, -- not Ram_not_ROM
-    addra                   => Fetch_Addr(instr_mem_width),
+    addra                   => Fetch_Addr(9 downto 1),
     douta                   => ROM_douta
   );
 
