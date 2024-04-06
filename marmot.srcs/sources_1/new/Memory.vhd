@@ -8,12 +8,12 @@ entity Memory is
     port(
         Reset           : IN  std_logic;
         Clk             : IN  std_logic;
-        Instr_Addr      : IN  std_logic_vector(instr_width);
-        Instr           : OUT std_logic_vector(instr_width);
-        Data_Addr       : IN  std_logic_vector(instr_width);
-        Read_Data       : OUT std_logic_vector(instr_width);
-        Write_Data      : IN  std_logic_vector(instr_width); 
-        Write_Not_Read  : IN  std_logic_vector(1 downto 0) 
+        Fetch_Addr      : IN  std_logic_vector(instr_width);
+        Fetch_Instr     : OUT std_logic_vector(instr_width);
+        Mem_Addr        : IN  std_logic_vector(instr_width);
+        Load_Data       : OUT std_logic_vector(instr_width);
+        Store_Data      : IN  std_logic_vector(instr_width); 
+        Store_Not_Load  : IN  std_logic_vector(1 downto 0) 
         );
 end Memory;
     
@@ -46,31 +46,31 @@ begin
     
 -----------------------------------    PC    -------------------------------------------------   
         -- RAM/ROM Selector for Fetch
-        RAM_not_ROM <= Instr_Addr(15) OR
-                       Instr_Addr(14) OR
-                       Instr_Addr(13) OR
-                       Instr_Addr(12) OR
-                       Instr_Addr(11);
+        RAM_not_ROM <= Fetch_Addr(15) OR
+                       Fetch_Addr(14) OR
+                       Fetch_Addr(13) OR
+                       Fetch_Addr(12) OR
+                       Fetch_Addr(11);
     
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
-        RAM_addrb  <= Instr_Addr(9 downto 1);  
+        RAM_addrb  <= Fetch_Addr(9 downto 1);  
         RAM_enb    <= RAM_not_ROM;
         RAM_rstb   <= Reset;
 
         ROM_clka   <= Clk;
         ROM_ena    <= not RAM_not_ROM;
         ROM_rsta   <= Reset;
-        ROM_addra  <= '0' & Instr_Addr(8 downto 1);
-        Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
+        ROM_addra        <= '0' & Fetch_Addr(8 downto 1);
+        Fetch_Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
         
  
 -----------------------------------   IF/ID   -------------------------------------------------   
 
-        RAM_addra  <= Data_Addr(9 downto 1);
-        RAM_wea    <= Write_Not_Read;
-        RAM_dina   <= Write_Data;
-        Read_Data  <= RAM_douta;
+        RAM_addra  <= Mem_Addr(9 downto 1);
+        RAM_wea    <= Store_Not_Load;
+        RAM_dina   <= Store_Data;
+        Load_Data  <= RAM_douta;
         RAM_ena    <= not RAM_Not_ROM;
         RAM_rsta   <= Reset;
 

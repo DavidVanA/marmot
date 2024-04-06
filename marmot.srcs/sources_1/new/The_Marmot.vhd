@@ -44,10 +44,10 @@ architecture Behavioral of The_Marmot is
     signal r1_data        :   std_logic_vector(reg_width);
     signal r2_data        :   std_logic_vector(reg_width);
 
-    signal MEM_read_data  :   std_logic_vector(instr_width);
-    signal MEM_data_addr  :   std_logic_vector(instr_width);
-    signal MEM_data_data  :   std_logic_vector(instr_width);
-    signal MEM_instr      :   std_logic_vector(instr_width);
+    signal Load_Data  :   std_logic_vector(instr_width);
+    signal Mem_Addr  :   std_logic_vector(instr_width);
+    signal Store_Data  :   std_logic_vector(instr_width);
+    signal Fetch_Instr      :   std_logic_vector(instr_width);
     
     signal br_addr        :   std_logic_vector(instr_width);
 
@@ -75,16 +75,14 @@ architecture Behavioral of The_Marmot is
     signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
 
     -- MUX for memory data address
-    signal o_CON_Data_Addr_Src: std_logic_vector(mem_src_width);
-
+    signal Mem_Addr_Select: std_logic_vector(mem_src_width);
     -- MUX for memory write data 
-    signal o_CON_Data_Data_Src: std_logic_vector(mem_src_width);
-
+    signal Store_Data_Select: std_logic_vector(mem_src_width);
     -- Signal for selecting write or read
-    signal o_CON_Mem_Wr_nRd: std_logic_vector(byte_addressable);
+    signal Store_Not_Load: std_logic_vector(byte_addressable);
 
     -- MUX for writeback source
-    signal o_CON_Wb_Src:     std_logic_vector(wb_src_width);
+    signal WB_Select:     std_logic_vector(wb_src_width);
     
     -- Pipeline Latch Signals
     signal PC             :   PC_rec;
@@ -302,13 +300,13 @@ begin
        EX_MEM_PORT        => i_CON_EX_MEM,
        MEM_WB_PORT        => i_CON_MEM_WB,
        WB_EN              => o_CON_Wb_En,
-       MEM_DATA_ADDR_SRC  => o_CON_Data_Addr_Src,
-       MEM_DATA_DATA_SRC  => o_CON_Data_Data_Src,
+       Mem_Addr_Select    => Mem_Addr_Select,
+       Store_Data_Select  => Store_Data_Select,
        ALU_SRC_1          => o_CON_alu_src_1,
        ALU_SRC_2          => o_CON_alu_src_2,
        EX_RES_SRC         => o_CON_Ex_Res_Src,
-       MEM_WR_nRD         => o_CON_Mem_Wr_nRd,
-       WB_SRC             => o_CON_Wb_Src,
+       Store_Not_Load         => Store_Not_Load,
+       WB_SRC             => WB_Select,
        MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
        RD_INDEX_1         => o_CON_Rd_Index1,
        RD_INDEX_2         => o_CON_Rd_Index2,
@@ -355,7 +353,7 @@ begin
             else
                 IF_ID_latch.pc      <= PC.pc;
                 IF_ID_latch.npc     <= PC.npc;
-                IF_ID_latch.instr   <= MEM_instr;
+                IF_ID_latch.instr   <= Fetch_Instr;
             end if;
         end if;
     end process IF_ID;
@@ -495,15 +493,15 @@ begin
         end if;
     end process EX_MEM;    
 
-    with o_CON_Data_Addr_Src select
-        MEM_data_addr <=
+    with Mem_Addr_Select select
+         Mem_Addr <=
             EX_MEM_latch.ra_data(15 downto 0) when mem_src_ra,
             EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
 			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
 			(others => '0') when others;
 
-    with o_CON_Data_Data_Src select
-        MEM_data_data <=
+    with Store_Data_Select select    
+         Store_Data <=
             EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
 			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
 			(others => '0') when others;
@@ -512,19 +510,19 @@ begin
         port map(                               
             Reset           => Reset_and_Load,
             Clk             => M_Clock,
-            Instr_Addr      => PC.pc,
-            Instr           => MEM_instr,
-            Data_Addr       => MEM_data_addr,
-            Read_Data       => MEM_read_data,
-            Write_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
-            Write_Not_Read  => o_CON_Mem_Wr_nRd
+            Fetch_Addr      => Pc.pc,
+            Fetch_Instr     => Fetch_Instr,
+            Mem_Addr        => Mem_Addr,
+            Load_Data       => Load_Data,
+            Store_Data      => Store_Data, -- EX_MEM_latch.rb_data(instr_width), --
+            Store_Not_Load  => Store_Not_Load
         );
         
     
-    with o_CON_Wb_Src select
-        wb_data <=
+    with WB_Select select
+         WB_Data <=
            EX_MEM_latch.result       when wb_src_alu,
-           '0' & MEM_read_data       when wb_src_mem,
+           '0' & Load_Data           when wb_src_mem,
            '0' & EX_MEM_latch.npc    when wb_src_npc,
            EX_MEM_latch.rb_data      when wb_src_rb,
            EX_MEM_latch.ra_data      when wb_src_out,
@@ -604,15 +602,15 @@ port map (
         s3_reg_c_data   => wb_data(instr_width),
         s3_immediate    => x"00" & EX_MEM_latch.instr(imm_width),
     
-        s3_r_wb         => not(o_CON_MEM_wr_nRd(0)),
-        s3_r_wb_data    => MEM_read_data,
+        s3_r_wb         => not(Store_Not_Load(0)),
+        s3_r_wb_data    => Load_Data,
     
         s3_br_wb            => '0',
         s3_br_wb_address    => x"0000",
     
-        s3_mr_wr            => o_CON_MEM_wr_nrd(0),
-        s3_mr_wr_address    => MEM_data_addr,
-        s3_mr_wr_data       => MEM_data_data,
+        s3_mr_wr            => Store_Not_Load(0),
+        s3_mr_wr_address    => Mem_Addr,
+        s3_mr_wr_data       => Store_Data,
     
         s3_mr_rd            => '0',
         s3_mr_rd_address    => x"0000",
