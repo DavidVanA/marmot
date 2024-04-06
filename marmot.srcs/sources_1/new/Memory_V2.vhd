@@ -14,12 +14,11 @@ entity Memory_V2 is
         Fetch_Instr     : OUT std_logic_vector(instr_width); -- The fetched instruction
         
         -- Memory
---        Load_Not_Store  : IN std_logic_vector(1 downto 0); -- Write_Not_Read  => o_CON_Mem_Wr_nRd
-        Write_or_Read   : IN std_logic_vector(1 downto 0);
+        Store_Not_Load   : IN std_logic_vector(1 downto 0);
         
-        Data_Addr       : IN  std_logic_vector(instr_width);
-        Read_Data       : OUT std_logic_vector(instr_width);
-        Write_Data      : IN  std_logic_vector(instr_width)
+        Mem_Addr       : IN  std_logic_vector(instr_width);
+        Load_Data       : OUT std_logic_vector(instr_width);
+        Store_Data      : IN  std_logic_vector(instr_width)
    );
 end Memory_V2;
 
@@ -49,12 +48,12 @@ begin
     
     ROM_en      <= not RAM_not_ROM;
 
-    Read_Data   <= RAM_douta;
+    Load_Data   <= RAM_douta;
     
-    RAM_ena     <= '1' when Write_or_Read = write_word  else
-                   '1' when Write_or_Read = read_mem    else
+    RAM_ena     <= '1' when Store_Not_Load = mem_load  else
+                   '1' when Store_Not_Load = mem_store    else
                    '0';
-    RAM_wea     <= Write_or_Read;
+    RAM_wea     <= Store_Not_Load;
     
 xpm_memory_dpdistram_inst : xpm_memory_dpdistram
   generic map (
@@ -93,8 +92,8 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     rsta                    => Reset,
     ena                     => RAM_ena,
     wea                     => RAM_wea,
-    addra                   => Data_Addr(9 downto 1),
-    dina                    => Write_Data,
+    addra                   => Mem_Addr(9 downto 1),
+    dina                    => Store_Data,
     douta                   => RAM_douta,
 
 

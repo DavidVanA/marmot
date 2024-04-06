@@ -1,83 +1,60 @@
-Library IEEE;
+library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 Library xpm;
 use xpm.vcomponents.all;
 use work.Marmot_Config.all;
 
 entity Memory is
-    port(
+  Port (
+        M_clock         : IN std_logic;
         Reset           : IN  std_logic;
-        Clk             : IN  std_logic;
-        Instr_Addr      : IN  std_logic_vector(instr_width);
-        Instr           : OUT std_logic_vector(instr_width);
-        Data_Addr       : IN  std_logic_vector(instr_width);
-        Read_Data       : OUT std_logic_vector(instr_width);
-        Write_Data      : IN  std_logic_vector(instr_width); 
-        Write_Not_Read  : IN  std_logic_vector(1 downto 0) 
-        );
+        
+        -- Fetch 
+        Fetch_Addr      : IN  std_logic_vector(instr_width);-- The instruction to fetch
+        Fetch_Instr     : OUT std_logic_vector(instr_width); -- The fetched instruction
+        
+        -- Memory
+        Store_Not_Load   : IN std_logic_vector(1 downto 0);
+        
+        Mem_Addr       : IN  std_logic_vector(instr_width);
+        Load_Data       : OUT std_logic_vector(instr_width);
+        Store_Data      : IN  std_logic_vector(instr_width)
+   );
 end Memory;
-    
+
 architecture Behavioral of Memory is
 
     signal RAM_Not_ROM : std_logic;
-    signal RAM_clka    : std_logic;
-    signal RAM_clkb    : std_logic;
-    signal RAM_addrb   : std_logic_vector(instr_mem_width);
-    signal RAM_doutb   : std_logic_vector(instr_width);
-    signal RAM_enb     : std_logic;
-    signal RAM_rstb    : std_logic;
-         
-    signal ROM_clka    : std_logic;
-    signal ROM_ena     : std_logic;
-    signal ROM_addra   : std_logic_vector(instr_mem_width);
-    signal ROM_douta   : std_logic_vector(instr_width); 
-    signal ROM_rsta    : std_logic;
-    signal ROM_sleep   : std_logic;
 
-    signal RAM_addra   : std_logic_vector(instr_mem_width);
-    signal RAM_wea     : std_logic_vector(1 downto 0);
-    signal RAM_dina    : std_logic_vector(instr_width);
-    signal RAM_douta   : std_logic_vector(instr_width);
     signal RAM_ena     : std_logic;
-    signal RAM_rsta    : std_logic;
+    signal RAM_enb     : std_logic;
+    signal ROM_en      : std_logic;
+    signal RAM_douta   : std_logic_vector(instr_width);
+    signal RAM_doutb   : std_logic_vector(instr_width);
+    signal ROM_douta   : std_logic_vector(instr_width); 
+    signal RAM_wea     : std_logic_vector(1 downto 0);
 
-    
+
 begin
     
------------------------------------    PC    -------------------------------------------------   
-        -- RAM/ROM Selector for Fetch
-        RAM_not_ROM <= Instr_Addr(15) OR
-                       Instr_Addr(14) OR
-                       Instr_Addr(13) OR
-                       Instr_Addr(12) OR
-                       Instr_Addr(11);
     
-        RAM_clka   <= Clk;
-        RAM_clkb   <= Clk;
-        RAM_addrb  <= Instr_Addr(9 downto 1);  
-        RAM_enb    <= RAM_not_ROM;
-        RAM_rstb   <= Reset;
+    RAM_not_ROM <= Fetch_Addr(15) OR
+                   Fetch_Addr(14) OR
+                   Fetch_Addr(13) OR
+                   Fetch_Addr(12) OR
+                   Fetch_Addr(11);
 
-        ROM_clka   <= Clk;
-        ROM_ena    <= not RAM_not_ROM;
-        ROM_rsta   <= Reset;
-        ROM_addra  <= '0' & Instr_Addr(8 downto 1);
-        Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
-        
- 
------------------------------------   IF/ID   -------------------------------------------------   
-
-        RAM_addra  <= Data_Addr(9 downto 1);
-        RAM_wea    <= Write_Not_Read;
-        RAM_dina   <= Write_Data;
-        Read_Data  <= RAM_douta;
-        RAM_ena    <= not RAM_Not_ROM;
-        RAM_rsta   <= Reset;
-
------------------------------------   MEM/WB   -------------------------------------------------   
+    Fetch_Instr <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
     
--- xpm_memory_dpdistram: Dual Port Distributed RAM
--- Xilinx Parameterized Macro, Version 2017.4
+    ROM_en      <= not RAM_not_ROM;
+
+    Load_Data   <= RAM_douta;
+    
+    RAM_ena     <= '1' when Store_Not_Load = mem_load     else
+                   '1' when Store_Not_Load = mem_store    else
+                   '0';
+    RAM_wea     <= Store_Not_Load;
+    
 xpm_memory_dpdistram_inst : xpm_memory_dpdistram
   generic map (
 
@@ -97,44 +74,45 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     BYTE_WRITE_WIDTH_A      => 8,              --integer; 8, 9, or WRITE_DATA_WIDTH_A value
     ADDR_WIDTH_A            => 9,             --positive integer --> 2^10 = 1024
     READ_RESET_VALUE_A      => "0",            --string
-    READ_LATENCY_A          => 1,              --non-negative integer
+    READ_LATENCY_A          => 0,              --non-negative integer
 
     -- Port B module generics
     READ_DATA_WIDTH_B       => 16,             --positive integer
     ADDR_WIDTH_B            => 9,             --positive integer
     READ_RESET_VALUE_B      => "0",            --string
-    READ_LATENCY_B          => 1               --non-negative integer
+    READ_LATENCY_B          => 0               --non-negative integer
   )
 
   port map (
+    regcea                  => '1',   --do not change
+    regceb                  => '1',   --do not change
 
     -- Port A module ports
-    clka                    => RAM_clka,
-    rsta                    => RAM_rsta,
+    clka                    => M_clock,
+    rsta                    => Reset,
     ena                     => RAM_ena,
-    regcea                  => '1',   --do not change
     wea                     => RAM_wea,
-    addra                   => RAM_addra,
-    dina                    => RAM_dina,
+    addra                   => Mem_Addr(9 downto 1),
+    dina                    => Store_Data,
     douta                   => RAM_douta,
 
+
     -- Port B module ports
-    clkb                    => RAM_clkb,
-    rstb                    => RAM_rstb,
-    enb                     => RAM_enb,
-    regceb                  => '1',   --do not change
-    addrb                   => RAM_addrb,
+    clkb                    => M_clock,
+    rstb                    => Reset,
+    enb                     => RAM_not_ROM,
+    addrb                   => Fetch_Addr(9 downto 1),
     doutb                   => RAM_doutb
+    
   );
-
-
+  
+  
 xpm_memory_sprom_inst : xpm_memory_sprom
   generic map (
 
-    -- Common module generics
     MEMORY_SIZE             => 8192,            --positive integer
     MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
-    MEMORY_INIT_FILE        => "storeTest.mem",     --string; "none" or "<filename>.mem" 
+    MEMORY_INIT_FILE        => "boots.mem",     --string; "none" or "<filename>.mem" 
     MEMORY_INIT_PARAM       => "",              --string;
     USE_MEM_INIT            => 1,               --integer; 0,1
     WAKEUP_TIME             => "disable_sleep", --string; "disable_sleep" or "use_sleep_pin" 
@@ -150,23 +128,20 @@ xpm_memory_sprom_inst : xpm_memory_sprom
     READ_LATENCY_A          => 0                --non-negative integer
   )
   port map (
-
-    -- Common module ports
     sleep                   => '0',
-
-    -- Port A module ports
-    clka                    => ROM_clka,
-    rsta                    => ROM_rsta,
-    ena                     => ROM_ena,
-    regcea                  => '1',
-    addra                   => ROM_addra,
     injectsbiterra          => '0',   --do not change
     injectdbiterra          => '0',   --do not change
-    douta                   => ROM_douta,
     sbiterra                => open,  --do not change
-    dbiterra                => open   --do not change
+    dbiterra                => open,   --do not change
+    regcea                  => '1',
+    
+    -- ROM ports
+    clka                    => M_clock,
+    rsta                    => Reset,
+    ena                     => ROM_en, -- not Ram_not_ROM
+    addra                   => Fetch_Addr(9 downto 1),
+    douta                   => ROM_douta
   );
 
 -- End of xpm_memory_sprom_inst instance declaration
-        
 end Behavioral;

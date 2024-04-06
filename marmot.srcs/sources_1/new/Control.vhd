@@ -62,9 +62,9 @@ entity Controller is
     EX_RES_SRC          : OUT std_logic_vector(ex_res_src_width);
     
   	-- RAM control signals
-    MEM_WR_nRD          : OUT std_logic_vector(byte_addressable);
-    MEM_DATA_ADDR_SRC   : OUT std_logic_vector(mem_src_width);
-    MEM_DATA_DATA_SRC   : OUT std_logic_vector(mem_src_width);
+    Store_Not_Load      : OUT std_logic_vector(byte_addressable);
+    Mem_Addr_Select     : OUT std_logic_vector(mem_src_width);
+    Store_Data_Select   : OUT std_logic_vector(mem_src_width);
 
   	-- WB control signals
     WB_EN               : OUT std_logic;
@@ -244,16 +244,19 @@ begin
       Reset_EX_MEM <= Reset_Execute or Reset_Load; -- OR whatever else
 
       EX_MEM_INS <= EX_MEM_PORT;
-      
-	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
+
+	  Mem_Addr_Select <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_f1 when EX_MEM_INS(op_width) = op_store and EX_MEM_INS(ra_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_rb when EX_MEM_INS(op_width) = op_load else 
 						   mem_src_ra;
 
-	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
+	  Store_Data_Select <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_rb;
 
-      MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
+
+      Store_Not_Load <= mem_store when EX_MEM_INS(op_width) = op_store else 
+                        mem_load  when EX_MEM_INS(op_width) = op_load else
+                        mem_not_mem;
 
       WB_SRC <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
