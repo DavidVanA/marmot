@@ -522,13 +522,13 @@ begin
     Memory_instance : entity work.Memory_V2
     port map(                               
         Reset           => Reset_and_Load,
-        M_clock             => M_Clock,
+        M_clock         => M_Clock,
         Fetch_Addr      => PC.pc,
-        Fetch_Instr           => MEM_instr,
+        Fetch_Instr     => MEM_instr,
         Data_Addr       => MEM_data_addr,
         Read_Data       => MEM_read_data,
         Write_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
-        Write_or_Read  => o_CON_Mem_Wr_nRd
+        Write_or_Read   => o_CON_Mem_Wr_nRd
     );        
     
     with o_CON_Wb_Src select
