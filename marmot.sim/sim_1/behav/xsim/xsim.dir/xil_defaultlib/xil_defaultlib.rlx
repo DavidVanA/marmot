@@ -10,7 +10,7 @@ C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/BarrelShif
 C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/BarrelShifterRight.vhd,1710610269,vhdl,C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/ALU.vhd,,,barrelshifterright,,,,,,,,
 C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Branch_Calculator.vhd,1712091622,vhdl,C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/The_Marmot.vhd,,,branch_calculator,,,,,,,,
 C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Branch_Resolver.vhd,1712086732,vhdl,C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Control.vhd,,,branch_resolver,,,,,,,,
-C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Control.vhd,1712384673,vhdl,C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/The_Marmot.vhd,,,controller,,,,,,,,
+C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Control.vhd,1712388562,vhdl,C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/The_Marmot.vhd,,,controller,,,,,,,,
 C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/FullAdder.vhd,1710610280,vhdl,,,,fulladder,,,,,,,,
 C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/HalfAdder.vhd,1710610289,vhdl,,,,ha,,,,,,,,
 C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Instruction_Decoder.vhd,1712086732,vhdl,C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.srcs/sources_1/new/Control.vhd,,,instruction_decoder,,,,,,,,

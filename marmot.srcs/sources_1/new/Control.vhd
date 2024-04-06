@@ -169,31 +169,31 @@ begin
 
 	 -- TODO This is ugly af
      ex_mem_dest <= "0111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
-					"1000" when (EX_MEM_INS(op_width) /= op_add AND
-								 EX_MEM_INS(op_width) /= op_sub AND
-								 EX_MEM_INS(op_width) /= op_mult AND
-								 EX_MEM_INS(op_width) /= op_nand AND
-								 EX_MEM_INS(op_width) /= op_bshl AND
-								 EX_MEM_INS(op_width) /= op_bshr AND
-								 EX_MEM_INS(op_width) /= op_in AND
-								 EX_MEM_INS(op_width) /= op_br_sub AND
-								 EX_MEM_INS(op_width) /= op_load AND
-								 EX_MEM_INS(op_width) /= op_load_imm AND
-								 EX_MEM_INS(op_width) /= op_mov) else
+					"1000" when (EX_MEM_INS(op_width) /= op_add         AND
+								 EX_MEM_INS(op_width) /= op_sub         AND
+								 EX_MEM_INS(op_width) /= op_mult        AND
+								 EX_MEM_INS(op_width) /= op_nand        AND
+								 EX_MEM_INS(op_width) /= op_bshl        AND
+								 EX_MEM_INS(op_width) /= op_bshr        AND
+								 EX_MEM_INS(op_width) /= op_in          AND
+								 EX_MEM_INS(op_width) /= op_br_sub      AND
+								 EX_MEM_INS(op_width) /= op_load        AND
+								 EX_MEM_INS(op_width) /= op_load_imm    AND
+								 EX_MEM_INS(op_width) /= op_mov)        else
                      '0' & EX_MEM_INS(ra_width);
                      
      mem_wb_dest <= "0111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
-					"1000" when (MEM_WB_INS(op_width) /= op_add AND
-								 MEM_WB_INS(op_width) /= op_sub AND
-								 MEM_WB_INS(op_width) /= op_mult AND
-								 MEM_WB_INS(op_width) /= op_nand AND
-								 MEM_WB_INS(op_width) /= op_bshl AND
-								 MEM_WB_INS(op_width) /= op_bshr AND
-								 MEM_WB_INS(op_width) /= op_in AND
-								 MEM_WB_INS(op_width) /= op_br_sub AND
-								 MEM_WB_INS(op_width) /= op_load AND
-								 MEM_WB_INS(op_width) /= op_load_imm AND
-								 MEM_WB_INS(op_width) /= op_mov) else
+					"1000" when (MEM_WB_INS(op_width) /= op_add         AND
+								 MEM_WB_INS(op_width) /= op_sub         AND
+								 MEM_WB_INS(op_width) /= op_mult        AND
+								 MEM_WB_INS(op_width) /= op_nand        AND
+								 MEM_WB_INS(op_width) /= op_bshl        AND
+								 MEM_WB_INS(op_width) /= op_bshr        AND
+								 MEM_WB_INS(op_width) /= op_in          AND
+								 MEM_WB_INS(op_width) /= op_br_sub      AND
+								 MEM_WB_INS(op_width) /= op_load        AND
+								 MEM_WB_INS(op_width) /= op_load_imm    AND
+								 MEM_WB_INS(op_width) /= op_mov)        else
                      '0' & MEM_WB_INS(ra_width);    
 
 
