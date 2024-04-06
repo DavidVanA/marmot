@@ -395,6 +395,10 @@ begin
             if Reset_ID_EX = '1' then
                 ID_EX_latch.instr 	<= (others => '0');
                 ID_EX_latch.pc 		<= (others => '0');
+                ID_EX_latch.npc     <= (others => '0');
+                ID_EX_latch.br_addr <= (others => '0');
+                ID_EX_latch.ra_data <= (others => '0');
+                ID_EX_latch.rb_data <= (others => '0');
             else
                 ID_EX_latch.instr <= IF_ID_latch.instr;
                 ID_EX_latch.pc <= IF_ID_latch.pc;
@@ -473,7 +477,10 @@ begin
         if Reset_EX_MEM = '1' then
               EX_MEM_latch.instr    <= (others => '0');
               EX_MEM_latch.pc       <= (others => '0');
+              EX_MEM_latch.npc      <= (others => '0');
               EX_MEM_latch.result   <= (others => '0');
+              EX_MEM_latch.ra_data  <= (others => '0');
+              EX_MEM_latch.rb_data  <= (others => '0');
               FLAG_N    <= '0';
               FLAG_Z    <= '0';
               FLAG_Ov   <= '0';
@@ -483,7 +490,7 @@ begin
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.pc <= ID_EX_latch.pc;
             EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
-            EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
+            EX_MEM_latch.rb_data <= ID_EX_latch.rb_data;
             EX_MEM_latch.npc <= ID_EX_latch.npc;
             
             if ID_EX_latch.instr (op_width) = op_test then
