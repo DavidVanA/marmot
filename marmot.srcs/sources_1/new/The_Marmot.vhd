@@ -506,18 +506,30 @@ begin
 			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
 			(others => '0') when others;
         
-     Memory_instance : entity work.Memory
-        port map(                               
-            Reset           => Reset_and_Load,
-            Clk             => M_Clock,
-            Fetch_Addr      => Pc.pc,
-            Fetch_Instr     => Fetch_Instr,
-            Mem_Addr        => Mem_Addr,
-            Load_Data       => Load_Data,
-            Store_Data      => Store_Data, -- EX_MEM_latch.rb_data(instr_width), --
-            Store_Not_Load  => Store_Not_Load
-        );
+
+    --  Memory_instance : entity work.Memory
+    --     port map(                               
+    --         Reset           => Reset_and_Load,
+    --         Clk             => M_Clock,
+    --         Fetch_Addr      => Pc.pc,
+    --         Fetch_Instr     => Fetch_Instr,
+    --         Mem_Addr        => Mem_Addr,
+    --         Load_Data       => Load_Data,
+    --         Store_Data      => Store_Data, -- EX_MEM_latch.rb_data(instr_width), --
+    --         Store_Not_Load  => Store_Not_Load
+    --     );
         
+    Memory_instance : entity work.Memory_V2
+    port map(                               
+        Reset           => Reset_and_Load,
+        M_clock             => M_Clock,
+        Fetch_Addr      => PC.pc,
+        Fetch_Instr     => Fetch_instr,
+        Mem_Addr        => Mem_addr,
+        Load_Data       => Load_Data,
+        Store_Data      => Store_Data, -- EX_MEM_latch.rb_data(instr_width), --
+        Store_Not_Load  => Store_Not_Load
+    );        
     
     with WB_Select select
          WB_Data <=
