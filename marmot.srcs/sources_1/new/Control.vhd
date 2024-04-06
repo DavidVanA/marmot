@@ -245,20 +245,22 @@ begin
 
       EX_MEM_INS <= EX_MEM_PORT;
       
-	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load and EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
+	  MEM_DATA_ADDR_SRC <= mem_src_f1 when EX_MEM_INS(op_width) = op_load  and EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_f1 when EX_MEM_INS(op_width) = op_store and EX_MEM_INS(ra_width) = mem_wb_dest(reg_idx_width) else
-						   mem_src_rb when EX_MEM_INS(op_width) = op_load else 
+						   mem_src_rb when EX_MEM_INS(op_width) = op_load  else 
 						   mem_src_ra;
 
 	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_rb;
 
-      MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
+      MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else 
+                    read_mem    when EX_MEM_INS(op_width) = op_load else
+                    write_high_byte; 
 
       WB_SRC <=
-         wb_src_mem when EX_MEM_INS(op_width) = op_load else
-         wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
-         wb_src_out when EX_MEM_INS(op_width) = op_out else
+         wb_src_mem when EX_MEM_INS(op_width) = op_load     else
+         wb_src_npc when EX_MEM_INS(op_width) = op_br_sub   else
+         wb_src_out when EX_MEM_INS(op_width) = op_out      else
          wb_src_alu;
         
       EX_MEM_Instr_Decode_instance: entity work.Instruction_Decoder
