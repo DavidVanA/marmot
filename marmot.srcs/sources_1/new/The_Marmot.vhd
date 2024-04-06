@@ -478,13 +478,13 @@ begin
               FLAG_Z    <= '0';
               FLAG_Ov   <= '0';
         elsif rising_edge(M_clock) then
-              EX_MEM_latch.result <= EX_result;
+              EX_MEM_latch.result   <= EX_result;
             
-            EX_MEM_latch.instr <= ID_EX_latch.instr;
-            EX_MEM_latch.pc <= ID_EX_latch.pc;
-            EX_MEM_latch.ra_data <= ID_EX_latch.ra_data;
-            EX_MEM_latch.rb_data <= ID_EX_latch.ra_data;
-            EX_MEM_latch.npc <= ID_EX_latch.npc;
+            EX_MEM_latch.instr      <= ID_EX_latch.instr;
+            EX_MEM_latch.pc         <= ID_EX_latch.pc;
+            EX_MEM_latch.ra_data    <= ID_EX_latch.ra_data;
+            EX_MEM_latch.rb_data    <= ID_EX_latch.ra_data;
+            EX_MEM_latch.npc        <= ID_EX_latch.npc;
             
             if ID_EX_latch.instr (op_width) = op_test then
                 FLAG_N  <= o_ALU_N;
@@ -512,12 +512,12 @@ begin
         port map(                               
             Reset           => Reset_and_Load,
             Clk             => M_Clock,
-            Instr_Addr      => PC.pc,
-            Instr           => MEM_instr,
-            Data_Addr       => MEM_data_addr,
-            Read_Data       => MEM_read_data,
-            Write_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
-            Write_Not_Read  => o_CON_Mem_Wr_nRd
+            Fetch_Addr      => Pc.pc,
+            Fetch_Instr     => MEM_instr,
+            Mem_Addr        => MEM_data_addr,
+            Load_Data       => MEM_read_data,
+            Store_Data      => MEM_data_data, -- EX_MEM_latch.rb_data(instr_width), --
+            Store_Not_Load  => o_CON_Mem_Wr_nRd
         );
         
     

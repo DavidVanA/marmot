@@ -8,12 +8,14 @@ entity Memory is
     port(
         Reset           : IN  std_logic;
         Clk             : IN  std_logic;
-        Instr_Addr      : IN  std_logic_vector(instr_width);
-        Instr           : OUT std_logic_vector(instr_width);
-        Data_Addr       : IN  std_logic_vector(instr_width);
-        Read_Data       : OUT std_logic_vector(instr_width);
-        Write_Data      : IN  std_logic_vector(instr_width); 
-        Write_Not_Read  : IN  std_logic_vector(1 downto 0) 
+        -- Port B (fetch)
+        Fetch_Addr      : IN  std_logic_vector(instr_width); -- instruction counter in
+        Fetch_Instr     : OUT std_logic_vector(instr_width); -- store or load, instr out
+        -- Port A (memory)
+        Mem_Addr        : IN  std_logic_vector(instr_width); -- if store is data. if load is location
+        Load_Data       : OUT std_logic_vector(instr_width);
+        Store_Data      : IN  std_logic_vector(instr_width); 
+        Store_Not_Load  : IN  std_logic_vector(1 downto 0) -- store not load
         );
 end Memory;
     
@@ -39,6 +41,7 @@ architecture Behavioral of Memory is
     signal RAM_dina    : std_logic_vector(instr_width);
     signal RAM_douta   : std_logic_vector(instr_width);
     signal RAM_ena     : std_logic;
+    signal Mem_op      : std_logic;
     signal RAM_rsta    : std_logic;
 
     
@@ -46,34 +49,42 @@ begin
     
 -----------------------------------    PC    -------------------------------------------------   
         -- RAM/ROM Selector for Fetch
-        RAM_not_ROM <= Instr_Addr(15) OR
-                       Instr_Addr(14) OR
-                       Instr_Addr(13) OR
-                       Instr_Addr(12) OR
-                       Instr_Addr(11);
+        RAM_Not_ROM <= Fetch_Addr(15) OR
+                       Fetch_Addr(14) OR
+                       Fetch_Addr(13) OR
+                       Fetch_Addr(12) OR
+                       Fetch_Addr(11) OR
+                       Fetch_Addr(10) OR
+                       Fetch_Addr(9);
     
         RAM_clka   <= Clk;
         RAM_clkb   <= Clk;
-        RAM_addrb  <= Instr_Addr(9 downto 1);  
+        RAM_addrb  <= Fetch_Addr(instr_mem_width); -- 10 bits wide  
         RAM_enb    <= RAM_not_ROM;
         RAM_rstb   <= Reset;
 
         ROM_clka   <= Clk;
         ROM_ena    <= not RAM_not_ROM;
         ROM_rsta   <= Reset;
-        ROM_addra  <= '0' & Instr_Addr(8 downto 1);
-        Instr      <= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
+        ROM_addra  <= '0' & Fetch_Addr(9 downto 1);
+        Fetch_Instr<= RAM_doutb when RAM_not_ROM = '1' else ROM_douta;
         
  
 -----------------------------------   IF/ID   -------------------------------------------------   
 
-        RAM_addra  <= Data_Addr(9 downto 1);
-        RAM_wea    <= Write_Not_Read;
-        RAM_dina   <= Write_Data;
-        Read_Data  <= RAM_douta;
-        RAM_ena    <= not RAM_Not_ROM;
+        with Store_Not_Load select
+            Mem_op <= '1' when mem_store,
+                      '1' when mem_load,
+                      '0' when others;
+
+        RAM_addra  <= Mem_Addr(10 downto 1);
+        RAM_wea    <= Store_Not_Load;
+        RAM_dina   <= Store_Data;   
+        Load_Data  <= RAM_douta;    
+        RAM_ena    <= Mem_op;
         RAM_rsta   <= Reset;
 
+            
 -----------------------------------   MEM/WB   -------------------------------------------------   
     
 -- xpm_memory_dpdistram: Dual Port Distributed RAM
@@ -82,7 +93,7 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
   generic map (
 
     -- Common module generics
-    MEMORY_SIZE             => 8192,           --positive integer
+    MEMORY_SIZE             => 16384,           --positive integer
     CLOCKING_MODE           => "common_clock", --string; "common_clock", "independent_clock" 
     MEMORY_INIT_FILE        => "none",         --string; "none" or "<filename>.mem" 
     MEMORY_INIT_PARAM       => "0",         --string;
@@ -95,13 +106,13 @@ xpm_memory_dpdistram_inst : xpm_memory_dpdistram
     WRITE_DATA_WIDTH_A      => 16,             --positive integer
     READ_DATA_WIDTH_A       => 16,             --positive integer
     BYTE_WRITE_WIDTH_A      => 8,              --integer; 8, 9, or WRITE_DATA_WIDTH_A value
-    ADDR_WIDTH_A            => 9,             --positive integer --> 2^10 = 1024
+    ADDR_WIDTH_A            => 10,             --positive integer --> 2^10 = 1024
     READ_RESET_VALUE_A      => "0",            --string
     READ_LATENCY_A          => 1,              --non-negative integer
 
     -- Port B module generics
     READ_DATA_WIDTH_B       => 16,             --positive integer
-    ADDR_WIDTH_B            => 9,             --positive integer
+    ADDR_WIDTH_B            => 10,             --positive integer
     READ_RESET_VALUE_B      => "0",            --string
     READ_LATENCY_B          => 1               --non-negative integer
   )
@@ -132,7 +143,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
   generic map (
 
     -- Common module generics
-    MEMORY_SIZE             => 8192,            --positive integer
+    MEMORY_SIZE             => 16384,            --positive integer
     MEMORY_PRIMITIVE        => "auto",          --string; "auto", "distributed", or "block";
     MEMORY_INIT_FILE        => "storeTest.mem",     --string; "none" or "<filename>.mem" 
     MEMORY_INIT_PARAM       => "",              --string;
@@ -145,7 +156,7 @@ xpm_memory_sprom_inst : xpm_memory_sprom
 
     -- Port A module generics
     READ_DATA_WIDTH_A       => 16,              --positive integer
-    ADDR_WIDTH_A            => 9,               --positive integer
+    ADDR_WIDTH_A            => 10,               --positive integer
     READ_RESET_VALUE_A      => "0",             --string
     READ_LATENCY_A          => 0                --non-negative integer
   )

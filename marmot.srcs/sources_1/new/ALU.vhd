@@ -26,7 +26,6 @@ architecture Behavioral of ALU is
     signal  i_bshl_B                        : std_logic_vector(cl_width);
     signal  i_bshr_A, o_bshr_A              : std_logic_vector(instr_width);
     signal  i_bshr_B                        : std_logic_vector(cl_width);
---    signal  i_NOP_A, i_NOP_B, o_NOP_C                       : std_logic_vector(reg_width);
     signal  i_mult_A, i_mult_B              : std_logic_vector(instr_width);
     signal  o_mult_C                        : std_logic_vector(reg_width);
     signal  o_imm_C                         : std_logic_vector(instr_width);

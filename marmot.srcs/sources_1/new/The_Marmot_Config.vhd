@@ -65,10 +65,9 @@ package Marmot_Config is
     constant l2_instr        : std_logic_vector := "111";
 
     -- Memory constants
-    constant read_mem        : std_logic_vector := "00";
-    constant write_high_byte : std_logic_vector := "10";
-    constant write_low_byte  : std_logic_vector := "01";
-    constant write_word      : std_logic_vector := "11";
+    constant mem_load        : std_logic_vector := "00";
+    constant mem_not_mem     : std_logic_vector := "10";
+    constant mem_store       : std_logic_vector := "11";
 
 	-- Memory source enum
 	constant mem_src_ra		 : std_logic_vector := "00";
@@ -76,7 +75,7 @@ package Marmot_Config is
 	constant mem_src_f1		 : std_logic_vector := "10";
 
     -- Memory specific ranges
-    subtype instr_mem_width  is natural range 8 downto 0;
+    subtype instr_mem_width  is natural range 9 downto 0;
     subtype byte_addressable is natural range 1 downto 0;
     
     -- Register specific ranges

@@ -1,6 +1,6 @@
 webtalk_init -webtalk_dir C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/
 webtalk_register_client -client project
-webtalk_add_data -client project -key date_generated -value "Fri Apr  5 19:45:19 2024" -context "software_version_and_target_device"
+webtalk_add_data -client project -key date_generated -value "Fri Apr  5 22:54:39 2024" -context "software_version_and_target_device"
 webtalk_add_data -client project -key product_version -value "XSIM v2017.4 (64-bit)" -context "software_version_and_target_device"
 webtalk_add_data -client project -key build_version -value "2086221" -context "software_version_and_target_device"
 webtalk_add_data -client project -key os_platform -value "WIN64" -context "software_version_and_target_device"
@@ -14,7 +14,7 @@ webtalk_add_data -client project -key target_package -value "not_applicable" -co
 webtalk_add_data -client project -key target_speed -value "not_applicable" -context "software_version_and_target_device"
 webtalk_add_data -client project -key random_id -value "ac5fd521-3cec-4af3-943e-da39d255a05f" -context "software_version_and_target_device"
 webtalk_add_data -client project -key project_id -value "1b6822573ae146009d94617ec98d92de" -context "software_version_and_target_device"
-webtalk_add_data -client project -key project_iteration -value "73" -context "software_version_and_target_device"
+webtalk_add_data -client project -key project_iteration -value "82" -context "software_version_and_target_device"
 webtalk_add_data -client project -key os_name -value "Microsoft Windows 8 or later , 64-bit" -context "user_environment"
 webtalk_add_data -client project -key os_release -value "major release  (build 9200)" -context "user_environment"
 webtalk_add_data -client project -key cpu_name -value "AMD Ryzen 9 5900HS with Radeon Graphics        " -context "user_environment"
@@ -26,7 +26,7 @@ webtalk_add_data -client xsim -key Command -value "xsim" -context "xsim\\command
 webtalk_add_data -client xsim -key trace_waveform -value "true" -context "xsim\\usage"
 webtalk_add_data -client xsim -key runtime -value "2 us" -context "xsim\\usage"
 webtalk_add_data -client xsim -key iteration -value "3" -context "xsim\\usage"
-webtalk_add_data -client xsim -key Simulation_Time -value "0.01_sec" -context "xsim\\usage"
-webtalk_add_data -client xsim -key Simulation_Memory -value "9724_KB" -context "xsim\\usage"
-webtalk_transmit -clientid 2520600986 -regid "" -xml C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/usage_statistics_ext_xsim.xml -html C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/usage_statistics_ext_xsim.html -wdm C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/usage_statistics_ext_xsim.wdm -intro "<H3>XSIM Usage Report</H3><BR>"
+webtalk_add_data -client xsim -key Simulation_Time -value "0.00_sec" -context "xsim\\usage"
+webtalk_add_data -client xsim -key Simulation_Memory -value "9476_KB" -context "xsim\\usage"
+webtalk_transmit -clientid 565918902 -regid "" -xml C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/usage_statistics_ext_xsim.xml -html C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/usage_statistics_ext_xsim.html -wdm C:/Users/Joseph/git_repos/The_Marmot/marmot/marmot.sim/sim_1/behav/xsim/xsim.dir/The_Marmot_tb_behav/webtalk/usage_statistics_ext_xsim.wdm -intro "<H3>XSIM Usage Report</H3><BR>"
 webtalk_terminate

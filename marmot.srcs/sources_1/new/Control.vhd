@@ -253,7 +253,9 @@ begin
 	  MEM_DATA_DATA_SRC <= mem_src_f1 when EX_MEM_INS(rb_width) = mem_wb_dest(reg_idx_width) else
 						   mem_src_rb;
 
-      MEM_WR_nRD <= write_word when EX_MEM_INS(op_width) = op_store else read_mem; 
+      MEM_WR_nRD <= mem_store when EX_MEM_INS(op_width) = op_store else 
+                    mem_load  when EX_MEM_INS(op_width) = op_load else
+                    mem_not_mem;
 
       WB_SRC <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
