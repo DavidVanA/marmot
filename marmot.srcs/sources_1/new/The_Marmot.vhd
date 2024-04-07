@@ -13,118 +13,115 @@ entity The_Marmot is
     out_port              : OUT std_logic;
     
     ------- Input Switch Ports ------------------------------
-    sw      : IN std_logic_vector(9 downto 0);
-    sw_sel  : IN std_logic;
+    sw         			  : IN std_logic_vector(9 downto 0);
+    sw_sel     			  : IN std_logic;
     
     ------- Debug Console Ports -----------------------------
 
-    debug_console   : in std_logic;
-    board_clock     : in std_logic;
-
-    vga_red         : out std_logic_vector( 3 downto 0 );
-    vga_green       : out std_logic_vector( 3 downto 0 );
-    vga_blue        : out std_logic_vector( 3 downto 0 );
-
-    h_sync_signal   : out std_logic;
-    v_sync_signal   : out std_logic;
-    
+    debug_console   	  : in std_logic;
+    board_clock     	  : in std_logic;
+                    	  
+    vga_red         	  : out std_logic_vector( 3 downto 0 );
+    vga_green       	  : out std_logic_vector( 3 downto 0 );
+    vga_blue        	  : out std_logic_vector( 3 downto 0 );
+                    	  
+    h_sync_signal   	  : out std_logic;
+    v_sync_signal   	  : out std_logic;
+                    	  
     ------- LED Display Ports -------------------------------
-    led_segments    : out STD_LOGIC_VECTOR( 6 downto 0 );
-    led_digits      : out STD_LOGIC_VECTOR( 3 downto 0 )
+    led_segments    	  : out STD_LOGIC_VECTOR( 6 downto 0 );
+    led_digits      	  : out STD_LOGIC_VECTOR( 3 downto 0 )
 
     );
 end The_Marmot;
 
 architecture Behavioral of The_Marmot is
 
-    signal i_ALU_A, i_ALU_B, o_ALU_C : std_logic_vector(reg_width);
-    
-    signal rd_index1      :   std_logic_vector(reg_idx_width); 
-    signal rd_index2      :   std_logic_vector(reg_idx_width); 
-    signal r1_data        :   std_logic_vector(reg_width);
-    signal r2_data        :   std_logic_vector(reg_width);
-
-    signal Load_Data  :   std_logic_vector(instr_width);
-    signal Mem_Addr  :   std_logic_vector(instr_width);
-    signal Store_Data  :   std_logic_vector(instr_width);
-    signal Fetch_Instr      :   std_logic_vector(instr_width);
-    
-    signal br_addr        :   std_logic_vector(instr_width);
-
-    -- signal IF_ID_Instr    :   std_logic_vector(instr_width);
-    -- signal ID_EX_Instr    :   std_logic_vector(instr_width);
-    -- signal EX_MEM_Instr   :   std_logic_vector(instr_width);
-    -- signal MEM_WB_Instr   :   std_logic_vector(instr_width);
-    
+    signal ALU_A             : std_logic_vector(reg_width);
+    signal ALU_B             : std_logic_vector(reg_width);
+    signal ALU_C             : std_logic_vector(reg_width);
+                             
+    signal rd_index1         : std_logic_vector(reg_idx_width); 
+    signal rd_index2         : std_logic_vector(reg_idx_width); 
+    signal r1_data           : std_logic_vector(reg_width);
+    signal r2_data           : std_logic_vector(reg_width);
+                             
+    signal Load_Data         :   std_logic_vector(instr_width);
+    signal Mem_Addr          :   std_logic_vector(instr_width);
+    signal Store_Data        :   std_logic_vector(instr_width);
+    signal Fetch_Instr       :   std_logic_vector(instr_width);
+                             
+    signal br_addr           :   std_logic_vector(instr_width);
+                             
     -- Writeback enable from controller
-    signal o_CON_Wb_En    :   std_logic;
+    signal WB_Enable         :   std_logic;
     
     -- MUX for REG read index 1
-    signal o_CON_Rd_Index1:   std_logic_vector(rd_index_width);
+    signal Rd_Index_1_Select :   std_logic_vector(rd_index_width);
     -- MUX for REG read index 2
-    signal o_CON_Rd_Index2:   std_logic_vector(rd_index_width);
+    signal Rd_Index_2_Select :   std_logic_vector(rd_index_width);
 
     -- MUX for ALU A and B
-    signal o_CON_alu_src_1:   std_logic_vector(alu_src_width);    
-    signal o_CON_alu_src_2:   std_logic_vector(alu_src_width);
+    signal ALU_A_Select      :   std_logic_vector(alu_src_width);    
+    signal ALU_B_Select      :   std_logic_vector(alu_src_width);
     
     -- MUX for EX stage result source
-    signal o_CON_Ex_Res_Src:  std_logic_vector(ex_res_src_width);
+    signal EX_Result_Select  :  std_logic_vector(ex_res_src_width);
     
     -- MUX for MEM_WB write index
-    signal o_CON_Mem_Wb_Index: std_logic_vector(reg_idx_width);
+    signal WB_Index_Select   : std_logic_vector(reg_idx_width);
 
     -- MUX for memory data address
-    signal Mem_Addr_Select: std_logic_vector(mem_src_width);
+    signal Mem_Addr_Select   : std_logic_vector(mem_src_width);
     -- MUX for memory write data 
-    signal Store_Data_Select: std_logic_vector(mem_src_width);
+    signal Store_Data_Select : std_logic_vector(mem_src_width);
     -- Signal for selecting write or read
-    signal Store_Not_Load: std_logic_vector(byte_addressable);
+    signal Store_Not_Load    : std_logic_vector(byte_addressable);
 
     -- MUX for writeback source
-    signal WB_Select:     std_logic_vector(wb_src_width);
+    signal WB_Data_Select    :     std_logic_vector(wb_src_width);
     
     -- Pipeline Latch Signals
-    signal PC             :   PC_rec;
-    signal IF_ID_latch    :   IF_ID_rec;
-    signal ID_EX_latch    :   ID_EX_rec;
-    signal EX_MEM_latch   :   EX_MEM_rec;
-    signal MEM_WB_latch   :   MEM_WB_rec;
+    signal PC                :   PC_rec;
+    signal IF_ID_latch       :   IF_ID_rec;
+    signal ID_EX_latch       :   ID_EX_rec;
+    signal EX_MEM_latch      :   EX_MEM_rec;
+    signal MEM_WB_latch      :   MEM_WB_rec;
+                             
+    signal Reset_PC          :  std_logic;
+    signal Reset_IF_ID       :  std_logic;
+    signal Reset_Reg         :  std_logic;
+    signal Reset_ID_EX       :  std_logic;
+    signal Reset_EX_MEM      :  std_logic;
+    signal Reset_MEM_WB      :  std_logic;
+    signal Reset_Out         :  std_logic;
+    
+    signal ALU_Z             :  std_logic;
+    signal FLAG_Z            :  std_logic;
+    signal ALU_N             :  std_logic;
+    signal FLAG_N            :  std_logic;
+    signal ALU_Ov            :  std_logic;
+    signal FLAG_Ov           :  std_logic;
+    signal EX_result         :  std_logic_vector(reg_width);
 
-    signal Reset_PC       :  std_logic;
-    signal Reset_IF_ID    :  std_logic;
-    signal Reset_Reg      :  std_logic;
-    signal Reset_ID_EX    :  std_logic;
-    signal Reset_EX_MEM   :  std_logic;
-    signal Reset_MEM_WB   :  std_logic;
-    signal Reset_Out      :  std_logic;
-    
-    signal o_ALU_Z        :  std_logic;
-    signal FLAG_Z         :  std_logic;
-    signal o_ALU_N        :  std_logic;
-    signal FLAG_N         :  std_logic;
-    signal o_ALU_Ov       :  std_logic;
-    signal FLAG_Ov        :  std_logic;
-    signal EX_result       : std_logic_vector(reg_width);
-
-    signal wb_data         : std_logic_vector(reg_width);
-    signal PCSrc           : std_logic;
-    signal Disp_Select     : std_logic_vector(instr_type_width);
-    signal Branch_Relative : std_logic;
-    signal Branch_Base     : std_logic_vector(instr_width);
-    
-    signal branch_WB       : std_logic;
+    signal wb_data           : std_logic_vector(reg_width);
+    signal PCSrc             : std_logic;
+    signal Disp_Select       : std_logic_vector(instr_type_width);
+    signal Branch_Relative   : std_logic;
+    signal Branch_Base       : std_logic_vector(instr_width);
+                             
+    signal branch_WB         : std_logic;
     
 
     
-    signal debug_reg_0      : std_logic_vector(reg_width);
-    signal debug_reg_1      : std_logic_vector(reg_width);
-    signal debug_reg_2      : std_logic_vector(reg_width);
-    signal debug_reg_3      : std_logic_vector(reg_width);
-    signal debug_reg_4      : std_logic_vector(reg_width);
-    signal debug_reg_5      : std_logic_vector(reg_width);
-    signal debug_reg_6      : std_logic_vector(reg_width);
-    signal debug_reg_7      : std_logic_vector(reg_width);
+    signal debug_reg_0       : std_logic_vector(reg_width);
+    signal debug_reg_1       : std_logic_vector(reg_width);
+    signal debug_reg_2       : std_logic_vector(reg_width);
+    signal debug_reg_3       : std_logic_vector(reg_width);
+    signal debug_reg_4       : std_logic_vector(reg_width);
+    signal debug_reg_5       : std_logic_vector(reg_width);
+    signal debug_reg_6       : std_logic_vector(reg_width);
+    signal debug_reg_7       : std_logic_vector(reg_width);
 
     -- signal led_segments     : STD_LOGIC_VECTOR( 6 downto 0 );
     -- signal led_digits       : STD_LOGIC_VECTOR( 3 downto 0 );
@@ -133,11 +130,10 @@ architecture Behavioral of The_Marmot is
 component led_display is
    Port (
        -- Mem mapped to xFFF2
-       addr_write           : in  STD_LOGIC_VECTOR (15 downto 0);  -- wb_address
+       addr_write           : in  STD_LOGIC_VECTOR (15 downto 0);
        clk                  : in  STD_LOGIC;
        data_in              : in  STD_LOGIC_VECTOR (15 downto 0);
        en_write             : in  STD_LOGIC;
-
        board_clock          : in  STD_LOGIC;
        led_segments         : out STD_LOGIC_VECTOR( 6 downto 0 );
        led_digits           : out STD_LOGIC_VECTOR( 3 downto 0 )
@@ -280,11 +276,6 @@ begin
 
 -----------------------------------   Control   -------------------------------------------------
   
-     -- IF_ID_Instr  <= IF_ID_latch.instr;
-     -- ID_EX_Instr  <= ID_EX_latch.instr;
-     -- EX_MEM_Instr <= EX_MEM_latch.instr;
-     -- MEM_WB_Instr <= MEM_WB_latch.instr;
-
      Controller_instance: entity work.Controller
      port map(
        Reset_Execute_Port => Reset_and_Execute,
@@ -295,21 +286,21 @@ begin
        Reset_ID_EX        => Reset_ID_EX,
        Reset_EX_MEM       => Reset_EX_MEM,
        Reset_MEM_WB       => Reset_MEM_WB,
-       IF_ID_PORT         => IF_ID_latch.instr, --IF_ID_Instr,
+       IF_ID_PORT         => IF_ID_latch.instr,
        ID_EX_PORT         => ID_EX_latch.instr,
        EX_MEM_PORT        => EX_MEM_latch.instr,
        MEM_WB_PORT        => MEM_WB_latch.instr,
-       WB_EN              => o_CON_Wb_En,
+       WB_Enable          => WB_Enable,
        Mem_Addr_Select    => Mem_Addr_Select,
        Store_Data_Select  => Store_Data_Select,
-       ALU_SRC_1          => o_CON_alu_src_1,
-       ALU_SRC_2          => o_CON_alu_src_2,
-       EX_RES_SRC         => o_CON_Ex_Res_Src,
-       Store_Not_Load         => Store_Not_Load,
-       WB_SRC             => WB_Select,
-       MEM_WB_INDEX       => o_CON_Mem_Wb_Index,
-       RD_INDEX_1         => o_CON_Rd_Index1,
-       RD_INDEX_2         => o_CON_Rd_Index2,
+       ALU_A_Select       => ALU_A_Select,
+       ALU_B_Select       => ALU_B_Select,
+       EX_RES_SRC         => EX_Result_Select,
+       Store_Not_Load     => Store_Not_Load,
+       WB_Data_Select     => WB_Data_Select,
+       MEM_WB_INDEX       => WB_Index_Select,
+       RD_INDEX_1         => Rd_Index_1_Select,
+       RD_INDEX_2         => Rd_Index_2_Select,
        ALU_N              => FLAG_N,
        ALU_Z              => FLAG_Z,
        ALU_Ov             => FLAG_Ov,
@@ -330,7 +321,6 @@ begin
             Reset_Out           <= '1';
         elsif rising_edge(M_clock) then
             Reset_Out           <= '0';
-            -- Instr_mem.in <= PC.pc
             if PCSrc = '0' then
                 PC.pc <= PC.npc;
             else
@@ -349,7 +339,7 @@ begin
             if Reset_IF_ID = '1' then
                 IF_ID_latch.instr   <= (others => '0');
                 IF_ID_latch.pc      <= (others => '0');
-                IF_ID_latch.npc     <= (others => '0'); --(others => '0');         
+                IF_ID_latch.npc     <= (others => '0'); 
             else
                 IF_ID_latch.pc      <= PC.pc;
                 IF_ID_latch.npc     <= PC.npc;
@@ -359,16 +349,16 @@ begin
     end process IF_ID;
 
          -- Select register read index
-    rd_index1 <= o_CON_Rd_Index1;
-    rd_index2 <= o_CON_Rd_Index2;
+    rd_index1 <= Rd_Index_1_Select;
+    rd_index2 <= Rd_Index_2_Select;
      
     Registers_Latches_instance : entity work.register_file
     port map(
         rst         => Reset_Reg,
         clk         => M_clock,
-        wr_index    => o_CON_Mem_Wb_Index,
+        wr_index    => WB_Index_Select,
         wr_data     => MEM_WB_latch.result,
-        wr_enable   => o_CON_Wb_En,
+        wr_enable   => WB_Enable,
         rd_index1   => rd_index1,
         rd_index2   => rd_index2,
         rd_data1    => r1_data,
@@ -413,29 +403,29 @@ begin
 
     with Branch_Relative select
          Branch_Base <=
-                       i_ALU_A(instr_width) when '1',
+                       ALU_A(instr_width) when '1',
                        ID_EX_latch.pc                   when others;
     
    Branch_Calculator_instance: entity work.Branch_Calculator
        port map (
            Instr_Port      => ID_EX_latch.instr,
            Branch_Base     => Branch_Base,
-           Ra              => i_ALU_A(instr_width),
+           Ra              => ALU_A(instr_width),
            Disp_Selector   => Disp_Select,
            Br_Addr_Port    => PC.br
        );
 
     --------------------------------------
           
-    with o_CON_alu_src_1 select
-      i_ALU_A <= 
+    with ALU_A_Select select
+      ALU_A <= 
         ID_EX_latch.ra_data when alu_src_rd,
         wb_data when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
         (others => '0') when others;
         
-    with o_CON_alu_src_2 select
-      i_ALU_B <= 
+    with ALU_B_Select select
+      ALU_B <= 
         ID_EX_latch.rb_data when alu_src_rd,
         wb_data when alu_src_fd1,
         MEM_WB_latch.result when alu_src_fd2,
@@ -445,12 +435,12 @@ begin
     ALU_instance: entity work.ALU
     port map( 
         ALU_Ins  => ID_EX_latch.instr,
-        ALU_A    => i_ALU_A, 
-        ALU_B    => i_ALU_B, 
-        ALU_C    => o_ALU_C, 
-        ALU_N    => o_ALU_N, 
-        ALU_Z    => o_ALU_Z, 
-        ALU_Ov   => o_ALU_Ov
+        ALU_A    => ALU_A, 
+        ALU_B    => ALU_B, 
+        ALU_C    => ALU_C, 
+        ALU_N    => ALU_N, 
+        ALU_Z    => ALU_Z, 
+        ALU_Ov   => ALU_Ov
         );    
     
     OUT_process: process(Reset_Out, M_Clock)
@@ -460,14 +450,14 @@ begin
             end if;
             if falling_edge(M_Clock) and Reset_Out = '0' then
                 if ID_EX_latch.instr(op_width) = op_out then
-                    out_port <= i_ALU_A(0);
+                    out_port <= ALU_A(0);
                 end if;
             end if;
     end process OUT_process;        
     
-    EX_result <= '0' & in_port & "000000" when o_CON_EX_Res_Src = ex_res_src_in and sw_sel = '0' else
-                 '0' & "000000"& sw       when o_CON_EX_Res_Src = ex_res_src_in and sw_sel = '1' else
-                 o_ALU_C;
+    EX_result <= '0' & in_port & "000000" when EX_Result_Select = ex_res_src_in and sw_sel = '0' else
+                 '0' & "000000"& sw       when EX_Result_Select = ex_res_src_in and sw_sel = '1' else
+                 ALU_C;
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
     EX_MEM: process(M_clock, Reset_EX_MEM)
@@ -487,14 +477,14 @@ begin
             
             EX_MEM_latch.instr <= ID_EX_latch.instr;
             EX_MEM_latch.pc <= ID_EX_latch.pc;
-            EX_MEM_latch.ra_data <= i_ALU_A;
-            EX_MEM_latch.rb_data <= i_ALU_B;
+            EX_MEM_latch.ra_data <= ALU_A;
+            EX_MEM_latch.rb_data <= ALU_B;
             EX_MEM_latch.npc <= ID_EX_latch.npc;
             
             if ID_EX_latch.instr (op_width) = op_test then
-                FLAG_N  <= o_ALU_N;
-                FLAG_Z  <= o_ALU_Z;
-                FLAG_Ov <= o_ALU_Ov;
+                FLAG_N  <= ALU_N;
+                FLAG_Z  <= ALU_Z;
+                FLAG_Ov <= ALU_Ov;
             end if;
             
         end if;
@@ -526,7 +516,7 @@ begin
         Store_Not_Load  => Store_Not_Load
     );        
     
-    with WB_Select select
+    with WB_Data_Select select
          WB_Data <=
            EX_MEM_latch.result       when wb_src_alu,
            '0' & Load_Data           when wb_src_mem,
@@ -588,8 +578,8 @@ port map (
         s2_reg_b        => ID_EX_latch.instr(rb_width),
         s2_reg_c        => ID_EX_latch.instr(rc_width),
     
-        s2_reg_a_data   => i_ALU_A(instr_width),
-        s2_reg_b_data   => i_ALU_B(instr_width),
+        s2_reg_a_data   => ALU_A(instr_width),
+        s2_reg_b_data   => ALU_B(instr_width),
         s2_reg_c_data   => EX_Result(instr_width),
         s2_immediate    => x"0000",
     
@@ -628,8 +618,8 @@ port map (
     
         s4_pc => MEM_WB_latch.pc,
         s4_inst => MEM_WB_latch.instr,
-        s4_reg_a => o_CON_mem_wb_index,
-        s4_r_wb => o_CON_wb_en,
+        s4_reg_a => WB_Index_Select,
+        s4_r_wb => WB_Enable,
         s4_r_wb_data => MEM_WB_latch.result(instr_width),
     
     --

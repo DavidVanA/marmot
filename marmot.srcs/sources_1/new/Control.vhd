@@ -55,8 +55,8 @@ entity Controller is
     RD_INDEX_2          : OUT std_logic_vector(rd_index_width);
     
   	-- Source for ALU inputs
-    ALU_SRC_1           : OUT std_logic_vector(alu_src_width);
-    ALU_SRC_2           : OUT std_logic_vector(alu_src_width);
+    ALU_A_Select           : OUT std_logic_vector(alu_src_width);
+    ALU_B_Select           : OUT std_logic_vector(alu_src_width);
 
     -- Source for EX stage result
     EX_RES_SRC          : OUT std_logic_vector(ex_res_src_width);
@@ -67,8 +67,8 @@ entity Controller is
     Store_Data_Select   : OUT std_logic_vector(mem_src_width);
 
   	-- WB control signals
-    WB_EN               : OUT std_logic;
-    WB_SRC              : OUT std_logic_vector(wb_src_width);
+    WB_Enable               : OUT std_logic;
+    WB_Data_Select              : OUT std_logic_vector(wb_src_width);
     MEM_WB_INDEX        : OUT std_logic_vector(reg_idx_width);
 
   	-- Branch control signals
@@ -189,11 +189,11 @@ begin
 	               '0' & ID_EX_INS(rc_width) when (ID_EX_INS_type = a1_instr) else
 				   "1111";
 
-	ALU_SRC_1 <= alu_src_fd1 when alu_1_read_src = ex_mem_dest else
+	ALU_A_Select <= alu_src_fd1 when alu_1_read_src = ex_mem_dest else
 				 alu_src_fd2 when alu_1_read_src = mem_wb_dest else
                  alu_src_rd;
                         
-    ALU_SRC_2 <= alu_src_cl  when ID_EX_INS_type = a2_instr else
+    ALU_B_Select <= alu_src_cl  when ID_EX_INS_type = a2_instr else
                  alu_src_fd1 when alu_2_read_src = ex_mem_dest else
                  alu_src_fd2 when alu_2_read_src = mem_wb_dest else
                  alu_src_rd;
@@ -242,7 +242,7 @@ begin
                         mem_load  when EX_MEM_INS(op_width) = op_load else
                         mem_not_mem;
 
-      WB_SRC <=
+      WB_Data_Select <=
          wb_src_mem when EX_MEM_INS(op_width) = op_load else
          wb_src_npc when EX_MEM_INS(op_width) = op_br_sub else
          wb_src_out when EX_MEM_INS(op_width) = op_out else
@@ -259,7 +259,7 @@ begin
 
       MEM_WB_INS <= MEM_WB_PORT;
       
-      WB_EN <= '1' when 
+      WB_Enable <= '1' when 
         MEM_WB_PORT(op_width) = op_add OR
         MEM_WB_PORT(op_width) = op_sub OR
         MEM_WB_PORT(op_width) = op_mult OR
