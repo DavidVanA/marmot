@@ -50,7 +50,8 @@ begin
 
     Load_Data   <= RAM_douta;
     
-    RAM_ena     <= '1' when Store_Not_Load = mem_load     else
+    RAM_ena     <= '0' when Mem_Addr(15 downto 11) /= "00001" else
+				   '1' when Store_Not_Load = mem_load     else
                    '1' when Store_Not_Load = mem_store    else
                    '0';
     RAM_wea     <= Store_Not_Load;

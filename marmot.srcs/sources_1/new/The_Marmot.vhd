@@ -670,10 +670,10 @@ port map (
     -- Text console display memory access signals ( clk is the processor clock )
     --
     
-        clk => '0',
-        addr_write => x"0000",
-        data_in => x"0000",
-        en_write => '0',
+        clk => M_Clock,
+        addr_write => Mem_Addr,
+        data_in => Store_Data,
+        en_write => Store_Not_Load(0),
     
     --
     -- Video related signals
