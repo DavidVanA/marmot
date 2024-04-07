@@ -13,6 +13,7 @@ entity The_Marmot is
     out_port              : OUT std_logic;
     
     ------- Input Switch Ports ------------------------------
+
     sw         			  : IN std_logic_vector(9 downto 0);
     sw_sel     			  : IN std_logic;
     
@@ -29,6 +30,7 @@ entity The_Marmot is
     v_sync_signal   	  : out std_logic;
                     	  
     ------- LED Display Ports -------------------------------
+
     led_segments    	  : out STD_LOGIC_VECTOR( 6 downto 0 );
     led_digits      	  : out STD_LOGIC_VECTOR( 3 downto 0 )
 
@@ -105,7 +107,7 @@ architecture Behavioral of The_Marmot is
     signal EX_result         :  std_logic_vector(reg_width);
 
     signal wb_data           : std_logic_vector(reg_width);
-    signal PCSrc             : std_logic;
+    signal PC_Select         : std_logic;
     signal Disp_Select       : std_logic_vector(instr_type_width);
     signal Branch_Relative   : std_logic;
     signal Branch_Base       : std_logic_vector(instr_width);
@@ -122,10 +124,6 @@ architecture Behavioral of The_Marmot is
     signal debug_reg_5       : std_logic_vector(reg_width);
     signal debug_reg_6       : std_logic_vector(reg_width);
     signal debug_reg_7       : std_logic_vector(reg_width);
-
-    -- signal led_segments     : STD_LOGIC_VECTOR( 6 downto 0 );
-    -- signal led_digits       : STD_LOGIC_VECTOR( 3 downto 0 );
-    -- signal en_write         : std_logic;
         
 component led_display is
    Port (
@@ -295,16 +293,16 @@ begin
        Store_Data_Select  => Store_Data_Select,
        ALU_A_Select       => ALU_A_Select,
        ALU_B_Select       => ALU_B_Select,
-       EX_RES_SRC         => EX_Result_Select,
+       EX_Result_Select   => EX_Result_Select,
        Store_Not_Load     => Store_Not_Load,
        WB_Data_Select     => WB_Data_Select,
        MEM_WB_INDEX       => WB_Index_Select,
-       RD_INDEX_1         => Rd_Index_1_Select,
-       RD_INDEX_2         => Rd_Index_2_Select,
+       Rd_Index_1_Select  => Rd_Index_1_Select,
+       Rd_Index_2_Select  => Rd_Index_2_Select,
        ALU_N              => FLAG_N,
        ALU_Z              => FLAG_Z,
        ALU_Ov             => FLAG_Ov,
-       Conn_PCSrc_Port    => PCSrc,
+       PC_Select          => PC_Select,
        Disp_Select_Port   => Disp_Select,
        Branch_Relative    => Branch_Relative
        );
@@ -321,7 +319,7 @@ begin
             Reset_Out           <= '1';
         elsif rising_edge(M_clock) then
             Reset_Out           <= '0';
-            if PCSrc = '0' then
+            if PC_Select = '0' then
                 PC.pc <= PC.npc;
             else
                 PC.pc <= PC.br;
@@ -364,14 +362,14 @@ begin
         rd_data1    => r1_data,
         rd_data2    => r2_data,
         
-        reg_0   =>  debug_reg_0,
-        reg_1   =>  debug_reg_1,
-        reg_2   =>  debug_reg_2,
-        reg_3   =>  debug_reg_3,
-        reg_4   =>  debug_reg_4,
-        reg_5   =>  debug_reg_5,
-        reg_6   =>  debug_reg_6,
-        reg_7   =>  debug_reg_7
+        reg_0       =>  debug_reg_0,
+        reg_1       =>  debug_reg_1,
+        reg_2       =>  debug_reg_2,
+        reg_3       =>  debug_reg_3,
+        reg_4       =>  debug_reg_4,
+        reg_5       =>  debug_reg_5,
+        reg_6       =>  debug_reg_6,
+        reg_7       =>  debug_reg_7
         
     );
     
@@ -401,6 +399,7 @@ begin
     
      ------------ Branching -----------------
 
+    -- Redundant?
     with Branch_Relative select
          Branch_Base <=
                        ALU_A(instr_width) when '1',
@@ -418,19 +417,19 @@ begin
     --------------------------------------
           
     with ALU_A_Select select
-      ALU_A <= 
-        ID_EX_latch.ra_data when alu_src_rd,
-        wb_data when alu_src_fd1,
-        MEM_WB_latch.result when alu_src_fd2,
-        (others => '0') when others;
+         ALU_A <= 
+                 ID_EX_latch.ra_data when alu_src_rd,
+                 wb_data when alu_src_fd1,
+                 MEM_WB_latch.result when alu_src_fd2,
+                 (others => '0') when others;
         
     with ALU_B_Select select
-      ALU_B <= 
-        ID_EX_latch.rb_data when alu_src_rd,
-        wb_data when alu_src_fd1,
-        MEM_WB_latch.result when alu_src_fd2,
-        '0' & x"000" & ID_EX_latch.instr(cl_width) when alu_src_cl,
-        (others => '0') when others;
+         ALU_B <= 
+                 ID_EX_latch.rb_data when alu_src_rd,
+                 wb_data when alu_src_fd1,
+                 MEM_WB_latch.result when alu_src_fd2,
+                 '0' & x"000" & ID_EX_latch.instr(cl_width) when alu_src_cl,
+                 (others => '0') when others;
 
     ALU_instance: entity work.ALU
     port map( 
@@ -475,33 +474,32 @@ begin
         elsif rising_edge(M_clock) then
               EX_MEM_latch.result <= EX_result;
             
-            EX_MEM_latch.instr <= ID_EX_latch.instr;
-            EX_MEM_latch.pc <= ID_EX_latch.pc;
-            EX_MEM_latch.ra_data <= ALU_A;
-            EX_MEM_latch.rb_data <= ALU_B;
-            EX_MEM_latch.npc <= ID_EX_latch.npc;
+              EX_MEM_latch.instr   <= ID_EX_latch.instr;
+              EX_MEM_latch.pc      <= ID_EX_latch.pc;
+              EX_MEM_latch.ra_data <= ALU_A;
+              EX_MEM_latch.rb_data <= ALU_B;
+              EX_MEM_latch.npc     <= ID_EX_latch.npc;
             
-            if ID_EX_latch.instr (op_width) = op_test then
-                FLAG_N  <= ALU_N;
-                FLAG_Z  <= ALU_Z;
-                FLAG_Ov <= ALU_Ov;
-            end if;
-            
+              if ID_EX_latch.instr (op_width) = op_test then
+                  FLAG_N  <= ALU_N;
+                  FLAG_Z  <= ALU_Z;
+                  FLAG_Ov <= ALU_Ov;
+              end if;            
         end if;
     end process EX_MEM;    
 
     with Mem_Addr_Select select
          Mem_Addr <=
-            EX_MEM_latch.ra_data(15 downto 0) when mem_src_ra,
-            EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
-			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
-			(others => '0') when others;
+                    EX_MEM_latch.ra_data(15 downto 0) when mem_src_ra,
+                    EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
+			        MEM_WB_latch.result(15 downto 0)  when mem_src_f1,
+			        (others => '0') when others;
 
     with Store_Data_Select select    
          Store_Data <=
-            EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
-			MEM_WB_latch.result(15 downto 0) when mem_src_f1,
-			(others => '0') when others;
+                      EX_MEM_latch.rb_data(15 downto 0) when mem_src_rb,
+			          MEM_WB_latch.result(15 downto 0) when mem_src_f1,
+			          (others => '0') when others;
         
         
     Memory_instance : entity work.Memory
@@ -512,18 +510,18 @@ begin
         Fetch_Instr     => Fetch_instr,
         Mem_Addr        => Mem_addr,
         Load_Data       => Load_Data,
-        Store_Data      => Store_Data, -- EX_MEM_latch.rb_data(instr_width), --
+        Store_Data      => Store_Data, 
         Store_Not_Load  => Store_Not_Load
     );        
     
     with WB_Data_Select select
          WB_Data <=
-           EX_MEM_latch.result       when wb_src_alu,
-           '0' & Load_Data           when wb_src_mem,
-           '0' & EX_MEM_latch.npc    when wb_src_npc,
-           EX_MEM_latch.rb_data      when wb_src_rb,
-           EX_MEM_latch.ra_data      when wb_src_out,
-           (others => '0')           when others;
+                   EX_MEM_latch.result       when wb_src_alu,
+                   '0' & Load_Data           when wb_src_mem,
+                   '0' & EX_MEM_latch.npc    when wb_src_npc,
+                   EX_MEM_latch.rb_data      when wb_src_rb,
+                   EX_MEM_latch.ra_data      when wb_src_out,
+                   (others => '0')           when others;
            
            
 -----------------------------------   MEM/WB   -------------------------------------------------   
