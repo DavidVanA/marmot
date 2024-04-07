@@ -671,9 +671,9 @@ port map (
     --
     
         clk => M_Clock,
-        addr_write => MEM_data_addr,
-        data_in => MEM_data_data,
-        en_write => o_CON_Mem_Wr_nRd(0),
+        addr_write => Mem_Addr,
+        data_in => Store_Data,
+        en_write => Store_Not_Load(0),
     
     --
     -- Video related signals
