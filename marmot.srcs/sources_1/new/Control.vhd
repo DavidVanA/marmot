@@ -116,22 +116,6 @@ begin
     Reset_Execute   <= Reset_Execute_Port;
     Reset_Load      <= Reset_Load_Port;
 
------------------------------------   Hazards    ------------------------------------------------
-
-    -- Data Hazards
-
-    -- Check instrction relative positions 
-       -- A , A
-       -- 
-    -- Check operands - Dependencies
-       -- RAR:
-    
-    -- Set forwarding signals
-       -- ALUSrc1
-       -- ALUSec2?
-    
-    -- Control Hazards
-
 ----------------------------------     PC       ------------------------------------------------
 
     Reset_PC <= Reset_Execute or Reset_Load;                      

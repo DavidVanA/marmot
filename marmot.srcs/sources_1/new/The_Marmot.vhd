@@ -51,10 +51,10 @@ architecture Behavioral of The_Marmot is
     
     signal br_addr        :   std_logic_vector(instr_width);
 
-    signal i_CON_IF_ID    :   std_logic_vector(instr_width);
-    signal i_CON_ID_EX    :   std_logic_vector(instr_width);
-    signal i_CON_EX_MEM   :   std_logic_vector(instr_width);
-    signal i_CON_MEM_WB   :   std_logic_vector(instr_width);
+    -- signal IF_ID_Instr    :   std_logic_vector(instr_width);
+    -- signal ID_EX_Instr    :   std_logic_vector(instr_width);
+    -- signal EX_MEM_Instr   :   std_logic_vector(instr_width);
+    -- signal MEM_WB_Instr   :   std_logic_vector(instr_width);
     
     -- Writeback enable from controller
     signal o_CON_Wb_En    :   std_logic;
@@ -280,10 +280,10 @@ begin
 
 -----------------------------------   Control   -------------------------------------------------
   
-     i_CON_IF_ID  <= IF_ID_latch.instr;
-     i_CON_ID_EX  <= ID_EX_latch.instr;
-     i_CON_EX_MEM <= EX_MEM_latch.instr;
-     i_CON_MEM_WB <= MEM_WB_latch.instr;
+     -- IF_ID_Instr  <= IF_ID_latch.instr;
+     -- ID_EX_Instr  <= ID_EX_latch.instr;
+     -- EX_MEM_Instr <= EX_MEM_latch.instr;
+     -- MEM_WB_Instr <= MEM_WB_latch.instr;
 
      Controller_instance: entity work.Controller
      port map(
@@ -295,10 +295,10 @@ begin
        Reset_ID_EX        => Reset_ID_EX,
        Reset_EX_MEM       => Reset_EX_MEM,
        Reset_MEM_WB       => Reset_MEM_WB,
-       IF_ID_PORT         => i_CON_IF_ID,
-       ID_EX_PORT         => i_CON_ID_EX,
-       EX_MEM_PORT        => i_CON_EX_MEM,
-       MEM_WB_PORT        => i_CON_MEM_WB,
+       IF_ID_PORT         => IF_ID_latch.instr, --IF_ID_Instr,
+       ID_EX_PORT         => ID_EX_latch.instr,
+       EX_MEM_PORT        => EX_MEM_latch.instr,
+       MEM_WB_PORT        => MEM_WB_latch.instr,
        WB_EN              => o_CON_Wb_En,
        Mem_Addr_Select    => Mem_Addr_Select,
        Store_Data_Select  => Store_Data_Select,
