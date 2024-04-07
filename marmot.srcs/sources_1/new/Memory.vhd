@@ -50,7 +50,7 @@ begin
 
     Load_Data   <= RAM_douta;
     
-    RAM_ena     <= '0' when data_addr(15 downto 10) /= "000010" else
+    RAM_ena     <= '0' when Store_Data(15 downto 10) /= "000010" else
 				   '1' when Store_Not_Load = mem_load     else
                    '1' when Store_Not_Load = mem_store    else
                    '0';
