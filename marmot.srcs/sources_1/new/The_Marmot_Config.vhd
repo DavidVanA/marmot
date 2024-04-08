@@ -35,14 +35,14 @@ package Marmot_Config is
     constant op_mov          : std_logic_vector(op_code) := "0010011"; -- 19
 
     -- ALU input source
-    constant alu_src_rd     : std_logic_vector := "000";
-    constant alu_src_fd1    : std_logic_vector := "001";
-    constant alu_src_fd2    : std_logic_vector := "010";
-    constant alu_src_cl     : std_logic_vector := "011";
+    constant alu_src_rd      : std_logic_vector := "000";
+    constant alu_src_fd1     : std_logic_vector := "001";
+    constant alu_src_fd2     : std_logic_vector := "010";
+    constant alu_src_cl      : std_logic_vector := "011";
     
     -- EX result source
-    constant ex_res_src_alu : std_logic_vector := "00";
-    constant ex_res_src_in  : std_logic_vector := "01";
+    constant ex_res_src_alu  : std_logic_vector := "00";
+    constant ex_res_src_in   : std_logic_vector := "01";
 
     -- Wb source
     constant wb_src_alu      : std_logic_vector := "000";
@@ -128,9 +128,9 @@ package Marmot_Config is
     end record PC_rec;
 
     type IF_ID_rec is record
-           instr : std_logic_vector(instr_width);
-           npc   : std_logic_vector(instr_width);        
-           pc    : std_logic_vector(instr_width);
+           instr   : std_logic_vector(instr_width);
+           npc     : std_logic_vector(instr_width);        
+           pc      : std_logic_vector(instr_width);
    end record IF_ID_rec;
 
    type ID_EX_rec is record
@@ -145,7 +145,7 @@ package Marmot_Config is
    type EX_MEM_rec is record
            instr   : std_logic_vector(instr_width);
            npc     : std_logic_vector(instr_width);
-           pc    : std_logic_vector(instr_width);
+           pc      : std_logic_vector(instr_width);
            ra_data : std_logic_vector(reg_width);
            rb_data : std_logic_vector(reg_width);
            result  : std_logic_vector(reg_width);
@@ -164,9 +164,9 @@ package Marmot_Config is
 
     -- Status Flag Latch Record Type
     type Status_Flags_rec is record
-         zero     : std_logic;
-         neg      : std_logic;
-         overflow : std_logic;
+         zero      : std_logic;
+         neg       : std_logic;
+         overflow  : std_logic;
     end record Status_Flags_rec;
     
 end package Marmot_Config;
