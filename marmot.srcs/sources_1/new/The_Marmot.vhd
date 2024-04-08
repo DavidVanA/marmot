@@ -39,82 +39,83 @@ end The_Marmot;
 
 architecture Behavioral of The_Marmot is
 
-    signal ALU_A             : std_logic_vector(reg_width);
-    signal ALU_B             : std_logic_vector(reg_width);
-    signal ALU_C             : std_logic_vector(reg_width);
-                             
-    signal rd_index1         : std_logic_vector(reg_idx_width); 
-    signal rd_index2         : std_logic_vector(reg_idx_width); 
-    signal r1_data           : std_logic_vector(reg_width);
-    signal r2_data           : std_logic_vector(reg_width);
-                             
-    signal Load_Data         :   std_logic_vector(instr_width);
-    signal Mem_Addr          :   std_logic_vector(instr_width);
-    signal Store_Data        :   std_logic_vector(instr_width);
-    signal Fetch_Instr       :   std_logic_vector(instr_width);
-                             
+
     signal br_addr           :   std_logic_vector(instr_width);
-                             
-    -- Writeback enable from controller
-    signal WB_Enable         :   std_logic;
-    
-    -- MUX for REG read index 1
-    signal Rd_Index_1_Select :   std_logic_vector(rd_index_width);
-    -- MUX for REG read index 2
-    signal Rd_Index_2_Select :   std_logic_vector(rd_index_width);
-
-    -- MUX for ALU A and B
-    signal ALU_A_Select      :   std_logic_vector(alu_src_width);    
-    signal ALU_B_Select      :   std_logic_vector(alu_src_width);
-    
-    -- MUX for EX stage result source
-    signal EX_Result_Select  :  std_logic_vector(ex_res_src_width);
-    
-    -- MUX for MEM_WB write index
-    signal WB_Index_Select   : std_logic_vector(reg_idx_width);
-
-    -- MUX for memory data address
-    signal Mem_Addr_Select   : std_logic_vector(mem_src_width);
-    -- MUX for memory write data 
-    signal Store_Data_Select : std_logic_vector(mem_src_width);
-    -- Signal for selecting write or read
-    signal Store_Not_Load    : std_logic_vector(byte_addressable);
-
-    -- MUX for writeback source
-    signal WB_Data_Select    :     std_logic_vector(wb_src_width);
-    
-    -- Pipeline Latch Signals
+                                 
+    signal Reset_PC          :   std_logic;
     signal PC                :   PC_rec;
-    signal IF_ID_latch       :   IF_ID_rec;
-    signal ID_EX_latch       :   ID_EX_rec;
-    signal EX_MEM_latch      :   EX_MEM_rec;
-    signal MEM_WB_latch      :   MEM_WB_rec;
-                             
-    signal Reset_PC          :  std_logic;
-    signal Reset_IF_ID       :  std_logic;
-    signal Reset_Reg         :  std_logic;
-    signal Reset_ID_EX       :  std_logic;
-    signal Reset_EX_MEM      :  std_logic;
-    signal Reset_MEM_WB      :  std_logic;
-    signal Reset_Out         :  std_logic;
+    signal PC_Select         :   std_logic;
     
-    signal ALU_Z             :  std_logic;
-    signal FLAG_Z            :  std_logic;
-    signal ALU_N             :  std_logic;
-    signal FLAG_N            :  std_logic;
-    signal ALU_Ov            :  std_logic;
-    signal FLAG_Ov           :  std_logic;
-    signal EX_result         :  std_logic_vector(reg_width);
+    signal Fetch_Instr       :   std_logic_vector(instr_width);
+    
+    ------- IF/ID -------------------------------
 
-    signal wb_data           : std_logic_vector(reg_width);
-    signal PC_Select         : std_logic;
+    signal Reset_IF_ID       :   std_logic;
+    signal IF_ID_latch       :   IF_ID_rec;
+    
+    signal Reset_Reg         :   std_logic;
+    signal rd_index1         :   std_logic_vector(reg_idx_width); 
+    signal rd_index2         :   std_logic_vector(reg_idx_width); 
+    signal Rd_Index_1_Select :   std_logic_vector(rd_index_width);
+    signal Rd_Index_2_Select :   std_logic_vector(rd_index_width);
+    signal r1_data           :   std_logic_vector(reg_width);
+    signal r2_data           :   std_logic_vector(reg_width);
+    
+    ------- ID/EX --------------------------------
+
+    signal Reset_ID_EX       :  std_logic;
+    signal ID_EX_latch       :  ID_EX_rec;
+
+    -- Branching
     signal Disp_Select       : std_logic_vector(instr_type_width);
     signal Branch_Relative   : std_logic;
-    signal Branch_Base       : std_logic_vector(instr_width);
-                             
+    signal Branch_Base       : std_logic_vector(instr_width);                             
     signal branch_WB         : std_logic;
     
+    -- ALU
+    signal ALU_A_Select      :   std_logic_vector(alu_src_width);    
+    signal ALU_B_Select      :   std_logic_vector(alu_src_width);
+    signal ALU_A             :   std_logic_vector(reg_width);
+    signal ALU_B             :   std_logic_vector(reg_width);
+    signal ALU_C             :   std_logic_vector(reg_width);
+    -- Status flags
+    signal ALU_Z             :  std_logic;
+    signal ALU_N             :  std_logic;
+    signal ALU_Ov            :  std_logic;
+    signal FLAG_Z            :  std_logic;
+    signal FLAG_N            :  std_logic;
+    signal FLAG_Ov           :  std_logic;
+    
+    signal EX_result         :  std_logic_vector(reg_width);
 
+    -- MUX for EX stage result source
+    signal EX_Result_Select  :   std_logic_vector(ex_res_src_width);
+    
+    ------- EX/MEM -------------------------------
+
+    signal Reset_EX_MEM      :  std_logic;
+    signal EX_MEM_latch      :   EX_MEM_rec;
+    
+    -- Memory
+    signal Mem_Addr_Select   :   std_logic_vector(mem_src_width);
+    signal Mem_Addr          :   std_logic_vector(instr_width);
+    signal Load_Data         :   std_logic_vector(instr_width);
+    signal Store_Data        :   std_logic_vector(instr_width);
+    signal Store_Data_Select :   std_logic_vector(mem_src_width);
+    signal Store_Not_Load    :   std_logic_vector(byte_addressable);
+    
+    ------- MEM/WB -------------------------------
+    
+    signal Reset_MEM_WB      :  std_logic;
+    signal MEM_WB_latch      :   MEM_WB_rec;
+
+    signal wb_data           : std_logic_vector(reg_width);
+    signal WB_Enable         :   std_logic;    
+    signal WB_Index_Select   :   std_logic_vector(reg_idx_width);
+    signal WB_Data_Select    :   std_logic_vector(wb_src_width);
+
+    signal Reset_Out         :  std_logic;
+               
     -- Debug monitor
     signal debug_reg_0       : std_logic_vector(reg_width);
     signal debug_reg_1       : std_logic_vector(reg_width);
@@ -143,51 +144,42 @@ component console is
     --
     -- Stage 1 Fetch
     --
-            s1_pc            : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            s1_inst          : in STD_LOGIC_VECTOR ( 15 downto 0 );
+            s1_pc            : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s1_inst          : in STD_LOGIC_VECTOR( 15 downto 0 );
     --
     -- Stage 2 Decode
     --
-            s2_pc            : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            s2_inst          : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    
+            s2_pc            : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s2_inst          : in STD_LOGIC_VECTOR( 15 downto 0 );
             s2_reg_a         : in STD_LOGIC_VECTOR( 2 downto 0 );
             s2_reg_b         : in STD_LOGIC_VECTOR( 2 downto 0 );
             s2_reg_c         : in STD_LOGIC_VECTOR( 2 downto 0 );
-    
             s2_reg_a_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
             s2_reg_b_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
             s2_reg_c_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
             s2_immediate     : in STD_LOGIC_VECTOR( 15 downto 0 );
     --
     -- Stage 3 Execute
     --
-            s3_pc            : in STD_LOGIC_VECTOR ( 15 downto 0 );
-            s3_inst          : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    
+            s3_pc            : in STD_LOGIC_VECTOR( 15 downto 0 );
+            s3_inst          : in STD_LOGIC_VECTOR( 15 downto 0 );    
             s3_reg_a         : in STD_LOGIC_VECTOR( 2 downto 0 );
             s3_reg_b         : in STD_LOGIC_VECTOR( 2 downto 0 );
-            s3_reg_c         : in STD_LOGIC_VECTOR( 2 downto 0 );
-    
+            s3_reg_c         : in STD_LOGIC_VECTOR( 2 downto 0 );    
             s3_reg_a_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
             s3_reg_b_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
-            s3_reg_c_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
+            s3_reg_c_data    : in STD_LOGIC_VECTOR( 15 downto 0 );    
             s3_immediate     : in STD_LOGIC_VECTOR( 15 downto 0 );
     --
     -- Branch and memory operation
     --
             s3_r_wb          : in STD_LOGIC;
             s3_r_wb_data     : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
             s3_br_wb         : in STD_LOGIC;
             s3_br_wb_address : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
             s3_mr_wr         : in STD_LOGIC;
             s3_mr_wr_address : in STD_LOGIC_VECTOR( 15 downto 0 );
             s3_mr_wr_data    : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
             s3_mr_rd         : in STD_LOGIC;
             s3_mr_rd_address : in STD_LOGIC_VECTOR( 15 downto 0 );
     --
@@ -195,9 +187,7 @@ component console is
     --
             s4_pc            : in STD_LOGIC_VECTOR( 15 downto 0 );
             s4_inst          : in STD_LOGIC_VECTOR( 15 downto 0 );
-    
-            s4_reg_a         : in STD_LOGIC_VECTOR( 2 downto 0 );
-    
+            s4_reg_a         : in STD_LOGIC_VECTOR( 2 downto 0 );    
             s4_r_wb          : in STD_LOGIC;
             s4_r_wb_data     : in STD_LOGIC_VECTOR( 15 downto 0 );
     --
@@ -262,33 +252,58 @@ begin
      port map(
        Reset_Execute_Port => Reset_and_Execute,
        Reset_Load_Port    => Reset_and_Load,
+
+       -- PC --------------------------------------
+       
        Reset_PC           => Reset_PC,
+       PC_Select          => PC_Select,
+
+       -- IF/ID -----------------------------------
+       
        Reset_IF_ID        => Reset_IF_ID,
-       Reset_Reg          => Reset_Reg,
-       Reset_ID_EX        => Reset_ID_EX,
-       Reset_EX_MEM       => Reset_EX_MEM,
-       Reset_MEM_WB       => Reset_MEM_WB,
        IF_ID_PORT         => IF_ID_latch.instr,
-       ID_EX_PORT         => ID_EX_latch.instr,
-       EX_MEM_PORT        => EX_MEM_latch.instr,
-       MEM_WB_PORT        => MEM_WB_latch.instr,
-       WB_Enable          => WB_Enable,
-       Mem_Addr_Select    => Mem_Addr_Select,
-       Store_Data_Select  => Store_Data_Select,
-       ALU_A_Select       => ALU_A_Select,
-       ALU_B_Select       => ALU_B_Select,
-       EX_Result_Select   => EX_Result_Select,
-       Store_Not_Load     => Store_Not_Load,
-       WB_Data_Select     => WB_Data_Select,
-       MEM_WB_INDEX       => WB_Index_Select,
+       Reset_Reg          => Reset_Reg,
+
        Rd_Index_1_Select  => Rd_Index_1_Select,
        Rd_Index_2_Select  => Rd_Index_2_Select,
+
+       -- ID/EX -----------------------------------
+       
+       Reset_ID_EX        => Reset_ID_EX,
+       ID_EX_PORT         => ID_EX_latch.instr,
+
+       -- Branching
+       Disp_Select_Port   => Disp_Select,
+       Branch_Relative    => Branch_Relative,
+
+       -- ALU
+       ALU_A_Select       => ALU_A_Select,
+       ALU_B_Select       => ALU_B_Select,
        ALU_N              => FLAG_N,
        ALU_Z              => FLAG_Z,
        ALU_Ov             => FLAG_Ov,
-       PC_Select          => PC_Select,
-       Disp_Select_Port   => Disp_Select,
-       Branch_Relative    => Branch_Relative
+
+       EX_Result_Select   => EX_Result_Select,
+
+       -- EX/MEM ---------------------------------
+
+       Reset_EX_MEM       => Reset_EX_MEM,
+       EX_MEM_PORT        => EX_MEM_latch.instr,
+
+       -- Memory 
+       Mem_Addr_Select    => Mem_Addr_Select,
+       Store_Data_Select  => Store_Data_Select,
+       Store_Not_Load     => Store_Not_Load,
+
+       -- MEM/WB --------------------------------
+       
+       Reset_MEM_WB       => Reset_MEM_WB,
+       MEM_WB_PORT        => MEM_WB_latch.instr,
+       
+       -- Writeback
+       WB_Enable          => WB_Enable,
+       WB_Data_Select     => WB_Data_Select,
+       MEM_WB_INDEX       => WB_Index_Select
        );
 
 ----------------------------------     PC       -------------------------------------------------
@@ -345,7 +360,7 @@ begin
         rd_index2   => rd_index2,
         rd_data1    => r1_data,
         rd_data2    => r2_data,
-        
+        -- Debug monitor
         reg_0       =>  debug_reg_0,
         reg_1       =>  debug_reg_1,
         reg_2       =>  debug_reg_2,
@@ -419,7 +434,7 @@ begin
         ALU_Ins  => ID_EX_latch.instr,
         ALU_A    => ALU_A, 
         ALU_B    => ALU_B, 
-        ALU_C    => ALU_C, 
+        ALU_C    => ALU_C,
         ALU_N    => ALU_N, 
         ALU_Z    => ALU_Z, 
         ALU_Ov   => ALU_Ov
@@ -488,8 +503,10 @@ begin
     port map(                               
         Reset           => Reset_and_Load,
         M_clock         => M_Clock,
+        -- Instruction Fetch - RAM/ROM
         Fetch_Addr      => PC.pc,
         Fetch_Instr     => Fetch_instr,
+        -- Memory Operation - RAM
         Mem_Addr        => Mem_addr,
         Load_Data       => Load_Data,
         Store_Data      => Store_Data, 
@@ -526,7 +543,6 @@ begin
 -- Mem mapped to xFFF2
 led_display_memory : led_display
 port map (
-
        addr_write   => EX_MEM_latch.ra_data(15 downto 0), -- store address  
        clk          => M_clock,
        data_in      => EX_MEM_latch.rb_data(15 downto 0), -- data written to LEDs  
@@ -544,83 +560,75 @@ port map (
     --
     -- Stage 1 Fetch
     --
-        s1_pc   => IF_ID_latch.pc,
-        s1_inst => IF_ID_latch.instr,    
+        s1_pc               => IF_ID_latch.pc,
+        s1_inst             => IF_ID_latch.instr,    
     --
     -- Stage 2 Decode
     --
-        s2_pc           => ID_EX_latch.pc,
-        s2_inst         => ID_EX_latch.instr,
-    
-        s2_reg_a        => ID_EX_latch.instr(ra_width),
-        s2_reg_b        => ID_EX_latch.instr(rb_width),
-        s2_reg_c        => ID_EX_latch.instr(rc_width),
-    
-        s2_reg_a_data   => ALU_A(instr_width),
-        s2_reg_b_data   => ALU_B(instr_width),
-        s2_reg_c_data   => EX_Result(instr_width),
-        s2_immediate    => x"0000",
+        s2_pc               => ID_EX_latch.pc,
+        s2_inst             => ID_EX_latch.instr,    
+        s2_reg_a            => ID_EX_latch.instr(ra_width),
+        s2_reg_b            => ID_EX_latch.instr(rb_width),
+        s2_reg_c            => ID_EX_latch.instr(rc_width),    
+        s2_reg_a_data       => ALU_A(instr_width),
+        s2_reg_b_data       => ALU_B(instr_width),
+        s2_reg_c_data       => EX_Result(instr_width),
+        s2_immediate        => x"0000",
     --
     -- Stage 3 Execute
     --
-        s3_pc           => EX_MEM_latch.pc,
-        s3_inst         => EX_MEM_latch.instr,
-    
-        s3_reg_a        => EX_MEM_latch.instr(8 downto 6),
-        s3_reg_b        => EX_MEM_latch.instr(5 downto 3),
-        s3_reg_c        => EX_MEM_latch.instr(2 downto 0),
-    
-        s3_reg_a_data   => EX_MEM_latch.ra_data(instr_width),
-        s3_reg_b_data   => EX_MEM_latch.rb_data(instr_width),
-        s3_reg_c_data   => wb_data(instr_width),
-        s3_immediate    => x"00" & EX_MEM_latch.instr(imm_width),
-    
-        s3_r_wb         => not(Store_Not_Load(0)),
-        s3_r_wb_data    => Load_Data,
-    
+        s3_pc               => EX_MEM_latch.pc,
+        s3_inst             => EX_MEM_latch.instr,
+        s3_reg_a            => EX_MEM_latch.instr(8 downto 6),
+        s3_reg_b            => EX_MEM_latch.instr(5 downto 3),
+        s3_reg_c            => EX_MEM_latch.instr(2 downto 0),    
+        s3_reg_a_data       => EX_MEM_latch.ra_data(instr_width),
+        s3_reg_b_data       => EX_MEM_latch.rb_data(instr_width),
+        s3_reg_c_data       => wb_data(instr_width),
+        s3_immediate        => x"00" & EX_MEM_latch.instr(imm_width),    
+        s3_r_wb             => not(Store_Not_Load(0)),
+        s3_r_wb_data        => Load_Data,
         s3_br_wb            => '0',
         s3_br_wb_address    => x"0000",
-    
         s3_mr_wr            => Store_Not_Load(0),
         s3_mr_wr_address    => Mem_Addr,
         s3_mr_wr_data       => Store_Data,
-    
         s3_mr_rd            => '0',
         s3_mr_rd_address    => x"0000",
     --
     -- Stage 4 Memory
     --
-        s4_pc => MEM_WB_latch.pc,
-        s4_inst => MEM_WB_latch.instr,
-        s4_reg_a => WB_Index_Select,
-        s4_r_wb => WB_Enable,
-        s4_r_wb_data => MEM_WB_latch.result(instr_width),
+        s4_pc               => MEM_WB_latch.pc,
+        s4_inst             => MEM_WB_latch.instr,
+        s4_reg_a            => WB_Index_Select,
+        s4_r_wb             => WB_Enable,
+        s4_r_wb_data        => MEM_WB_latch.result(instr_width),
     --
     -- CPU registers
     --
-        register_0 => debug_reg_0(instr_width),
-        register_1 => debug_reg_1(instr_width),
-        register_2 => debug_reg_2(instr_width),
-        register_3 => debug_reg_3(instr_width),
-        register_4 => debug_reg_4(instr_width),
-        register_5 => debug_reg_5(instr_width),
-        register_6 => debug_reg_6(instr_width),
-        register_7 => debug_reg_7(instr_width),
+        register_0          => debug_reg_0(instr_width),
+        register_1          => debug_reg_1(instr_width),
+        register_2          => debug_reg_2(instr_width),
+        register_3          => debug_reg_3(instr_width),
+        register_4          => debug_reg_4(instr_width),
+        register_5          => debug_reg_5(instr_width),
+        register_6          => debug_reg_6(instr_width),
+        register_7          => debug_reg_7(instr_width),
     
-        register_0_of => debug_reg_0(16),
-        register_1_of => debug_reg_0(16),
-        register_2_of => debug_reg_0(16),
-        register_3_of => debug_reg_0(16),
-        register_4_of => debug_reg_0(16),
-        register_5_of => debug_reg_0(16),
-        register_6_of => debug_reg_0(16),
-        register_7_of => debug_reg_0(16),
+        register_0_of       => debug_reg_0(16),
+        register_1_of       => debug_reg_0(16),
+        register_2_of       => debug_reg_0(16),
+        register_3_of       => debug_reg_0(16),
+        register_4_of       => debug_reg_0(16),
+        register_5_of       => debug_reg_0(16),
+        register_6_of       => debug_reg_0(16),
+        register_7_of       => debug_reg_0(16),
     --
     -- CPU Flags
     --
-        zero_flag       => flag_z,
-        negative_flag   => flag_n,
-        overflow_flag   => flag_OV,
+        zero_flag           => flag_z,
+        negative_flag       => flag_n,
+        overflow_flag       => flag_OV,
     --
     -- Debug screen enable
     --
@@ -628,10 +636,10 @@ port map (
     --
     -- Text console display memory access signals ( clk is the processor clock )
     --
-        clk => M_Clock,
-        addr_write => Mem_Addr,
-        data_in => Store_Data,
-        en_write => Store_Not_Load(0),
+        clk         => M_Clock,
+        addr_write  => Mem_Addr,
+        data_in     => Store_Data,
+        en_write    => Store_Not_Load(0),
     --
     -- Video related signals
     --
