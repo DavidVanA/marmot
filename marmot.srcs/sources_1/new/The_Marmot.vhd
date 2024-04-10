@@ -116,6 +116,9 @@ architecture Behavioral of The_Marmot is
 
     signal Reset_Out         :  std_logic;
                
+    -- Seven Seg LEDs
+    signal led_en            : std_logic;        
+      
     -- Debug monitor
     signal debug_reg_0       : std_logic_vector(reg_width);
     signal debug_reg_1       : std_logic_vector(reg_width);
@@ -539,18 +542,20 @@ begin
     end process MEM_WB;       
 
 -----------------------------------   LED Display     -------------------------------------------------   
-
--- Mem mapped to xFFF2
-led_display_memory : led_display
-port map (
-       addr_write   => EX_MEM_latch.ra_data(15 downto 0), -- store address  
-       clk          => M_clock,
-       data_in      => EX_MEM_latch.rb_data(15 downto 0), -- data written to LEDs  
-       en_write     => '1', 
-       board_clock  => board_clock,
-       led_segments => led_segments,
-       led_digits   => led_digits
-   );
+    led_en <= '1' when EX_MEM_latch.instr = x"23C8" else -- only update on store instr
+              '0';
+              
+    -- Mem mapped to xFFF2
+    led_display_memory : led_display
+    port map (
+           addr_write   => EX_MEM_latch.ra_data(15 downto 0), -- store address  
+           clk          => M_clock,
+           data_in      => EX_MEM_latch.rb_data(15 downto 0), -- data written to LEDs  
+           en_write     => led_en, 
+           board_clock  => board_clock,
+           led_segments => led_segments,
+           led_digits   => led_digits
+       );
      
 -----------------------------------   Debug Console   -------------------------------------------------   
 
