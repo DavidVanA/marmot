@@ -40,10 +40,9 @@ entity Controller is
     Reset_IF_ID               : OUT std_logic;
 
     -- Registers
-    Rd_Index_1_Select         : out std_logic_vector(rd_index_width);
-    Rd_Index_2_Select         : out std_logic_vector(rd_index_width);
+    Rd_Index_1_Select         : OUT std_logic_vector(rd_index_width);
+    Rd_Index_2_Select         : OUT std_logic_vector(rd_index_width);
     Reset_Reg                 : OUT std_logic;
-
                 
 ----------------------------- ID/EX -----------------------------------
     
@@ -53,7 +52,6 @@ entity Controller is
   	-- Branch control signals
     Branch_Relative           : OUT std_logic;
     Disp_Select_Port          : OUT std_logic_vector(instr_type_width);
---    Disp_Select_Port          : OUT std_logic_vector(instr_type_width);
 
     -- ALU Ports
     ALU_A_Select              : OUT std_logic_vector(alu_src_width);
@@ -96,8 +94,8 @@ architecture Behavioral of Controller is
 ----------------------------- PC ---------------------------------------
     
     signal PC                 : PC_rec;
-    signal PCSrc_conn         : std_logic;                             
-
+    signal PC_Src             : std_logic;                             
+    
 ----------------------------- IF/ID -----------------------------------
         
     signal IF_ID_INS          : std_logic_vector(instr_width);
@@ -139,7 +137,7 @@ begin
                        
 -----------------------------------   IF/ID     -------------------------------------------------        
                        
-    Reset_IF_ID           <= Reset_Execute or Reset_Load or PCsrc_conn; -- OR whatever else
+    Reset_IF_ID           <= Reset_Execute or Reset_Load or PC_Src; -- OR whatever else
     IF_ID_INS             <= IF_ID_PORT;
 
     IF_ID_Instr_Decode_instance: entity work.Instruction_Decoder
@@ -156,17 +154,17 @@ begin
     
     -- Registers                          
      Reset_Reg            <= Reset_Execute or Reset_Load;
-     Rd_Index_1_Select     <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr else
-                             "111" when IF_ID_INS(op_width)          = op_return else
+     Rd_Index_1_Select    <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr    else
+                             "111" when IF_ID_INS(op_width)          = op_return   else
                              "111" when IF_ID_INS(op_width)          = op_load_imm else
                              IF_ID_INS(ra_width);
                           
-	Rd_Index_2_Select     <= IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr else
+	Rd_Index_2_Select     <= IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr    else
 				             IF_ID_INS(rc_width);
                           
 ------------------------------------   ID/EX   -------------------------------------------------   
                           
-     Reset_ID_EX          <= Reset_Execute or Reset_Load or PCsrc_conn; 
+     Reset_ID_EX          <= Reset_Execute or Reset_Load or PC_Src; 
 
 
      ID_EX_INS            <= ID_EX_PORT;
@@ -182,7 +180,7 @@ begin
 
     -- Fowarding
      ex_mem_dest          <= "0111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
-				             "1000" when (EX_MEM_INS(op_width) /= op_add      AND
+				             "1000" when (EX_MEM_INS(op_width) /= op_add     AND
 				             			 EX_MEM_INS(op_width) /= op_sub      AND
 				             			 EX_MEM_INS(op_width) /= op_mult     AND
 				             			 EX_MEM_INS(op_width) /= op_nand     AND
@@ -196,7 +194,7 @@ begin
                               '0' & EX_MEM_INS(ra_width);
      -- Forwarding                                  
      mem_wb_dest          <= "0111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
-				             "1000" when (MEM_WB_INS(op_width) /= op_add      AND
+				             "1000" when (MEM_WB_INS(op_width) /= op_add     AND
 				             			 MEM_WB_INS(op_width) /= op_sub      AND
 				             			 MEM_WB_INS(op_width) /= op_mult     AND
 				             			 MEM_WB_INS(op_width) /= op_nand     AND
@@ -218,13 +216,13 @@ begin
 	                         '0' & ID_EX_INS(rc_width) when (ID_EX_INS_type = a1_instr) else
 				             "1111";
                           
-	ALU_A_Select          <= alu_src_fd1 when ALU_A_Read_Src = ex_mem_dest else
-				             alu_src_fd2 when ALU_A_Read_Src = mem_wb_dest else
+	ALU_A_Select          <= alu_src_fd1   when ALU_A_Read_Src = ex_mem_dest else
+				             alu_src_fd2   when ALU_A_Read_Src = mem_wb_dest else
                              alu_src_rd;
                               
-    ALU_B_Select          <= alu_src_cl  when ID_EX_INS_type = a2_instr    else
-                             alu_src_fd1 when ALU_B_Read_Src = ex_mem_dest else
-                             alu_src_fd2 when ALU_B_Read_Src = mem_wb_dest else
+    ALU_B_Select          <= alu_src_cl    when ID_EX_INS_type = a2_instr    else
+                             alu_src_fd1   when ALU_B_Read_Src = ex_mem_dest else
+                             alu_src_fd2   when ALU_B_Read_Src = mem_wb_dest else
                              alu_src_rd;
                          
     EX_Result_Select      <= ex_res_src_in when ID_EX_INS(op_width) = op_in else
@@ -235,14 +233,14 @@ begin
       port map(
         Status            => Status_Flags,
         Opcode            => ID_EX_INS(op_width),
-        PCSrc_Port        => PCSrc_conn
+        PCSrc_Port        => PC_Src
     );
                
     Status_Flags.zero     <= ALU_Z;
     Status_Flags.neg      <= ALU_N;
     Status_Flags.overflow <= ALU_Ov;
     
-    PC_Select             <= PCSrc_conn;
+    PC_Select             <= PC_Src;
     
 -----------------------------------   EX/MEM   -------------------------------------------------   
 
@@ -265,8 +263,8 @@ begin
 						     mem_src_rb;
                           
                           
-      Store_Not_Load      <= mem_store    when EX_MEM_INS(op_width) = op_store else 
-                             mem_load     when EX_MEM_INS(op_width) = op_load  else
+      Store_Not_Load      <= mem_store    when EX_MEM_INS(op_width) = op_store  else 
+                             mem_load     when EX_MEM_INS(op_width) = op_load   else
                              mem_not_mem;
 
       WB_Data_Select      <= wb_src_mem   when EX_MEM_INS(op_width) = op_load   else
