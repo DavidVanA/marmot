@@ -68,6 +68,8 @@ BEGIN
     clk_process :process
     begin
         M_clock <= '0';
+        sw_sel <= '1';
+        sw(9 downto 0) <= x"00" & "11";
         wait for 10 ns;
         M_clock <= '1';
         wait for 10 ns;

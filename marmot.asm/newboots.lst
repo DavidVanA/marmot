@@ -1,0 +1,24 @@
+
+;
+; Created on Fri Apr 12 20:48:45 2024 with ECE 449 assembler v1.12 beta 1 (16 bit).
+;
+;Header Section
+RADIX 10
+DEPTH 2048
+WIDTH 16
+DEFAULT 0
+;
+; Data Section
+; Specifies data to be stored in different addresses
+; e.g., DATA 0:A, 1:0
+;
+RADIX 16
+DATA 
+0000 => "0010010110000000", -- 0000 - 2580   loadimm.upper 0x80     
+0002 => "0010010000000000", -- 0002 - 2400   loadimm.lower 0x00     
+0004 => "1000011111000000", -- 0004 - 87C0   br            r7,0     
+
+
+-------------------------------------------------------
+Symbol Table:
+
