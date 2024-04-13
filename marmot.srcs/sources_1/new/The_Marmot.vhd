@@ -343,6 +343,7 @@ begin
             else
                 IF_ID_latch.pc      <= PC.pc;
                 IF_ID_latch.npc     <= PC.npc;
+                -- Fetch_Instr is outputted by Memory entity in Memory stage
                 IF_ID_latch.instr   <= Fetch_Instr;
             end if;
         end if;

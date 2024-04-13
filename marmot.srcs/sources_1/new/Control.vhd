@@ -146,11 +146,6 @@ begin
        Instr_Type_Port    => IF_ID_INS_type
     );
     
-    -- Branch Relative Selector --
-    with ID_EX_INS_type select
-         Branch_Relative  <=
-                            '1' when b2_instr,
-                            '0' when others;
     
     -- Registers                          
      Reset_Reg            <= Reset_Execute or Reset_Load;
@@ -165,8 +160,6 @@ begin
 ------------------------------------   ID/EX   -------------------------------------------------   
                           
      Reset_ID_EX          <= Reset_Execute or Reset_Load or PC_Src; 
-
-
      ID_EX_INS            <= ID_EX_PORT;
 
     ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
@@ -176,7 +169,12 @@ begin
       );
     
     -- Branching
-     Disp_Select_Port     <= ID_EX_INS_type;      
+    with ID_EX_INS_type select
+         Branch_Relative  <=
+                            '1' when b2_instr,
+                            '0' when others;
+
+    Disp_Select_Port     <= ID_EX_INS_type;      
 
     -- Fowarding
      ex_mem_dest          <= "0111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
