@@ -148,19 +148,19 @@ begin
     
     
     -- Registers                          
-     Reset_Reg            <= Reset_Execute or Reset_Load;
-     Rd_Index_1_Select    <= IF_ID_INS(rb_width) when IF_ID_INS_type = a1_instr    else
-                             "111" when IF_ID_INS(op_width)          = op_return   else
-                             "111" when IF_ID_INS(op_width)          = op_load_imm else
+     Reset_Reg            <= Reset_Execute       or Reset_Load;
+     Rd_Index_1_Select    <= IF_ID_INS(rb_width) when IF_ID_INS_type      = a1_instr    else
+                             "111"               when IF_ID_INS(op_width) = op_return   else
+                             "111"               when IF_ID_INS(op_width) = op_load_imm else
                              IF_ID_INS(ra_width);
                           
-	Rd_Index_2_Select     <= IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr    else
+	Rd_Index_2_Select     <= IF_ID_INS(rb_width) when IF_ID_INS_type = l2_instr         else
 				             IF_ID_INS(rc_width);
                           
 ------------------------------------   ID/EX   -------------------------------------------------   
                           
-     Reset_ID_EX          <= Reset_Execute or Reset_Load or PC_Src; 
-     ID_EX_INS            <= ID_EX_PORT;
+    Reset_ID_EX          <= Reset_Execute or Reset_Load or PC_Src; 
+    ID_EX_INS            <= ID_EX_PORT;
 
     ID_EX_Instr_Decode_instance: entity work.Instruction_Decoder
       port map(
@@ -174,7 +174,21 @@ begin
                             '1' when b2_instr,
                             '0' when others;
 
-    Disp_Select_Port     <= ID_EX_INS_type;      
+    Disp_Select_Port     <= ID_EX_INS_type;
+
+    Status_Flags.zero     <= ALU_Z;
+    Status_Flags.neg      <= ALU_N;
+    Status_Flags.overflow <= ALU_Ov;
+    
+    Branch_Resolver_instance: entity work.Branch_Resolver
+      port map(
+        Status            => Status_Flags,
+        Opcode            => ID_EX_INS(op_width),
+        PCSrc_Port        => PC_Src
+    );
+
+    PC_Select             <= PC_Src;
+    -- End Branching
 
     -- Fowarding
      ex_mem_dest          <= "0111" when (EX_MEM_INS_type = l1_instr or EX_MEM_INS(op_width) = op_br_sub) else
@@ -190,7 +204,7 @@ begin
 				             			 EX_MEM_INS(op_width) /= op_load_imm AND
 				             			 EX_MEM_INS(op_width) /= op_mov)     else
                               '0' & EX_MEM_INS(ra_width);
-     -- Forwarding                                  
+
      mem_wb_dest          <= "0111" when (MEM_WB_INS_type = l1_instr or MEM_WB_INS(op_width) = op_br_sub) else
 				             "1000" when (MEM_WB_INS(op_width) /= op_add     AND
 				             			 MEM_WB_INS(op_width) /= op_sub      AND
@@ -214,36 +228,21 @@ begin
 	                         '0' & ID_EX_INS(rc_width) when (ID_EX_INS_type = a1_instr) else
 				             "1111";
                           
-	ALU_A_Select          <= alu_src_fd1   when ALU_A_Read_Src = ex_mem_dest else
-				             alu_src_fd2   when ALU_A_Read_Src = mem_wb_dest else
+	ALU_A_Select          <= alu_src_fd1               when ALU_A_Read_Src = ex_mem_dest else
+				             alu_src_fd2               when ALU_A_Read_Src = mem_wb_dest else
                              alu_src_rd;
                               
-    ALU_B_Select          <= alu_src_cl    when ID_EX_INS_type = a2_instr    else
-                             alu_src_fd1   when ALU_B_Read_Src = ex_mem_dest else
-                             alu_src_fd2   when ALU_B_Read_Src = mem_wb_dest else
+    ALU_B_Select          <= alu_src_cl                when ID_EX_INS_type = a2_instr    else
+                             alu_src_fd1               when ALU_B_Read_Src = ex_mem_dest else
+                             alu_src_fd2               when ALU_B_Read_Src = mem_wb_dest else
                              alu_src_rd;
                          
-    EX_Result_Select      <= ex_res_src_in when ID_EX_INS(op_width) = op_in else
+    EX_Result_Select      <= ex_res_src_in             when ID_EX_INS(op_width) = op_in else
                              ex_res_src_alu;
-                 
-      
-    Branch_Resolver_instance: entity work.Branch_Resolver
-      port map(
-        Status            => Status_Flags,
-        Opcode            => ID_EX_INS(op_width),
-        PCSrc_Port        => PC_Src
-    );
-               
-    Status_Flags.zero     <= ALU_Z;
-    Status_Flags.neg      <= ALU_N;
-    Status_Flags.overflow <= ALU_Ov;
-    
-    PC_Select             <= PC_Src;
-    
+    -- End Fowarding    
 -----------------------------------   EX/MEM   -------------------------------------------------   
 
-      Reset_EX_MEM        <= Reset_Execute or Reset_Load; 
-                          
+      Reset_EX_MEM        <= Reset_Execute or Reset_Load;                           
       EX_MEM_INS          <= EX_MEM_PORT;
 
       EX_MEM_Instr_Decode_instance: entity work.Instruction_Decoder
