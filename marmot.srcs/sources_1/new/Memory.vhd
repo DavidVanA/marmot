@@ -6,26 +6,25 @@ use work.Marmot_Config.all;
 
 entity Memory is
   Port (
-        M_clock         : IN std_logic;
-        Reset           : IN  std_logic;
+        M_clock        : IN  std_logic;
+        Reset          : IN  std_logic;
         
         -- Fetch 
-        Fetch_Addr      : IN  std_logic_vector(instr_width);-- The instruction to fetch
-        Fetch_Instr     : OUT std_logic_vector(instr_width); -- The fetched instruction
+        Fetch_Addr     : IN  std_logic_vector(instr_width);-- The instruction to fetch
+        Fetch_Instr    : OUT std_logic_vector(instr_width); -- The fetched instruction
         
         -- Memory
-        Store_Not_Load   : IN std_logic_vector(1 downto 0);
+        Store_Not_Load : IN  std_logic_vector(1 downto 0);
         
         Mem_Addr       : IN  std_logic_vector(instr_width);
-        Load_Data       : OUT std_logic_vector(instr_width);
-        Store_Data      : IN  std_logic_vector(instr_width)
+        Load_Data      : OUT std_logic_vector(instr_width);
+        Store_Data     : IN  std_logic_vector(instr_width)
    );
 end Memory;
 
 architecture Behavioral of Memory is
 
     signal RAM_Not_ROM : std_logic;
-
     signal RAM_ena     : std_logic;
     signal RAM_enb     : std_logic;
     signal ROM_en      : std_logic;
@@ -51,8 +50,8 @@ begin
     Load_Data   <= RAM_douta;
     
     RAM_ena     <= '0' when Mem_Addr(15 downto 11) /= "00001" else
-				   '1' when Store_Not_Load = mem_load     else
-                   '1' when Store_Not_Load = mem_store    else
+				   '1' when Store_Not_Load = mem_load         else
+                   '1' when Store_Not_Load = mem_store        else
                    '0';
     RAM_wea     <= Store_Not_Load;
     
