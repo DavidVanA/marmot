@@ -1,5 +1,10 @@
 # The Marmot
 
+The Marmot is a 16-bit pipelined processor, characterised by its 1kB RAM and ROM, alongside a 5-stage pipelined architecture that includes forwarding logic.
+
+![image](https://github.com/user-attachments/assets/ad8b8de7-a361-448a-87a8-82cfe5fad6d9)
+
+
 ## Using the `assembler.py`
 ```
 assembler.py -D 2048 -o example ./example.asm
